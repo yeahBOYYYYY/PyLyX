@@ -1,0 +1,6 @@
+{
+"Title": {"tag": "h1", "attrib": {"class": "title"}},
+"Standard": {"tag": "div", "attrib": {"class": "Standard"}},
+"Plain Layout": {"tag": "div", "attrib": {"class": "Plain Layout"}},
+"Itemize": {"tag": "li"}
+}

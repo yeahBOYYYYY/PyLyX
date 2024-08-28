@@ -1,0 +1,6 @@
+{
+"Formula": {"": "math"},
+"CommandInset": {"href": "a", "ref": "a", "label": "a", "include": ""},
+"space": {"\\space{}": " "},
+"Tabular": {"": "table"}
+}
