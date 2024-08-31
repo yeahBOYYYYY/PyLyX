@@ -1,7 +1,7 @@
 from os import rename, remove
 from os.path import exists, join, split
 from sys import argv
-from PyLyX.lyx import LYX
+from PyLyX.lyx import LyX
 from PyLyX.helper import correct_name, detect_lang, RIGHT, LEFT, LANGUAGES
 
 FLOAT_TAG = "<span class='float-caption-Standard float-caption float-caption-standard'>"
@@ -192,7 +192,7 @@ def correct_file(path, css_path='', depth=0, addition_func=None):
 
 def export2xhtml(input_path, output_path='', css_path='', depth=0, addition_func=None):
     path, name = split(input_path)
-    f = LYX(path, name)
+    f = LyX(path, name)
     f.update_version()
 
     output_path = input_path if not output_path else output_path

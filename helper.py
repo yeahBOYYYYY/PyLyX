@@ -94,9 +94,7 @@ def create_table(table: list[list], align=CENTER, tabularvalignment=MIDDLE, colu
 
     foot = '</lyxtabular>\n'
 
-    content = head + content + foot
-    content = create_inset(TABLE, content)
-    return create_layout('Standard', content, align)
+    return head + content + foot
 
 
 def detect_lang(text: str):

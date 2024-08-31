@@ -1,5 +1,5 @@
 from PyLyX.helper import *
-from PyLyX.toc import TOC
+from PyLyX.environments import Environment
 
 
 
@@ -18,17 +18,16 @@ def __line2toc(line: str):
     else:
         text = ''
 
-    toc = TOC(command, category, details, text)
+    toc = Environment(command, category, text, details=details)
     if 0 <= toc.rank() <= 6:
-        section = TOC('', '', '')
-        section.set_rank(toc.rank())
+        section = Environment('', '', details='')
         section.append(toc)
         toc.close()
         toc = section
     return toc
 
 
-def __one_line(line: str, branch: list[TOC]):
+def __one_line(line: str, branch: list[Environment]):
     last = branch[-1]
 
     if line.startswith(BEGIN):

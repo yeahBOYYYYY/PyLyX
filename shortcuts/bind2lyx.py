@@ -1,7 +1,7 @@
 from os import remove
 from sys import argv
-from PyLyX.lyx import LYX
-from PyLyX.toc import TOC
+from PyLyX.lyx import LyX
+from PyLyX.environments import Environment
 from PyLyX.helper import *
 from compare_bind import scan_file
 
@@ -10,8 +10,15 @@ with open('data\\shifted.json', 'r') as f:
     SHIFTED_DICT = load(f)
 with open('data\\keys.json', 'r') as f:
     KEYS_DICT = load(f)
-with open('data\\layouts.json', 'r') as f:
-    LAYOUTS = load(f)
+
+LAYOUTS = {0: 'Part',
+           1: 'Chapter',
+           2: 'Section',
+           3: 'Subsection',
+           4: 'Subsubsection',
+           5: 'Paragraph',
+           6: 'Subparagraph',
+           7: 'Standard'}
 
 
 def translate_shortcut(code):
@@ -67,22 +74,32 @@ def one_file(full_path: str, depth=2):
         canceled_table = ['CANCELED', canceled]
         tables.append(canceled_table)
 
-    for t in tables:
-        translate_table(t[1])
-        design_table(t[1])
-        t[1] = [TOC(STANDARD, t[1], [])]
-        layout = CATEGORIES[str(depth + 1)]
-        t.insert(0, layout)
+    for i in range(len(tables)):
+        title, table = tables[i]
+        translate_table(table)
+        design_table(table)
+        table = create_table(table)
+        table = Environment(INSET, TABLE, table)
+        standard = Environment(LAYOUT, STANDARD)
+        standard.append(table)
+        layout = Environment(LAYOUT, LAYOUTS[depth + 1], title)
+        section = Environment('')
+        section.append(layout)
+        section.append(standard)
+        tables[i] = section
 
     name = splitext(split(full_path)[1])[0]
     if depth >= 2:
         name = name.upper()
-    layout = CATEGORIES[str(depth)]
-    toc = TOC(layout, name, tables)
-    return toc, files
+    layout = Environment(LAYOUT, LAYOUTS[depth], name)
+    section = Environment('')
+    section.append(layout)
+    for t in tables:
+        section.append(t)
+    return section, files
 
 
-def recursive_write(path: str, files: list, result: LYX, depth=2):
+def recursive_write(path: str, files: list, result: LyX, depth=2):
     for name in files:
         if name.count('\\') and name.count('/'):
             toc, files0 = one_file(name, depth)
@@ -100,7 +117,8 @@ def write_all_files(full_path: str, final_path: str):
 
     toc, files = one_file(full_path)
     files.append(join(PERSONAL_PATH, PERSONAL_NAME))
-    result = LYX(final_path, toc)
+    result = LyX(final_path)
+    result.write(toc)
     recursive_write(split(full_path)[0], files, result)
 
 

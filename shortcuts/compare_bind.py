@@ -6,9 +6,10 @@ BIND, UNBIND, BIND_FILE, SELF = '\\bind ', '\\unbind ', '\\bind_file', 'self-ins
 EXTENSION = '.bind'
 TITLE_OPEN, TITLE_CLOSE = '##### ', ' #####\n'
 SHORTCUTS, FILES, TABLES, CANCELED = 'shortcuts', 'files', 'tables', 'canceled'
+TABLE = list[[str, str]]
 
 
-def check_line(line):
+def check_line(line: str) -> (int, str, str):
     if line.startswith(BIND) or line.startswith(UNBIND):
         command, shortcut, space, latex, *end = line.split('"')
         if latex == SELF:
@@ -30,7 +31,7 @@ def check_line(line):
         return 0, '', ''
 
 
-def scan_file(full_path: str):
+def scan_file(full_path: str) -> (list[[str, TABLE]], list[str, TABLE], list[str]):
     full_path = correct_name(full_path, '.bind')
 
     tables = [['BEGINNING', []]]
@@ -56,7 +57,7 @@ def scan_file(full_path: str):
     return tables, canceled_table, files
 
 
-def search_shortcut(shortcut, latex, full_path):
+def search_shortcut(shortcut: str, latex: str, full_path: str) -> (bool, (str, str), (str, str)):
     with open(full_path, 'r', encoding='utf8') as file:
         for line in file:
             sign, command, code = check_line(line)

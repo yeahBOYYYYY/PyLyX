@@ -1,7 +1,7 @@
-from PyLyX.lyx import LYX, CURRENT_FILE_PATH, join
+from PyLyX.lyx import LyX, CURRENT_FILE_PATH, join
 
 
-file = LYX(join(CURRENT_FILE_PATH, 'x.lyx'))
+file = LyX(join(CURRENT_FILE_PATH, 'x.lyx'))
 toc = file.load_toc()
-new = LYX(join(CURRENT_FILE_PATH, 'y.lyx'), None)
+new = LyX(join(CURRENT_FILE_PATH, 'y.lyx'), None)
 new.write(toc)

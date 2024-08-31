@@ -2,11 +2,11 @@ from os import rename, remove
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
 from PyLyX.helper import *
-from PyLyX.toc import TOC
+from PyLyX.environments import Environment
 from PyLyX.loader import load
 
 
-class LYX:
+class LyX:
     def __init__(self, full_path: str, template=join(CURRENT_FILE_PATH, 'data\\template.lyx')):
         self.__full_path = correct_name(full_path, '.lyx')
 
@@ -17,10 +17,10 @@ class LYX:
             if type(template) is str and exists(template):
                 copy(template, self.__full_path)
             else:
-                print('invalid path for template, create empty file instead.')
+                print(f'invalid path for template: {template},\ncreate empty file instead.')
                 with open(self.__full_path, 'x', encoding='utf8') as file:
                     file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {FORMAT}\n')
-                    doc, head, body = TOC(DOCUMENT), TOC(HEADER), TOC(BODY)
+                    doc, head, body = Environment(DOCUMENT), Environment(HEADER), Environment(BODY)
                     doc.append(head)
                     doc.append(body)
                     file.write(str(doc))
@@ -49,13 +49,13 @@ class LYX:
         return is_changed
 
 
-    def write(self, toc: TOC):
-        if type(toc) is not TOC:
-            raise TypeError(f'toc must be {TOC} object, not {type(toc)}.')
+    def write(self, toc: Environment):
+        if type(toc) is not Environment:
+            raise TypeError(f'toc must be {Environment} object, not {type(toc)}.')
         if exists(self.__full_path + '~'):
             remove(self.__full_path)
 
-        if toc.command() == LAYOUT:
+        if toc.command() == LAYOUT or toc.is_section():
             start = ()
             end = (f'{END}{BODY}\n', f'{END}{DOCUMENT}\n')
         elif toc.command() == BODY:
@@ -65,7 +65,7 @@ class LYX:
             start = (f'{BEGIN}{DOCUMENT}\n', )
             end = ()
         else:
-            raise TypeError(f'invalid command of {TOC} object.')
+            raise TypeError(f'invalid command of Environment object: {toc.command()}.')
 
         with open(self.__full_path, 'r', encoding='utf8') as old:
             with open(self.__full_path + '~', 'x', encoding='utf8') as new:

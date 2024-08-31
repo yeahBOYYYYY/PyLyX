@@ -1,6 +1,6 @@
 from xml.etree.ElementTree import Element
 from PyLyX.helper import *
-from PyLyX.lyx import load, TOC
+from PyLyX.lyx import load, Environment
 
 SECTION, SPAN, CLASS = 'section', 'span', 'class'
 
@@ -90,7 +90,7 @@ def convert_text(lines: str):
     return ''
 
 
-def one_toc(toc: TOC):
+def one_toc(toc: Environment):
     lines = toc.text().split('\n')
     html_code = ''
     if toc.category() in CATEGORIES:
