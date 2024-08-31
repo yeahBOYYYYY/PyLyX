@@ -1,4 +1,3 @@
-from PyLyX.base.helper import BEGIN_INSET
 from lyx_reader import *
 
 MATHJAX_SOURCE = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'

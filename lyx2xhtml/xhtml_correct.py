@@ -1,8 +1,8 @@
 from os import rename, remove
 from os.path import exists, join, split
 from sys import argv
-from PyLyX.base.lyx import LYX
-from PyLyX.base.helper import correct_name, detect_lang, RIGHT, LEFT, LANGUAGES
+from PyLyX.lyx import LYX
+from PyLyX.helper import correct_name, detect_lang, RIGHT, LEFT, LANGUAGES
 
 FLOAT_TAG = "<span class='float-caption-Standard float-caption float-caption-standard'>"
 MATHJAX_SOURCE = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'

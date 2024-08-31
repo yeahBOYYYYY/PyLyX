@@ -1,0 +1,11 @@
+{"inset": {
+"Formula": {"": {"tag": "math", "attrib": {}}},
+"CommandInset": {"href": {"tag": "a", "attrib": {"href": ""}},
+                "ref": {"tag": "a", "attrib": {"href": ""}},
+                "label": {"tag": "a", "attrib": {"id": ""}},
+                "include": {"tag": "meta", "attrib": {}}},
+"Tabular": {"": {"tag": "table", "attrib": {}}},
+
+"space": {"\\space{}": {"tag": "", "attrib": {}}},
+"Text": {"": {"tag": "", "attrib": {}}}
+}}

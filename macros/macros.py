@@ -1,4 +1,4 @@
-from PyLyX.base.helper import *
+from PyLyX.helper import *
 from sys import argv
 from os.path import join
 from json import dumps

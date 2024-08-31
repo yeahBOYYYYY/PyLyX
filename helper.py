@@ -4,49 +4,44 @@ from json import load
 
 
 def find_version():
-    for i in range(4, -1, -1):
+    for i in range(9, -1, -1):
         path = f'{DRIVE}:\\Program Files\\LyX 2.{i}'
         if exists(path):
             version = 2 + 0.1 * i
             user_dir = f'{USER}\\AppData\\Roaming\\LyX{version}'
             return version, path, user_dir
-    raise FileNotFoundError(f'Make sure LyX is installed on your computer,\nI can not found it in {DRIVE + ":/Program Files/LyX <VERSION>"}')
-
+    raise FileNotFoundError(f'Make sure LyX is installed on your computer,\nI can not found it in {DRIVE + ":\\Program Files\\LyX 2.x"}')
 
 CURRENT_FILE_PATH = split(abspath(__file__))[0]
-with open(join(CURRENT_FILE_PATH, 'data\\section_layouts.json'), 'r', encoding='utf8') as x:
-    SECTION_LAYOUTS = load(x)
-with open(join(CURRENT_FILE_PATH, 'data\\theorem_layouts.json'), 'r', encoding='utf8') as x:
-    THEOREM_LAYOUTS = load(x)
-with open(join(CURRENT_FILE_PATH, 'data\\regular_layouts.json'), 'r', encoding='utf8') as x:
-    REGULAR_LAYOUTS = load(x)
-with open(join(CURRENT_FILE_PATH, 'data\\insets.json'), 'r', encoding='utf8') as x:
-    INSETS = load(x)
-with open(join(CURRENT_FILE_PATH, 'data\\key_words.json'), 'r', encoding='utf8') as x:
-    KEY_WORDS = load(x)
 
-LAYOUTS = {}
-LAYOUTS.update(SECTION_LAYOUTS)
-LAYOUTS.update(THEOREM_LAYOUTS)
-LAYOUTS.update(REGULAR_LAYOUTS)
+with open(join(CURRENT_FILE_PATH, 'data\\key_words.json'), 'r', encoding='utf8') as f:
+    KEY_WORDS = load(f)
+
+with open(join(CURRENT_FILE_PATH, 'data\\layouts.json'), 'r', encoding='utf8') as f:
+    LAYOUTS = load(f)
+with open(join(CURRENT_FILE_PATH, 'data\\insets.json'), 'r', encoding='utf8') as f:
+    INSETS = load(f)
+with open(join(CURRENT_FILE_PATH, 'data\\commands.json'), 'r', encoding='utf8') as f:
+    COMMANDS = load(f)
+    COMMANDS.update(LAYOUTS)
+    COMMANDS.update(INSETS)
 
 USER = expanduser('~')
 DRIVE = USER[0]
 VERSION, LYX_PATH, USER_DIR = find_version()
-LYX_EXE, SYS_DIR = join(LYX_PATH, 'bin/LyX.exe'), join(LYX_PATH, 'Resources')
+LYX_EXE, SYS_DIR = join(LYX_PATH, 'bin\\LyX.exe'), join(LYX_PATH, 'Resources')
+FORMAT = 620
 DOWNLOADS_DIR = f'{USER}\\Downloads'
 
-TEXT, FORMULA, STANDARD, PLAIN_LAYOUT, TABLE = 'Text', 'Formula', 'Standard', 'Plain Layout', 'Tabular'
+TEXT, FORMULA, STANDARD, PLAIN_LAYOUT, TABLE, USD = 'Text', 'Formula', 'Standard', 'Plain Layout', 'Tabular', '$'
 LEFT, RIGHT, CENTER, TOP, MIDDLE, BOTTOM = 'left', 'right', 'center', 'top', 'middle', 'bottom'
 TRUE, FALSE, NONE, RANK = 'true', 'false', 'none', 'rank'
-LANGUAGES = {RIGHT: {'he'}, LEFT: {'en'}}
+TAG, ATTRIB = 'tag', 'attrib'
+HE, EN = 'he', 'en'
+# LANGUAGES = {RIGHT: {'he'}, LEFT: {'en'}}
 
-BEGIN_LAYOUT, END_LAYOUT = '\\begin_layout', '\\end_layout\n'
-BEGIN_INSET, END_INSET = '\\begin_inset', '\\end_inset\n'
-BEGIN_DEEPER, END_DEEPER = '\\begin_deeper\n', '\\end_deeper\n'
-# COMMAND_DICT = {BEGIN_LAYOUT: LAYOUTS, BEGIN_INSET: INSETS}
-# COMMAND_DICT.update({key: KEY_WORDS for key in KEY_WORDS})
-ENDS = {BEGIN_LAYOUT: END_LAYOUT, BEGIN_INSET: END_INSET, BEGIN_DEEPER: END_DEEPER}
+BEGIN, END = '\\begin_', '\\end_'
+DOCUMENT, HEADER, BODY, LAYOUT, INSET, DEEPER = 'document', 'header', 'body', 'layout', 'inset', 'deeper'
 
 
 def correct_name(name: str, extension: str):
@@ -57,16 +52,16 @@ def correct_name(name: str, extension: str):
 
 
 def create_layout(layout: str, content: str, align=''):
-    head = f'\n{BEGIN_LAYOUT} {layout}\n'
+    head = f'\n{BEGIN}{LAYOUT} {layout}\n'
     if align:
         head += f'\\align {align}\n'
-    foot = f'\n{END_LAYOUT}\n'
+    foot = f'\n{END}{LAYOUT}\n'
     return head + content + foot
 
 
 def create_inset(inset: str, content: str):
-    head = f'\n{BEGIN_INSET} {inset}\n'
-    foot = f'\n{END_INSET}'
+    head = f'\n{BEGIN}{INSET} {inset}\n'
+    foot = f'\n{END}{INSET}\n'
     return head + content + foot
 
 
@@ -104,12 +99,12 @@ def create_table(table: list[list], align=CENTER, tabularvalignment=MIDDLE, colu
     return create_layout('Standard', content, align)
 
 
-def detect_lang(text):
+def detect_lang(text: str):
     for char in text:
         if char in 'אבגדהוזחטיכלמנסעפצקרשת':
-            return 'he'
+            return HE
         elif char in ascii_letters:
-            return 'en'
+            return EN
     return ''
 
 

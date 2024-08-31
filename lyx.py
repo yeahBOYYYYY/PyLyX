@@ -1,67 +1,34 @@
 from os import rename, remove
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
-from PyLyX.base.toc import TOC
-from PyLyX.base.helper import *
-
-
-def __one_layout(file, line: str, current=None) -> TOC:
-    start, layout, *cmd = line.split()
-    text = '\n'.join(cmd)
-    for line in file:
-        if line == ENDS[start]:
-            break
-
-        text += line
-    new = TOC(layout, text, [])
-
-    if current is None or new.rank() <= current.rank():
-        return new
-    else:
-        current.append(new)
-        return current
-
-
-def __reader(file, root: list, current=None):
-    for line in file:
-        if line.startswith(BEGIN_LAYOUT) or line.startswith(BEGIN_INSET):
-            new = __one_layout(file, line, current)
-            if new is not current:
-                root.append(new)
-                current = new
-        elif line == BEGIN_DEEPER:
-            while line != END_DEEPER:
-                __reader(file, current.content())
-
-
-def load(full_path: str):
-    with open(full_path, 'r', encoding='utf8') as file:
-        root = []
-        __reader(file, root)
-    return root
+from PyLyX.helper import *
+from PyLyX.toc import TOC
+from PyLyX.loader import load
 
 
 class LYX:
-    def __init__(self, full_path: str, toc=None, template=join(CURRENT_FILE_PATH, 'template.lyx')):
-        if type(toc) is list:
-            for c in toc:
-                if type(c) is not TOC:
-                    raise TypeError(f'invalid toc: {toc}.')
-        elif toc is not None and type(toc) is not TOC:
-            raise TypeError(f'invalid toc: {toc}.')
-
+    def __init__(self, full_path: str, template=join(CURRENT_FILE_PATH, 'data\\template.lyx')):
         self.__full_path = correct_name(full_path, '.lyx')
 
+        if exists(self.__full_path + '~'):
+            rename(self.__full_path + '~', self.__full_path + '_')
+            print(f'the name of file "{self.__full_path + '~'}" is changed to "{self.__full_path + '_'}".')
         if not exists(self.__full_path):
-            copy(template, self.__full_path)
-        if toc is not None:
-            if type(toc) is list:
-                for c in toc:
-                    self.write(c)
+            if type(template) is str and exists(template):
+                copy(template, self.__full_path)
             else:
-                self.write(toc)
+                print('invalid path for template, create empty file instead.')
+                with open(self.__full_path, 'x', encoding='utf8') as file:
+                    file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {FORMAT}\n')
+                    doc, head, body = TOC(DOCUMENT), TOC(HEADER), TOC(BODY)
+                    doc.append(head)
+                    doc.append(body)
+                    file.write(str(doc))
 
-    def line_functions(self, func, args=()):
+    def load_toc(self):
+        return load(self.__full_path)
+
+    def line_functions(self, func, args=()) -> bool:
         if exists(self.__full_path + '~'):
             remove(self.__full_path + '~')
 
@@ -83,35 +50,52 @@ class LYX:
 
 
     def write(self, toc: TOC):
+        if type(toc) is not TOC:
+            raise TypeError(f'toc must be {TOC} object, not {type(toc)}.')
         if exists(self.__full_path + '~'):
             remove(self.__full_path)
+
+        if toc.command() == LAYOUT:
+            start = ()
+            end = (f'{END}{BODY}\n', f'{END}{DOCUMENT}\n')
+        elif toc.command() == BODY:
+            start = (f'{BEGIN}{BODY}\n', )
+            end = (f'{END}{DOCUMENT}\n', )
+        elif toc.command() == DOCUMENT:
+            start = (f'{BEGIN}{DOCUMENT}\n', )
+            end = ()
+        else:
+            raise TypeError(f'invalid command of {TOC} object.')
+
         with open(self.__full_path, 'r', encoding='utf8') as old:
             with open(self.__full_path + '~', 'x', encoding='utf8') as new:
                 for line in old:
-                    if line not in ('\\end_body\n', '\\end_document\n'):
+                    if line not in (start + end):
                         new.write(line)
-
+                    else:
+                        break
                 new.write(str(toc))
-                new.write('\n\\end_body\n\\end_document\n')
+                for s in end:
+                    new.write(s)
 
         remove(self.__full_path)
         rename(self.__full_path + '~', self.__full_path)
 
-    def find(self, query):
-        with open(self.__full_path, 'r', encoding='utf8') as f:
-            for line in f:
+    def find(self, query: str) -> bool:
+        with open(self.__full_path, 'r', encoding='utf8') as file:
+            for line in file:
                 if query in line:
                     return True
 
         return False
 
-    def find_and_replace(self, str1, str2):
+    def find_and_replace(self, str1, str2) -> bool:
         def func(line):
             return line.replace(str1, str2)
 
         return self.line_functions(func)
 
-    def export(self, fmt: str, output_path=''):
+    def export(self, fmt: str, output_path='') -> bool:
         if output_path:
             cmd = [LYX_EXE, '--export-to', fmt, output_path, self.__full_path]
         else:
@@ -129,7 +113,7 @@ class LYX:
             raise FileNotFoundError(f'Make sure the path "{LYX_EXE}" is correct.')
         return False
 
-    def reverse_hebrew_links(self):
+    def reverse_hebrew_links(self) -> bool:
         def one_link(line: str):
             start = 'name "'
             end = '"\n'
@@ -144,10 +128,10 @@ class LYX:
 
         return self.line_functions(one_link)
 
-    def update_version(self):
+    def update_version(self) -> bool:
         already_updated = True
-        with open(self.__full_path, 'r', encoding='utf8') as f:
-            first_line = f.readline()
+        with open(self.__full_path, 'r', encoding='utf8') as file:
+            first_line = file.readline()
             if not first_line.startswith(f'#LyX {VERSION}'):
                 self.export('lyx')
                 already_updated = False

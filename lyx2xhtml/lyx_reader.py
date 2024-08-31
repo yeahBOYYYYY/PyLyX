@@ -1,11 +1,10 @@
 from xml.etree.ElementTree import Element
-from PyLyX.base.helper import *
-from PyLyX.base.lyx import load, TOC
+from PyLyX.helper import *
+from PyLyX.lyx import load, TOC
 
-TAG, ATTRIB = 'tag', 'attrib'
 SECTION, SPAN, CLASS = 'section', 'span', 'class'
 
-HREF, REF, LABEL, ID, NAME, TARGET, USD = 'href', 'ref', 'label', 'id', 'name', 'target', '$'
+HREF, REF, LABEL, ID, NAME, TARGET = 'href', 'ref', 'label', 'id', 'name', 'target'
 SPECIAL_CHARS = {'"': '&quot;', '&': '&amp;', "'": '&apos;', '<': '&lt;', '>': '&gt;'}
 COMMAND_INSET = 'CommandInset'
 
@@ -75,7 +74,7 @@ def one_obj(file, cmd: list[str], father: Element):
     father.append(element)
 
     cmd = line.split()
-    if cmd[0] == ENDS[start]:
+    if cmd[0] == COMMANDS[start]:
         line = file.readline()
         if not line.startswith('\\'):
             tail, line = create_text(file, line)
@@ -94,7 +93,7 @@ def convert_text(lines: str):
 def one_toc(toc: TOC):
     lines = toc.text().split('\n')
     html_code = ''
-    if toc.layout() in LAYOUTS:
+    if toc.category() in CATEGORIES:
         for line in lines:
             if line == '\\backslash':
                 html_code += '\\'
@@ -102,7 +101,7 @@ def one_toc(toc: TOC):
                 pass
             else:
                 html_code += line
-    elif toc.layout() in INSETS:
+    elif toc.category() in INSETS:
     return html_code
 
 

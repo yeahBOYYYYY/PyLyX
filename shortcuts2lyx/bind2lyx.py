@@ -1,8 +1,8 @@
 from os import remove
 from sys import argv
-from PyLyX.base.lyx import LYX
-from PyLyX.base.toc import TOC
-from PyLyX.base.helper import *
+from PyLyX.lyx import LYX
+from PyLyX.toc import TOC
+from PyLyX.helper import *
 from compare_bind import scan_file
 
 
@@ -71,13 +71,13 @@ def one_file(full_path: str, depth=2):
         translate_table(t[1])
         design_table(t[1])
         t[1] = [TOC(STANDARD, t[1], [])]
-        layout = LAYOUTS[str(depth + 1)]
+        layout = CATEGORIES[str(depth + 1)]
         t.insert(0, layout)
 
     name = splitext(split(full_path)[1])[0]
     if depth >= 2:
         name = name.upper()
-    layout = LAYOUTS[str(depth)]
+    layout = CATEGORIES[str(depth)]
     toc = TOC(layout, name, tables)
     return toc, files
 
