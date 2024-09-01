@@ -1,7 +1,7 @@
 from os import remove
 from sys import argv
 from PyLyX.lyx import LyX
-from PyLyX.environments import Environment
+from PyLyX.environments import Environment, Section
 from PyLyX.helper import *
 from compare_bind import scan_file
 
@@ -79,21 +79,19 @@ def one_file(full_path: str, depth=2):
         translate_table(table)
         design_table(table)
         table = create_table(table)
-        table = Environment(INSET, TABLE, table)
+        table = Environment(INSET, TABLE, text=table)
         standard = Environment(LAYOUT, STANDARD)
         standard.append(table)
-        layout = Environment(LAYOUT, LAYOUTS[depth + 1], title)
-        section = Environment('')
-        section.append(layout)
+        env = Environment(LAYOUT, LAYOUTS[depth + 1], text=title)
+        section = Section(env)
         section.append(standard)
         tables[i] = section
 
     name = splitext(split(full_path)[1])[0]
     if depth >= 2:
         name = name.upper()
-    layout = Environment(LAYOUT, LAYOUTS[depth], name)
-    section = Environment('')
-    section.append(layout)
+    env = Environment(LAYOUT, LAYOUTS[depth], text=name)
+    section = Section(env)
     for t in tables:
         section.append(t)
     return section, files

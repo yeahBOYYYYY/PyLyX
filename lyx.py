@@ -2,7 +2,7 @@ from os import rename, remove
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
 from PyLyX.helper import *
-from PyLyX.environments import Environment
+from PyLyX.environments import Environment, Section
 from PyLyX.loader import load
 
 
@@ -49,13 +49,13 @@ class LyX:
         return is_changed
 
 
-    def write(self, toc: Environment):
-        if type(toc) is not Environment:
+    def write(self, toc):
+        if type(toc) is not Environment and type(toc) is not Section:
             raise TypeError(f'toc must be {Environment} object, not {type(toc)}.')
         if exists(self.__full_path + '~'):
             remove(self.__full_path)
 
-        if toc.command() == LAYOUT or toc.is_section():
+        if type(toc) is Section or toc.command() == LAYOUT:
             start = ()
             end = (f'{END}{BODY}\n', f'{END}{DOCUMENT}\n')
         elif toc.command() == BODY:
@@ -74,7 +74,7 @@ class LyX:
                         new.write(line)
                     else:
                         break
-                new.write(str(toc))
+                new.write(toc.env2lyx())
                 for s in end:
                     new.write(s)
 

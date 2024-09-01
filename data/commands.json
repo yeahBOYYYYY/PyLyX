@@ -5,6 +5,5 @@
         "modules": {"": {"": {"tag": "modules", "attrib": {}}}},
         "local_layout": {"": {"": {"tag": "local_layout", "attrib": {}}}},
     "body": {"": {"": {"tag": "body", "attrib": {}, "rank": -2}}},
-        "deeper": {"": {"": {"tag": "deeper", "attrib": {}, "rank": 7}}},
-        "": {"": {"": {"tag": "section", "attrib": {}}}}
+        "deeper": {"": {"": {"tag": "deeper", "attrib": {}, "rank": 7}}}
 }

@@ -22,9 +22,9 @@ with open(join(CURRENT_FILE_PATH, 'data\\layouts.json'), 'r', encoding='utf8') a
 with open(join(CURRENT_FILE_PATH, 'data\\insets.json'), 'r', encoding='utf8') as f:
     INSETS = load(f)
 with open(join(CURRENT_FILE_PATH, 'data\\commands.json'), 'r', encoding='utf8') as f:
-    COMMANDS = load(f)
-    COMMANDS.update(LAYOUTS)
-    COMMANDS.update(INSETS)
+    ENVIRONMENTS = load(f)
+    ENVIRONMENTS.update(LAYOUTS)
+    ENVIRONMENTS.update(INSETS)
 
 USER = expanduser('~')
 DRIVE = USER[0]
@@ -35,20 +35,13 @@ DOWNLOADS_DIR = f'{USER}\\Downloads'
 
 TEXT, FORMULA, STANDARD, PLAIN_LAYOUT, TABLE, USD = 'Text', 'Formula', 'Standard', 'Plain Layout', 'Tabular', '$'
 LEFT, RIGHT, CENTER, TOP, MIDDLE, BOTTOM = 'left', 'right', 'center', 'top', 'middle', 'bottom'
-TRUE, FALSE, NONE, RANK = 'true', 'false', 'none', 'rank'
+TRUE, FALSE, NONE, RANK, SECTION = 'true', 'false', 'none', 'rank', 'section'
 TAG, ATTRIB = 'tag', 'attrib'
 HE, EN = 'he', 'en'
-# LANGUAGES = {RIGHT: {'he'}, LEFT: {'en'}}
+# LANGUAGES = {RIGHT: {HE}, LEFT: {EN}}
 
 BEGIN, END = '\\begin_', '\\end_'
 DOCUMENT, HEADER, BODY, LAYOUT, INSET, DEEPER = 'document', 'header', 'body', 'layout', 'inset', 'deeper'
-
-
-def correct_name(name: str, extension: str):
-    path, name = split(name)
-    name = splitext(name)[0]
-    path = join(path, name + extension)
-    return path
 
 
 def create_layout(layout: str, content: str, align=''):
@@ -75,9 +68,26 @@ def create_cell(content: str, alignment=LEFT, valignment=TOP,
     return head + content + foot
 
 
-def create_table(table: list[list], align=CENTER, tabularvalignment=MIDDLE, column_alignment=LEFT, valignment=TOP):
+def is_table(table):
+    if (type(table) is not list) or (not table):
+        return False
     length = len(table)
     width = len(table[0])
+    for row in range(length):
+        if len(table[row]) != width:
+            return False
+        for col in range(width):
+            if type(table[row][col]) is not str:
+                return False
+    return True
+
+
+def create_table(table: list[list], tabularvalignment=MIDDLE, column_alignment=LEFT, valignment=TOP):
+    if is_table(table):
+        length = len(table)
+        width = len(table[0])
+    else:
+        raise TypeError(f'invalid table: {table}')
 
     head = f'\n<lyxtabular version="3" rows="{length}" columns="{width}">\n' \
             f'<features tabularvalignment="{tabularvalignment}">\n' \
@@ -106,15 +116,8 @@ def detect_lang(text: str):
     return ''
 
 
-def is_table(table):
-    if (type(table) is not list) or (not table):
-        return False
-    length = len(table)
-    width = len(table[0])
-    for row in range(length):
-        if len(table[row]) != width:
-            return False
-        for col in range(width):
-            if type(table[row][col]) is not str:
-                return False
-    return True
+def correct_name(name: str, extension: str):
+    path, name = split(name)
+    name = splitext(name)[0]
+    path = join(path, name + extension)
+    return path

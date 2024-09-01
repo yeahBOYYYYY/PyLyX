@@ -74,7 +74,7 @@ def one_obj(file, cmd: list[str], father: Element):
     father.append(element)
 
     cmd = line.split()
-    if cmd[0] == COMMANDS[start]:
+    if cmd[0] == ENVIRONMENTS[start]:
         line = file.readline()
         if not line.startswith('\\'):
             tail, line = create_text(file, line)

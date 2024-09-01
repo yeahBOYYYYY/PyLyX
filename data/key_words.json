@@ -1,4 +1,7 @@
 {
-"\\bar": {"under": "u"},
+"\\bar": {
+          "under": {"": {"tag": "u", "attrib": {}}},
+          "x": {"": {"tag": "u", "attrib": {}}}
+         },
 "\\series": {"bold": "b"}
 }
