@@ -17,15 +17,16 @@ class LyX:
             if type(template) is str and exists(template):
                 copy(template, self.__full_path)
             else:
-                print(f'invalid path for template: {template},\ncreate empty file instead.')
+                if template is not None:
+                    print(f'invalid path for template: {template},\ncreate empty file instead.')
                 with open(self.__full_path, 'x', encoding='utf8') as file:
                     file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {FORMAT}\n')
                     doc, head, body = Environment(DOCUMENT), Environment(HEADER), Environment(BODY)
                     doc.append(head)
                     doc.append(body)
-                    file.write(str(doc))
+                    file.write(doc.env2lyx())
 
-    def load_toc(self):
+    def load(self):
         return load(self.__full_path)
 
     def line_functions(self, func, args=()) -> bool:
@@ -49,32 +50,32 @@ class LyX:
         return is_changed
 
 
-    def write(self, toc):
-        if type(toc) is not Environment and type(toc) is not Section:
-            raise TypeError(f'toc must be {Environment} object, not {type(toc)}.')
+    def write(self, env: Environment):
+        if type(env) is not Environment and type(env) is not Section:
+            raise TypeError(f'toc must be {Environment} object, not {type(env)}.')
         if exists(self.__full_path + '~'):
             remove(self.__full_path)
 
-        if type(toc) is Section or toc.command() == LAYOUT:
-            start = ()
+        if type(env) is Section or env.command() == LAYOUT:
+            start = (f'{END}{BODY}\n', )
             end = (f'{END}{BODY}\n', f'{END}{DOCUMENT}\n')
-        elif toc.command() == BODY:
+        elif env.command() == BODY:
             start = (f'{BEGIN}{BODY}\n', )
             end = (f'{END}{DOCUMENT}\n', )
-        elif toc.command() == DOCUMENT:
+        elif env.command() == DOCUMENT:
             start = (f'{BEGIN}{DOCUMENT}\n', )
             end = ()
         else:
-            raise TypeError(f'invalid command of Environment object: {toc.command()}.')
+            raise TypeError(f'invalid command of Environment object: {env.command()}.')
 
         with open(self.__full_path, 'r', encoding='utf8') as old:
             with open(self.__full_path + '~', 'x', encoding='utf8') as new:
                 for line in old:
-                    if line not in (start + end):
+                    if line not in start:
                         new.write(line)
                     else:
                         break
-                new.write(toc.env2lyx())
+                new.write(env.env2lyx())
                 for s in end:
                     new.write(s)
 

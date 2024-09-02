@@ -1,7 +1,8 @@
-from PyLyX.lyx import LyX, CURRENT_FILE_PATH, join
+from PyLyX.helper import ENVIRONMENTS, LAYOUT, BODY
+from PyLyX.lyx import LyX, join, USER, DOWNLOADS_DIR
 
 
-file = LyX(join(CURRENT_FILE_PATH, 'x.lyx'))
-toc = file.load_toc()
-new = LyX(join(CURRENT_FILE_PATH, 'y.lyx'), None)
+file = LyX(join(USER, 'Documents', 'newfile1.lyx'))
+toc = file.load()
+new = LyX(join(DOWNLOADS_DIR, 'y.lyx'), None)
 new.write(toc)

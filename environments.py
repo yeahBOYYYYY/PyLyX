@@ -6,6 +6,7 @@ DEFAULT_RANK = 100
 
 class Object(Element):
     def __init__(self, tag: str, attrib: dict, command='', category='', details='', rank=DEFAULT_RANK, text='', tail='', is_open=True):
+        Element.__init__(self, tag, attrib)
         self.__command = str(command)
         self.__category = str(category)
         self.__details = str(details)
@@ -13,7 +14,6 @@ class Object(Element):
         self.__is_open = bool(is_open)
         self.text = str(text)
         self.tail = str(tail)
-        Element.__init__(self, tag, attrib)
 
     def can_be_nested_in(self, father):
         return type(father) is object and (self.__rank == DEFAULT_RANK or self.__rank > father.__rank)
@@ -42,6 +42,9 @@ class Object(Element):
     def is_open(self):
         return self.__is_open
 
+    def is_close(self):
+        return not self.__is_open
+
 
 class Environment(Object):
     def __init__(self, command: str, category='', details='', text='', tail='', is_open=True):
@@ -64,27 +67,27 @@ class Environment(Object):
 
     def can_be_nested_in(self, father):
         if type(father) is Section:
-            return self.__rank > father.rank()
-        elif type(father) is not Environment or not father.__is_open:
+            return self.rank() > father.rank()
+        elif type(father) is not Environment or not father.is_open():
             return False
-        elif self.__command == LAYOUT:
+        elif self.command() == LAYOUT:
             if self.is_regular():
-                return father.__command in {DEEPER, INSET}
+                return father.command() in {BODY, DEEPER, INSET}
             elif self.is_section_title():
                 return False
             else:  # i.e. self.is_primary() == True
-                return self.__rank > father.__rank
-        elif self.__command == INSET:
-            return father.__command in {LAYOUT, DEEPER, INSET}
-        elif self.__command == DEEPER:
-            return father.__command in {LAYOUT, DEEPER} and father.is_regular()
-        elif self.__rank > father.__rank:
+                return self.rank() > father.rank()
+        elif self.command() == INSET:
+            return father.command() in {LAYOUT, DEEPER, INSET}
+        elif self.command() == DEEPER:
+            return father.command() in {LAYOUT, DEEPER} and father.is_regular()
+        elif self.rank() > father.rank():
             return True
         else:
             return False
 
     def append(self, element):
-        if self.__is_open:
+        if self.is_open():
             if type(element) in {Environment, Design}:
                 if element.can_be_nested_in(self):
                     Element.append(self, element)
@@ -93,31 +96,31 @@ class Environment(Object):
             else:
                 raise TypeError(f'invalid Environment object: {element}.')
         else:
-            raise Exception('this Environment object is closed.')
+            raise Exception(f'this Environment object is closed: {self}.')
 
     def env2lyx(self):
-        text = f'{BEGIN}{self.__command}'
-        if self.__category:
-            text += f' {self.__category}'
-        if self.__details:
-            text += f' {self.__details}'
-        text += f'\n{self.text}\n'
+        text = f'{BEGIN}{self.command()}'
+        if self.category():
+            text += f' {self.category()}'
+        if self.details():
+            text += f' {self.details()}'
+        text += f'\n{self.text}'
 
         for e in self:
             text += e.env2lyx()
 
-        text += f'{END}{self.__command}\n\n'
+        text += f'{END}{self.command()}\n'
         text += self.tail
         return text
 
     def is_primary(self):
-        return self.__rank < 0
+        return self.rank() < 0
 
     def is_section_title(self):
-        return 0 <= self.__rank <= 6
+        return 0 <= self.rank() <= 6
 
     def is_regular(self):
-        return 6 < self.__rank
+        return 6 < self.rank()
 
 
 class Section(Object):
@@ -134,11 +137,11 @@ class Section(Object):
         self.__is_open = is_open
 
     def can_be_nested_in(self, father):
-        return type(father) is Section and self.__rank > father.__rank
+        return type(father) is Section and self.rank() > father.rank()
 
     def append(self, element):
         if type(element) in {Environment, Section, Design}:
-            if element.rank() > self.__rank:
+            if element.rank() > self.rank():
                 Element.append(self, element)
             else:
                 raise Exception('element can not be nested in this Section object.')
@@ -163,14 +166,14 @@ class Design(Object):
                         {}, key_word, choice, details, is_open=is_open)
 
     def env2lyx(self):
-        text = self.__command
-        if self.__category:
-            text += f' {self.__category}'
-        if self.__details:
-            text += f' {self.__details}'
+        text = self.command()
+        if self.category():
+            text += f' {self.category()}'
+        if self.details():
+            text += f' {self.details()}'
 
         for e in self:
             text += e.env2lyx()
 
-        text += f'{self.__command} default\n\n'
+        text += f'{self.command()} default\n\n'
         return text

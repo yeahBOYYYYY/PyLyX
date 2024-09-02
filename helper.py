@@ -33,12 +33,11 @@ LYX_EXE, SYS_DIR = join(LYX_PATH, 'bin\\LyX.exe'), join(LYX_PATH, 'Resources')
 FORMAT = 620
 DOWNLOADS_DIR = f'{USER}\\Downloads'
 
-TEXT, FORMULA, STANDARD, PLAIN_LAYOUT, TABLE, USD = 'Text', 'Formula', 'Standard', 'Plain Layout', 'Tabular', '$'
+PREAMBLE, STANDARD, PLAIN_LAYOUT, TEXT, FORMULA, TABLE, USD = 'preamble', 'Standard', 'Plain Layout', 'Text', 'Formula', 'Tabular', '$'
 LEFT, RIGHT, CENTER, TOP, MIDDLE, BOTTOM = 'left', 'right', 'center', 'top', 'middle', 'bottom'
 TRUE, FALSE, NONE, RANK, SECTION = 'true', 'false', 'none', 'rank', 'section'
 TAG, ATTRIB = 'tag', 'attrib'
 HE, EN = 'he', 'en'
-# LANGUAGES = {RIGHT: {HE}, LEFT: {EN}}
 
 BEGIN, END = '\\begin_', '\\end_'
 DOCUMENT, HEADER, BODY, LAYOUT, INSET, DEEPER = 'document', 'header', 'body', 'layout', 'inset', 'deeper'
@@ -116,8 +115,9 @@ def detect_lang(text: str):
     return ''
 
 
-def correct_name(name: str, extension: str):
-    path, name = split(name)
+def correct_name(full_path: str, extension: str):
+    extension = extension if extension.startswith('.') else '.' + extension
+    path, name = split(full_path)
     name = splitext(name)[0]
     path = join(path, name + extension)
     return path
