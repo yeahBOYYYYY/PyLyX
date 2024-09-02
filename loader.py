@@ -1,6 +1,6 @@
 from json import dumps
 from PyLyX.helper import *
-from PyLyX.environments import Environment, Section, Design, Object
+from PyLyX.objects import Environment, Section, Design, LyXobj
 
 
 def extract_cmd(line: str):
@@ -17,10 +17,10 @@ def extract_cmd(line: str):
     return command, category, details, text
 
 
-def perform_env(line: str, branch: list[Object], unknown: dict):
+def perform_obj(line: str, branch: list[LyXobj], unknown: dict):
     last = branch[-1]
     command, category, details, text = extract_cmd(line)
-    if line.startswith(BEGIN) and command in ENVIRONMENTS:
+    if line.startswith(BEGIN) and command in OBJECTS:
         new = Environment(command, category, details, text)
         if new.is_section_title():
             new = Section(new)
@@ -30,13 +30,13 @@ def perform_env(line: str, branch: list[Object], unknown: dict):
             last = branch[-1]
         last.append(new)
         branch.append(new)
-    elif line.startswith(END) and command in ENVIRONMENTS:
+    elif line.startswith(END) and command in OBJECTS:
         while last.is_close():
             branch.pop()
             last = branch[-1]
         if line == f'{END}{last.command()}\n':
             last.close()
-        elif ENVIRONMENTS[command] != 'end_only':
+        elif OBJECTS[command] != 'end_only':
             raise Exception(f'invalid LyX Document: last object opened with {BEGIN}{last.command()}, but current line is {line}.')
     elif command in KEY_WORDS:
         design = Design(command, category, details)
@@ -50,37 +50,37 @@ def perform_env(line: str, branch: list[Object], unknown: dict):
             last.tail += line
 
 
-def one_line(line: str, branch: list[Object], unknown: dict):
+def one_line(line: str, branch: list[LyXobj], unknown: dict):
     last = branch[-1]
 
     if line.startswith('\\'):
         if last.category() == FORMULA and last.is_open():
             last.text += line
         else:
-            perform_env(line, branch, unknown)
+            perform_obj(line, branch, unknown)
     elif last.is_open():
         last.text += line
     else:  # i.e. last is close
         last.tail += line
 
 
-def create_primary_env(file, command: str) -> Environment:
+def create_primary_obj(file, command: str) -> Environment:
     line = file.readline()
     while line != f'{BEGIN}{command}\n':
         line = file.readline()
     cmd = extract_cmd(line)
-    env = Environment(*cmd)
-    return env
+    obj = Environment(*cmd)
+    return obj
 
 
 def create_header(file):
-    header = create_primary_env(file, HEADER)
+    header = create_primary_obj(file, HEADER)
     branch = [header]
     line = file.readline()
     while line != f'{END}{HEADER}\n':
         last = branch[-1]
         if line.startswith(BEGIN) or line.startswith(END):
-            perform_env(line, branch, {})
+            perform_obj(line, branch, {})
         elif last.is_open():
                 last.text += line
         else:  # i.e. last is close
@@ -91,7 +91,7 @@ def create_header(file):
 
 def load(full_path: str):
     with open(full_path, 'r', encoding='utf8') as file:
-        root = create_primary_env(file, DOCUMENT)
+        root = create_primary_obj(file, DOCUMENT)
         header = create_header(file)
         root.append(header)
         branch = [root]

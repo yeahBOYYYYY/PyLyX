@@ -22,9 +22,9 @@ with open(join(CURRENT_FILE_PATH, 'data\\layouts.json'), 'r', encoding='utf8') a
 with open(join(CURRENT_FILE_PATH, 'data\\insets.json'), 'r', encoding='utf8') as f:
     INSETS = load(f)
 with open(join(CURRENT_FILE_PATH, 'data\\commands.json'), 'r', encoding='utf8') as f:
-    ENVIRONMENTS = load(f)
-    ENVIRONMENTS.update(LAYOUTS)
-    ENVIRONMENTS.update(INSETS)
+    OBJECTS = load(f)
+    OBJECTS.update(LAYOUTS)
+    OBJECTS.update(INSETS)
 
 USER = expanduser('~')
 DRIVE = USER[0]

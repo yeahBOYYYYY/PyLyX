@@ -1,7 +1,7 @@
 from os import remove
 from sys import argv
 from PyLyX.lyx import LyX
-from PyLyX.environments import Environment, Section
+from PyLyX.objects import Environment, Section
 from PyLyX.helper import *
 from compare_bind import scan_file
 
@@ -100,10 +100,10 @@ def one_file(full_path: str, depth=2):
 def recursive_write(path: str, files: list, result: LyX, depth=2):
     for name in files:
         if name.count('\\') and name.count('/'):
-            toc, files0 = one_file(name, depth)
+            obj, files0 = one_file(name, depth)
         else:
-            toc, files0 = one_file(join(path, name), depth)
-        result.write(toc)
+            obj, files0 = one_file(join(path, name), depth)
+        result.write(obj)
         recursive_write(path, files0, result, depth + 1)
 
 
@@ -113,10 +113,10 @@ def write_all_files(full_path: str, final_path: str):
     if exists(final_path + '~'):
         remove(final_path + '~')
 
-    toc, files = one_file(full_path)
+    obj, files = one_file(full_path)
     files.append(join(PERSONAL_PATH, PERSONAL_NAME))
     result = LyX(final_path)
-    result.write(toc)
+    result.write(obj)
     recursive_write(split(full_path)[0], files, result)
 
 

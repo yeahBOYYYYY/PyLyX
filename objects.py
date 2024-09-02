@@ -4,9 +4,9 @@ from PyLyX.helper import *
 DEFAULT_RANK = 100
 
 
-class Object(Element):
+class LyXobj(Element):
     def __init__(self, tag: str, attrib: dict, command='', category='', details='', rank=DEFAULT_RANK, text='', tail='', is_open=True):
-        Element.__init__(self, tag, attrib)
+        super().__init__(tag, attrib)
         self.__command = str(command)
         self.__category = str(category)
         self.__details = str(details)
@@ -15,10 +15,29 @@ class Object(Element):
         self.text = str(text)
         self.tail = str(tail)
 
-    def can_be_nested_in(self, father):
-        return type(father) is object and (self.__rank == DEFAULT_RANK or self.__rank > father.__rank)
+    def __str__(self):
+        category = ' ' + self.__details if self.__details else ''
+        details = ' ' + self.__details if self.__details else ''
+        full_command = self.__command + category + details
+        full_command = ' full command: ' + full_command + ',' if full_command else ''
+        return f'<tag: {self.tag},{full_command} rank: {self.__rank}>'
 
-    def env2lyx(self):
+    def can_be_nested_in(self, father):
+        return type(father) in CLASSES and (self.__rank == DEFAULT_RANK or self.__rank > father.__rank)
+
+    def append(self, obj):
+        if type(obj) in CLASSES:
+            if self.is_open():
+                if obj.can_be_nested_in(self):
+                    Element.append(self, obj)
+                else:
+                    raise Exception(f'LyXobj {obj} can not be nested in LyXobj: {self}.')
+            else:
+                raise Exception(f'this LyXobj is closed: {self}.')
+        else:
+            raise TypeError(f'invalid LyXobj: {obj}.')
+
+    def obj2lyx(self):
         return str(self)
 
     def open(self):
@@ -45,29 +64,35 @@ class Object(Element):
     def is_close(self):
         return not self.__is_open
 
+    def is_empty(self):
+        for _ in self:
+            return True
+        return False
 
-class Environment(Object):
+
+class Environment(LyXobj):
     def __init__(self, command: str, category='', details='', text='', tail='', is_open=True):
-        if command not in ENVIRONMENTS:
+        if command not in OBJECTS:
             raise TypeError(f'invalid command: {command}.')
-        elif category not in ENVIRONMENTS[command]:
+        elif category not in OBJECTS[command]:
             raise TypeError(f'invalid category: {category}.')
-        elif details not in ENVIRONMENTS[command][category]:
+        elif details not in OBJECTS[command][category]:
             raise TypeError(f'invalid details: {details}.')
         elif type(text) is not str:
             raise TypeError(f'invalid text: {text}.')
         elif type(text) is not str:
             raise TypeError(f'invalid tail: {tail}.')
 
-        Object.__init__(self, ENVIRONMENTS[command][category][details][TAG],
-                        ENVIRONMENTS[command][category][details][ATTRIB],
-                        command, category, details,
-                        ENVIRONMENTS[command][category][details].get(RANK, DEFAULT_RANK),
-                        text, tail, is_open)
+        super().__init__(OBJECTS[command][category][details][TAG],
+                         OBJECTS[command][category][details][ATTRIB], command, category, details,
+                         OBJECTS[command][category][details].get(RANK, DEFAULT_RANK), text, tail, is_open)
 
     def can_be_nested_in(self, father):
         if type(father) is Section:
-            return self.rank() > father.rank()
+            if self.is_section_title() and not father.is_empty() and self.rank() == father.rank():
+                return True
+            else:
+                return self.rank() > father.rank()
         elif type(father) is not Environment or not father.is_open():
             return False
         elif self.command() == LAYOUT:
@@ -86,19 +111,7 @@ class Environment(Object):
         else:
             return False
 
-    def append(self, element):
-        if self.is_open():
-            if type(element) in {Environment, Design}:
-                if element.can_be_nested_in(self):
-                    Element.append(self, element)
-                else:
-                    raise Exception('element can not be nested in this Environment object.')
-            else:
-                raise TypeError(f'invalid Environment object: {element}.')
-        else:
-            raise Exception(f'this Environment object is closed: {self}.')
-
-    def env2lyx(self):
+    def obj2lyx(self):
         text = f'{BEGIN}{self.command()}'
         if self.category():
             text += f' {self.category()}'
@@ -107,7 +120,7 @@ class Environment(Object):
         text += f'\n{self.text}'
 
         for e in self:
-            text += e.env2lyx()
+            text += e.obj2lyx()
 
         text += f'{END}{self.command()}\n'
         text += self.tail
@@ -123,57 +136,50 @@ class Environment(Object):
         return 6 < self.rank()
 
 
-class Section(Object):
+class Section(LyXobj):
     def __init__(self, env: Environment, is_open=True):
         if type(env) is not Environment:
             raise TypeError(f'invalid Environment object: {env}.')
-        elif not 0 <= env.rank() <= 6:
+        elif not env.is_section_title():
             raise TypeError(f'Environment object {env} is not section title.')
 
-        Object.__init__(self, SECTION, {}, rank=-1)
+        super().__init__(SECTION, {}, rank=env.rank())
 
         self.append(env)
-        self.__rank = env.rank()
-        self.__is_open = is_open
+        if not is_open:
+            self.close()
 
     def can_be_nested_in(self, father):
         return type(father) is Section and self.rank() > father.rank()
 
-    def append(self, element):
-        if type(element) in {Environment, Section, Design}:
-            if element.rank() > self.rank():
-                Element.append(self, element)
-            else:
-                raise Exception('element can not be nested in this Section object.')
-        else:
-            raise TypeError(f'invalid Environment object: {element}.')
-
-    def env2lyx(self):
+    def obj2lyx(self):
         text = ''
-        for e in self:
-            text += e.env2lyx()
+        for obj in self:
+            text += obj.obj2lyx()
         return text
 
 
-class Design(Object):
+class Design(LyXobj):
     def __init__(self, key_word: str, choice: str, details='', is_open=True):
         if key_word not in KEY_WORDS:
             raise TypeError(f'invalid key word: {key_word}.')
         elif choice not in KEY_WORDS[key_word]:
             raise TypeError(f'invalid choice: {choice} (in {key_word}).')
 
-        Object.__init__(self, KEY_WORDS[key_word][choice][self.__details][TAG],
-                        {}, key_word, choice, details, is_open=is_open)
+        super().__init__(KEY_WORDS[key_word][choice][self.__details][TAG], {}, key_word, choice, details, is_open=is_open)
 
-    def env2lyx(self):
+    def obj2lyx(self):
         text = self.command()
         if self.category():
             text += f' {self.category()}'
         if self.details():
             text += f' {self.details()}'
 
-        for e in self:
-            text += e.env2lyx()
+        for obj in self:
+            text += obj.obj2lyx()
 
         text += f'{self.command()} default\n\n'
         return text
+
+
+CLASSES = {LyXobj, Environment, Section, Design}

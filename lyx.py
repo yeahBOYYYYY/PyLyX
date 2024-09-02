@@ -2,7 +2,7 @@ from os import rename, remove
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
 from PyLyX.helper import *
-from PyLyX.environments import Environment, Section
+from PyLyX.objects import Environment, Section, LyXobj
 from PyLyX.loader import load
 
 
@@ -24,7 +24,7 @@ class LyX:
                     doc, head, body = Environment(DOCUMENT), Environment(HEADER), Environment(BODY)
                     doc.append(head)
                     doc.append(body)
-                    file.write(doc.env2lyx())
+                    file.write(doc.obj2lyx())
 
     def load(self):
         return load(self.__full_path)
@@ -50,23 +50,23 @@ class LyX:
         return is_changed
 
 
-    def write(self, env: Environment):
-        if type(env) is not Environment and type(env) is not Section:
-            raise TypeError(f'toc must be {Environment} object, not {type(env)}.')
+    def write(self, obj: LyXobj):
+        if type(obj) is not Environment and type(obj) is not Section:
+            raise TypeError(f'obj must be LyXobj, not {type(obj)}.')
         if exists(self.__full_path + '~'):
             remove(self.__full_path)
 
-        if type(env) is Section or env.command() == LAYOUT:
+        if type(obj) is Section or obj.command() == LAYOUT:
             start = (f'{END}{BODY}\n', )
             end = (f'{END}{BODY}\n', f'{END}{DOCUMENT}\n')
-        elif env.command() == BODY:
+        elif obj.command() == BODY:
             start = (f'{BEGIN}{BODY}\n', )
             end = (f'{END}{DOCUMENT}\n', )
-        elif env.command() == DOCUMENT:
+        elif obj.command() == DOCUMENT:
             start = (f'{BEGIN}{DOCUMENT}\n', )
             end = ()
         else:
-            raise TypeError(f'invalid command of Environment object: {env.command()}.')
+            raise TypeError(f'invalid command of Environment object: {obj.command()}.')
 
         with open(self.__full_path, 'r', encoding='utf8') as old:
             with open(self.__full_path + '~', 'x', encoding='utf8') as new:
@@ -75,7 +75,7 @@ class LyX:
                         new.write(line)
                     else:
                         break
-                new.write(env.env2lyx())
+                new.write(obj.obj2lyx())
                 for s in end:
                     new.write(s)
 
