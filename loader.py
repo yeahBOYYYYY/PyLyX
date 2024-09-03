@@ -1,15 +1,13 @@
-from json import dumps
 from PyLyX.helper import *
-from PyLyX.objects import Environment, Section, Design, LyXobj
+from PyLyX.objects import Environment, Section
 
 
 def extract_cmd(line: str):
     cmd = line.split()
-    if len(cmd) > 3:
-        raise Exception(f'invalid cmd: {line}')
-    cmd += ['', '']
+    if len(cmd) < 3:
+        cmd += ['', '', 'is not cmd']
     command, category, details = cmd[:3]
-    command = command[command.find('_')+1:]
+    command = command[command.find('_') + 1:]
     if details.startswith(USD) and details.endswith(USD):
         text, details = details + '\n', ''
     else:
@@ -17,12 +15,13 @@ def extract_cmd(line: str):
     return command, category, details, text
 
 
-def perform_obj(line: str, branch: list[LyXobj], unknown: dict):
+def one_line(line: str, branch: list):
     last = branch[-1]
     command, category, details, text = extract_cmd(line)
-    if line.startswith(BEGIN) and command in OBJECTS:
+
+    if line.startswith(BEGIN) and command in OBJECTS and category in OBJECTS[command] and details in OBJECTS[command][category]:
         new = Environment(command, category, details, text)
-        if new.is_section_title():
+        if type(new) is Environment and new.is_section_title():
             new = Section(new)
         while not new.can_be_nested_in(last):
             last.close()
@@ -30,76 +29,42 @@ def perform_obj(line: str, branch: list[LyXobj], unknown: dict):
             last = branch[-1]
         last.append(new)
         branch.append(new)
+        if type(new) is Section:
+            branch.append(new[0])
+    elif line.startswith(BEGIN):
+        raise Exception(f'unknown command: {line[:-1]}.')
+
     elif line.startswith(END) and command in OBJECTS:
-        while last.is_close():
-            branch.pop()
-            last = branch[-1]
-        if line == f'{END}{last.command()}\n':
-            last.close()
-        elif OBJECTS[command] != 'end_only':
-            raise Exception(f'invalid LyX Document: last object opened with {BEGIN}{last.command()}, but current line is {line}.')
-    elif command in KEY_WORDS:
-        design = Design(command, category, details)
-        last.append(design)
-    else:
-        unknown[command] = {category: {details: {}}}
-        print(f'unknown command: {line}')
-        if last.is_open():
-            last.text += line
-        else:  # i.e. last is close
+        if command == 'index':
             last.tail += line
-
-
-def one_line(line: str, branch: list[LyXobj], unknown: dict):
-    last = branch[-1]
-
-    if line.startswith('\\'):
-        if last.category() == FORMULA and last.is_open():
-            last.text += line
         else:
-            perform_obj(line, branch, unknown)
+            while last.is_close():
+                branch.pop()
+                last = branch[-1]
+            if line == f'{END}{last.command()}\n':
+                last.close()
+            elif line == f'{END}{BODY}\n':
+                while last.command() != DOCUMENT:
+                    last.close()
+                    branch.pop()
+                    last = branch[-1]
+            else:
+                raise Exception(f'invalid LyX document: last object is {last}, but current line is "{line[:-1]}".')
+
     elif last.is_open():
         last.text += line
     else:  # i.e. last is close
         last.tail += line
 
 
-def create_primary_obj(file, command: str) -> Environment:
-    line = file.readline()
-    while line != f'{BEGIN}{command}\n':
-        line = file.readline()
-    cmd = extract_cmd(line)
-    obj = Environment(*cmd)
-    return obj
-
-
-def create_header(file):
-    header = create_primary_obj(file, HEADER)
-    branch = [header]
-    line = file.readline()
-    while line != f'{END}{HEADER}\n':
-        last = branch[-1]
-        if line.startswith(BEGIN) or line.startswith(END):
-            perform_obj(line, branch, {})
-        elif last.is_open():
-                last.text += line
-        else:  # i.e. last is close
-            last.tail += line
-        line = file.readline()
-    return header
-
-
 def load(full_path: str):
     with open(full_path, 'r', encoding='utf8') as file:
-        root = create_primary_obj(file, DOCUMENT)
-        header = create_header(file)
-        root.append(header)
+        line = file.readline()
+        while line != f'{BEGIN}{DOCUMENT}\n':
+            line = file.readline()
+        cmd = extract_cmd(line)
+        root = Environment(*cmd)
         branch = [root]
-        unknown = {}
         for line in file:
-            one_line(line, branch, unknown)
-    if unknown:
-        string = dumps(unknown, indent=0)
-        with open(join(DOWNLOADS_DIR, 'unknown_commands.json'), 'w', encoding='utf8') as file:
-            file.write(string)
+            one_line(line, branch)
     return root

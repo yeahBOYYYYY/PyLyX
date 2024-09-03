@@ -33,10 +33,10 @@ LYX_EXE, SYS_DIR = join(LYX_PATH, 'bin\\LyX.exe'), join(LYX_PATH, 'Resources')
 FORMAT = 620
 DOWNLOADS_DIR = f'{USER}\\Downloads'
 
-PREAMBLE, STANDARD, PLAIN_LAYOUT, TEXT, FORMULA, TABLE, USD = 'preamble', 'Standard', 'Plain Layout', 'Text', 'Formula', 'Tabular', '$'
+PREAMBLE, STANDARD, PLAIN_LAYOUT, TEXT, FORMULA, TABLE, STATUS, USD = 'preamble', 'Standard', 'Plain Layout', 'Text', 'Formula', 'Tabular', 'status', '$'
 LEFT, RIGHT, CENTER, TOP, MIDDLE, BOTTOM = 'left', 'right', 'center', 'top', 'middle', 'bottom'
 TRUE, FALSE, NONE, RANK, SECTION = 'true', 'false', 'none', 'rank', 'section'
-TAG, ATTRIB = 'tag', 'attrib'
+TAG, ATTRIB, CLASS = 'tag', 'attrib', 'class'
 HE, EN = 'he', 'en'
 
 BEGIN, END = '\\begin_', '\\end_'

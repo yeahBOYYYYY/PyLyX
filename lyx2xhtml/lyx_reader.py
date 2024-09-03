@@ -2,7 +2,7 @@ from xml.etree.ElementTree import Element
 from PyLyX.helper import *
 from PyLyX.lyx import load, Environment
 
-SECTION, SPAN, CLASS = 'section', 'span', 'class'
+SPAN = 'span'
 
 HREF, REF, LABEL, ID, NAME, TARGET = 'href', 'ref', 'label', 'id', 'name', 'target'
 SPECIAL_CHARS = {'"': '&quot;', '&': '&amp;', "'": '&apos;', '<': '&lt;', '>': '&gt;'}

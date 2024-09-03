@@ -52,7 +52,7 @@ class LyX:
 
     def write(self, obj: LyXobj):
         if type(obj) is not Environment and type(obj) is not Section:
-            raise TypeError(f'obj must be LyXobj, not {type(obj)}.')
+            raise TypeError(f'obj must be {LyXobj.NAME}, not {type(obj)}.')
         if exists(self.__full_path + '~'):
             remove(self.__full_path)
 
@@ -66,7 +66,7 @@ class LyX:
             start = (f'{BEGIN}{DOCUMENT}\n', )
             end = ()
         else:
-            raise TypeError(f'invalid command of Environment object: {obj.command()}.')
+            raise TypeError(f'invalid command of {Environment.NAME} object: {obj.command()}.')
 
         with open(self.__full_path, 'r', encoding='utf8') as old:
             with open(self.__full_path + '~', 'x', encoding='utf8') as new:

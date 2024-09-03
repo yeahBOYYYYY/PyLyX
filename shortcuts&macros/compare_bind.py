@@ -5,7 +5,6 @@ from PyLyX.helper import correct_name
 BIND, UNBIND, BIND_FILE, SELF = '\\bind ', '\\unbind ', '\\bind_file', 'self-insert'
 EXTENSION = '.bind'
 TITLE_OPEN, TITLE_CLOSE = '##### ', ' #####\n'
-SHORTCUTS, FILES, TABLES, CANCELED = 'shortcuts', 'files', 'tables', 'canceled'
 TABLE = list[[str, str]]
 
 

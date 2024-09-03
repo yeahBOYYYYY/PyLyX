@@ -1,11 +1,24 @@
-{"inset": {
-"Formula": {"": {"tag": "math", "attrib": {}}},
-"CommandInset": {"href": {"tag": "a", "attrib": {"href": ""}},
-                "ref": {"tag": "a", "attrib": {"href": ""}},
-                "label": {"tag": "a", "attrib": {"id": ""}},
-                "include": {"tag": "meta", "attrib": {}}},
-"Tabular": {"": {"tag": "table", "attrib": {}}},
+{
+"inset": {
+            "Formula": {"": {"tag": "math", "attrib": {}}},
+            "CommandInset": {
+                            "href": {"tag": "a", "attrib": {"href": ""}},
+                            "ref": {"tag": "a", "attrib": {"href": ""}},
+                            "label": {"tag": "a", "attrib": {"id": ""}},
+                            "include": {"tag": "meta", "attrib": {}},
+                            "bibitem": {"tag": "a", "attrib": {}}
+                            },
+            "Tabular": {"": {"tag": "table", "attrib": {}}},
 
-"space": {"\\space{}": {"tag": "", "attrib": {}}},
-"Text": {"": {"tag": "", "attrib": {}}}
-}}
+            "space": {"\\space{}": {"tag": "space", "attrib": {}}},
+            "Text": {"": {"tag": "", "attrib": {}}},
+            "Foot": {"": {"tag": "div", "attrib": {"class": "foot"}}},
+            "Quotes":   {
+                        "qrd": {"tag": "", "attrib": {}},
+                        "qld": {"tag": "", "attrib": {}}
+                        },
+            "Newline": {"newline": {"tag": "br", "attrib": {}}},
+            "Newpage": {"newpage": {"tag": "", "attrib": {}}},
+            "Graphics": {"": {"tag": "", "attrib": {}}}
+            }
+}

@@ -1,7 +1,25 @@
 {
-"\\bar": {
-          "under": {"": {"tag": "u", "attrib": {}}},
-          "x": {"": {"tag": "u", "attrib": {}}}
-         },
-"\\series": {"bold": "b"}
+"\\lang":   {
+            "hebrew": {"": {"tag": "", "attrib": {"style": "text-align: right"}}},
+            "english": {"": {"tag": "", "attrib": {"style": "text-align: left"}}}
+            },
+"\\family": {
+            "roman": {"": {"tag": "", "attrib": {"style": "text-align: right"}}}
+            },
+"\\series": {
+            "medium": {"": {"tag": "", "attrib": {}}},
+            "bold": {"": {"tag": "b", "attrib": {}}}
+            },
+"\\shape":  {},
+"\\size":   {
+            "large": {"": {"tag": "", "attrib": {}}}
+            },
+"\\emph":   {},
+"\\bar":    {
+            "under": {"": {"tag": "u", "attrib": {}}}
+            },
+"\\strikeout": {},
+"\\xout": {},
+"\\uuline": {},
+"\\uwave": {}
 }
