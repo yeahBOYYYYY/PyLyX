@@ -21,7 +21,7 @@ with open(join(CURRENT_FILE_PATH, 'data\\layouts.json'), 'r', encoding='utf8') a
     LAYOUTS = load(f)
 with open(join(CURRENT_FILE_PATH, 'data\\insets.json'), 'r', encoding='utf8') as f:
     INSETS = load(f)
-with open(join(CURRENT_FILE_PATH, 'data\\commands.json'), 'r', encoding='utf8') as f:
+with open(join(CURRENT_FILE_PATH, 'data\\primary_objects.json'), 'r', encoding='utf8') as f:
     OBJECTS = load(f)
     OBJECTS.update(LAYOUTS)
     OBJECTS.update(INSETS)

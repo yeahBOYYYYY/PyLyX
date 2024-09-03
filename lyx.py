@@ -29,6 +29,9 @@ class LyX:
     def load(self):
         return load(self.__full_path)
 
+    def get_path(self):
+        return self.__full_path
+
     def line_functions(self, func, args=()) -> bool:
         if exists(self.__full_path + '~'):
             remove(self.__full_path + '~')

@@ -1,5 +1,5 @@
 # from PyLyX.helper import ATTRIB
-from PyLyX.lyx import LyX, join, DOWNLOADS_DIR, OBJECTS, TAG
+from PyLyX.lyx import LyX, join, DOWNLOADS_DIR #, OBJECTS, TAG
 # from PyLyX.loader import extract_cmd
 # from json import dumps
 
