@@ -19,6 +19,7 @@
                         },
             "Newline": {"newline": {"tag": "br", "attrib": {}}},
             "Newpage": {"newpage": {"tag": "", "attrib": {}}},
-            "Graphics": {"": {"tag": "", "attrib": {}}}
+            "Graphics": {"": {"tag": "", "attrib": {}}},
+            "float": {"table": {"tag": "", "attrib": {}}}
             }
 }

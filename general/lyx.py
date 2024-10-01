@@ -1,9 +1,9 @@
 from os import rename, remove
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
-from PyLyX.helper import *
-from PyLyX.objects import Environment, Section, LyXobj
-from PyLyX.loader import load
+from PyLyX.general.helper import *
+from PyLyX.general.objects import Environment, Section, LyXobj
+from PyLyX.general.loader import load
 
 
 class LyX:
@@ -26,10 +26,10 @@ class LyX:
                     doc.append(body)
                     file.write(doc.obj2lyx())
 
-    def load(self):
+    def load(self) -> Environment:
         return load(self.__full_path)
 
-    def get_path(self):
+    def get_path(self) -> str:
         return self.__full_path
 
     def line_functions(self, func, args=()) -> bool:
@@ -99,14 +99,14 @@ class LyX:
 
         return self.line_functions(func)
 
-    def export(self, fmt: str, output_path='') -> bool:
+    def export(self, fmt: str, output_path='', timeout=30) -> bool:
         if output_path:
             cmd = [LYX_EXE, '--export-to', fmt, output_path, self.__full_path]
         else:
             cmd = [LYX_EXE, '--export', fmt, self.__full_path]
 
         try:
-            run(cmd, timeout=15)
+            run(cmd, timeout=timeout)
             return True
         except TimeoutExpired:
             print(f'Attempting to export file "{split(self.__full_path)[1]}" took too long.')

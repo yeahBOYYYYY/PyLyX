@@ -1,6 +1,6 @@
 from xml.etree.ElementTree import Element
-from PyLyX.helper import *
-from PyLyX.lyx import load, Environment
+from PyLyX.general.helper import *
+from PyLyX.general.lyx import load, Environment
 
 SPAN = 'span'
 
@@ -91,7 +91,7 @@ def convert_text(lines: str):
 
 
 def one_toc(toc: Environment):
-    lines = toc.text().split('\n')
+    lines = toc.text.split('\n')
     html_code = ''
     if toc.category() in CATEGORIES:
         for line in lines:

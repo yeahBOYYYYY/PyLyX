@@ -1,5 +1,5 @@
-from PyLyX.helper import *
-from PyLyX.objects import Environment, Section
+from PyLyX.general.helper import *
+from PyLyX.general.objects import Environment, Section
 
 
 def extract_cmd(line: str):

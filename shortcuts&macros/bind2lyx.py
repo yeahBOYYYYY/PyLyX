@@ -1,8 +1,8 @@
 from os import remove
 from sys import argv
-from PyLyX.lyx import LyX
-from PyLyX.objects import Environment, Section
-from PyLyX.helper import *
+from PyLyX.general.lyx import LyX
+from PyLyX.general.objects import Environment, Section
+from PyLyX.general.helper import *
 from compare_bind import scan_file
 
 

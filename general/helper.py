@@ -27,11 +27,11 @@ with open(join(CURRENT_FILE_PATH, 'data\\primary_objects.json'), 'r', encoding='
     OBJECTS.update(INSETS)
 
 USER = expanduser('~')
+DOWNLOADS_DIR = f'{USER}\\Downloads'
 DRIVE = USER[0]
 VERSION, LYX_PATH, USER_DIR = find_version()
 LYX_EXE, SYS_DIR = join(LYX_PATH, 'bin\\LyX.exe'), join(LYX_PATH, 'Resources')
 FORMAT = 620
-DOWNLOADS_DIR = f'{USER}\\Downloads'
 
 PREAMBLE, STANDARD, PLAIN_LAYOUT, TEXT, FORMULA, TABLE, STATUS, USD = 'preamble', 'Standard', 'Plain Layout', 'Text', 'Formula', 'Tabular', 'status', '$'
 LEFT, RIGHT, CENTER, TOP, MIDDLE, BOTTOM = 'left', 'right', 'center', 'top', 'middle', 'bottom'

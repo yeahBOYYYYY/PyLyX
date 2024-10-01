@@ -1,5 +1,5 @@
 from xml.etree.ElementTree import Element
-from PyLyX.helper import *
+from PyLyX.general.helper import *
 
 
 class LyXobj(Element):
