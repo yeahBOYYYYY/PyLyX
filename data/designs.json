@@ -1,0 +1,48 @@
+{
+  "lang":             {
+                      "hebrew": {"": {}},
+                      "english": {"": {}}
+                      },
+  "family":           {
+                      "roman": {"": {}}
+                      },
+  "series":           {
+                      "medium": {"": {}},
+                      "bold": {"": {"tag": "b"}}
+                      },
+  "shape":            {
+                      "italic": {"": {"tag": "i"}},
+                      "slanted": {"": {"tag": "i"}},
+                      "smallcaps": {"": {}}
+                      },
+  "size":             {
+                      "tiny": {"": {}},
+                      "scriptsize": {"": {}},
+                      "footnotesize": {"": {}},
+                      "small": {"": {}},
+                      "large": {"": {}},
+                      "larger": {"": {}},
+                      "largest": {"": {}}
+                      },
+  "emph":             {"on": {"": {"tag": "em"}}},
+  "bar":              {
+                      "under": {"": {"tag": "u"}}
+                      },
+  "strikeout":        {"on": {"": {"tag": "del"}}},
+  "xout":             {"on": {"": {"tag": "del"}}},
+  "uuline":           {"on": {"": {"tag": "u"}}},
+  "uwave":            {"on": {"": {"tag": "u"}}},
+  "color":            {"blue": {"": {}}},
+  "noun":             {"on": {"": {}}},
+  "align":            {
+                      "block": {"": {}},
+                      "left": {"": {}},
+                      "right": {"": {}},
+                      "center": {"": {}}
+                      },
+  "deeper":           {"": {"": {}}},
+
+
+  "backslash":        {"": {"": {"text": "\\"}}},
+  "labelwidthstring": {"": {"": {}}}
+}

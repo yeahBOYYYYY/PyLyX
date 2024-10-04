@@ -2,7 +2,7 @@ from os import rename, remove
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
 from PyLyX.general.helper import *
-from PyLyX.general.objects import Environment, Section, LyXobj
+from PyLyX.general.objects import Environment, Section, LyxObj
 from PyLyX.general.loader import load
 
 
@@ -20,7 +20,7 @@ class LyX:
                 if template is not None:
                     print(f'invalid path for template: {template},\ncreate empty file instead.')
                 with open(self.__full_path, 'x', encoding='utf8') as file:
-                    file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {FORMAT}\n')
+                    file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {CUR_FORMAT}\n')
                     doc, head, body = Environment(DOCUMENT), Environment(HEADER), Environment(BODY)
                     doc.append(head)
                     doc.append(body)
@@ -53,9 +53,9 @@ class LyX:
         return is_changed
 
 
-    def write(self, obj: LyXobj):
+    def write(self, obj: LyxObj):
         if type(obj) is not Environment and type(obj) is not Section:
-            raise TypeError(f'obj must be {LyXobj.NAME}, not {type(obj)}.')
+            raise TypeError(f'obj must be {LyxObj.NAME}, not {type(obj)}.')
         if exists(self.__full_path + '~'):
             remove(self.__full_path)
 

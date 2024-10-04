@@ -43,13 +43,13 @@ def command2lyx(code: str):
     elif code.startswith('math-insert '):
         code = code[len('math-insert '):]
         code = code.replace('\\\\', '\\')
-        code = create_inset(FORMULA, f' ${code}$')
+        code = Environment(INSET, FORMULA, text=f' \\({code}\\)')
     elif code.startswith('math-delim '):
         code = code[len('math-delim '):]
         code.replace('langle', '<')
         code.replace('rangle', '>')
         code = f'\\left{code[0]} \\right{code[-1]}'
-        code = create_inset(FORMULA, f' ${code}$')
+        code = Environment(INSET, FORMULA, text=f' \\({code}\\)')
 
     return code
 
@@ -78,7 +78,7 @@ def one_file(full_path: str, depth=2):
         title, table = tables[i]
         translate_table(table)
         design_table(table)
-        table = create_table(table)
+        table = table2lyx(table)
         table = Environment(INSET, TABLE, text=table)
         standard = Environment(LAYOUT, STANDARD)
         standard.append(table)

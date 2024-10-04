@@ -1,25 +1,34 @@
 {
 "inset": {
-            "Formula": {"": {"tag": "math", "attrib": {}}},
-            "CommandInset": {
-                            "href": {"tag": "a", "attrib": {"href": ""}},
-                            "ref": {"tag": "a", "attrib": {"href": ""}},
-                            "label": {"tag": "a", "attrib": {"id": ""}},
-                            "include": {"tag": "meta", "attrib": {}},
-                            "bibitem": {"tag": "a", "attrib": {}}
-                            },
-            "Tabular": {"": {"tag": "table", "attrib": {}}},
+          "Formula": {"": {}},
+          "CommandInset": {
+                          "href": {"tag": "a", "required": {"target": "href", "name": "text", "more": "LatexCommand plural caps noprefix nolink"}},
+                          "ref": {"tag": "a", "required": {"reference": "href", "more": "LatexCommand plural caps noprefix nolink"}},
+                          "label": {"required": {"name": "id", "more": "LatexCommand"}},
+                          "include": {"tag": "meta", "required": {"filename": "content", "more": "LatexCommand literal"}},
+                          "bibitem": {"tag": "a", "required": {"key": "href", "more": "LatexCommand"}}
+                          },
+          "Tabular": {"": {"tag": "table"}},
 
-            "space": {"\\space{}": {"tag": "space", "attrib": {}}},
-            "Text": {"": {"tag": "", "attrib": {}}},
-            "Foot": {"": {"tag": "div", "attrib": {"class": "foot"}}},
-            "Quotes":   {
-                        "qrd": {"tag": "", "attrib": {}},
-                        "qld": {"tag": "", "attrib": {}}
-                        },
-            "Newline": {"newline": {"tag": "br", "attrib": {}}},
-            "Newpage": {"newpage": {"tag": "", "attrib": {}}},
-            "Graphics": {"": {"tag": "", "attrib": {}}},
-            "float": {"table": {"tag": "", "attrib": {}}}
-            }
+          "space": {"\\space{}": {"text": " "}},
+          "Text": {"": {}},
+          "Foot": {"": {}},
+          "Quotes":   {
+                      "qrd": {"text": "\""},
+                      "qld": {"text": "\""}
+                      },
+          "Newline": {"newline": {"tag": "br"}},
+          "Newpage": {"newpage": {}},
+          "Graphics": {"": {"tag": "img", "required": {"filename": "src"}}},
+          "Float": {
+                    "table": {},
+                    "figure": {}
+                    },
+          "ERT": {"": {}},
+          "Argument": {"1": {}},
+          "Marginal": {"": {}},
+          "Box": {"Frameless": {}},
+          "Caption": {"standard": {}},
+          "Note": {"Note": {}}
+          }
 }
