@@ -1,13 +1,14 @@
 from os import rename, remove
+from os.path import exists, join, split
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
-from PyLyX.general.helper import *
+from PyLyX import correct_name, detect_lang, PACKAGE_PATH, VERSION, CUR_FORMAT, LYX_EXE
 from PyLyX.general.objects import Environment, Section, LyxObj
-from PyLyX.general.loader import load
+from PyLyX.general.files_loader import load
 
 
 class LyX:
-    def __init__(self, full_path: str, template=join(CURRENT_FILE_PATH, 'data\\template.lyx')):
+    def __init__(self, full_path: str, template=join(PACKAGE_PATH, 'data\\template.lyx')):
         self.__full_path = correct_name(full_path, '.lyx')
 
         if exists(self.__full_path + '~'):
@@ -16,12 +17,11 @@ class LyX:
         if not exists(self.__full_path):
             if type(template) is str and exists(template):
                 copy(template, self.__full_path)
-            else:
-                if template is not None:
-                    print(f'invalid path for template: {template},\ncreate empty file instead.')
+            elif template is not None:
+                print(f'invalid path for template: {template},\ncreate empty file instead.')
                 with open(self.__full_path, 'x', encoding='utf8') as file:
                     file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {CUR_FORMAT}\n')
-                    doc, head, body = Environment(DOCUMENT), Environment(HEADER), Environment(BODY)
+                    doc, head, body = Environment('document'), Environment('header'), Environment('body')
                     doc.append(head)
                     doc.append(body)
                     file.write(doc.obj2lyx())
@@ -59,14 +59,14 @@ class LyX:
         if exists(self.__full_path + '~'):
             remove(self.__full_path)
 
-        if type(obj) is Section or obj.command() == LAYOUT:
-            start = (f'{END}{BODY}\n', )
-            end = (f'{END}{BODY}\n', f'{END}{DOCUMENT}\n')
-        elif obj.command() == BODY:
-            start = (f'{BEGIN}{BODY}\n', )
-            end = (f'{END}{DOCUMENT}\n', )
-        elif obj.command() == DOCUMENT:
-            start = (f'{BEGIN}{DOCUMENT}\n', )
+        if obj.is_section() or obj.is_layout():
+            start = ('\\end_body\n', )
+            end = ('\\end_body\n', '\\end_document\n')
+        elif obj.is_body():
+            start = ('\\begin_body\n', )
+            end = ('\\end_document\n', )
+        elif obj.is_document():
+            start = ('\\begin_document\n', )
             end = ()
         else:
             raise TypeError(f'invalid command of {Environment.NAME} object: {obj.command()}.')

@@ -32,7 +32,10 @@
   "xout":             {"on": {"": {"tag": "del"}}},
   "uuline":           {"on": {"": {"tag": "u"}}},
   "uwave":            {"on": {"": {"tag": "u"}}},
-  "color":            {"blue": {"": {}}},
+  "color":            {
+                      "blue": {"": {}},
+                      "red": {"": {}}
+                      },
   "noun":             {"on": {"": {}}},
   "align":            {
                       "block": {"": {}},
@@ -41,8 +44,12 @@
                       "center": {"": {}}
                       },
   "deeper":           {"": {"": {}}},
-
-
   "backslash":        {"": {"": {"text": "\\"}}},
-  "labelwidthstring": {"": {"": {}}}
+  "labelwidthstring": {"": {"": {}}},
+  "paragraph_spacing":          {
+                      "single": {"": {}},
+                      "onehalf": {"": {}},
+                      "double": {"": {}},
+                      "other": {"some_number!!!": {}}
+  }
 }

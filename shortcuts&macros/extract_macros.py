@@ -1,7 +1,7 @@
-from PyLyX.general.helper import *
 from sys import argv
 from os.path import join
 from json import dumps, load
+from PyLyX import correct_name, DOWNLOADS_DIR
 
 
 def translate_dicts(primary: dict, secondary: dict):
@@ -51,7 +51,7 @@ def extract_macros(macros_file: str):
     dictionary = {}
     with open(macros_file, 'r', encoding='utf8') as file:
         for line in file:
-            if line ==  f'{BEGIN}{INSET} FormulaMacro\n':
+            if line ==  '\\begin_inset FormulaMacro\n':
                 line = file.readline()
                 key, value = one_macro(line)
                 dictionary[key]= value

@@ -1,8 +1,11 @@
 from os import remove
+from os.path import split, splitext, exists, join
 from sys import argv
+from json import load
 from PyLyX.general.lyx import LyX
 from PyLyX.general.objects import Environment, Section
-from PyLyX.general.helper import *
+from PyLyX import USER, USER_DIR, SYS_DIR
+from PyLyX.general.tables_loader import create_table
 from compare_bind import scan_file
 
 
@@ -43,13 +46,13 @@ def command2lyx(code: str):
     elif code.startswith('math-insert '):
         code = code[len('math-insert '):]
         code = code.replace('\\\\', '\\')
-        code = Environment(INSET, FORMULA, text=f' \\({code}\\)')
+        code = Environment('inset', 'Formula', text=f'\\({code}\\)')
     elif code.startswith('math-delim '):
         code = code[len('math-delim '):]
         code.replace('langle', '<')
         code.replace('rangle', '>')
         code = f'\\left{code[0]} \\right{code[-1]}'
-        code = Environment(INSET, FORMULA, text=f' \\({code}\\)')
+        code = Environment('inset', 'Formula', text=f'\\({code}\\)')
 
     return code
 
@@ -78,11 +81,12 @@ def one_file(full_path: str, depth=2):
         title, table = tables[i]
         translate_table(table)
         design_table(table)
-        table = table2lyx(table)
-        table = Environment(INSET, TABLE, text=table)
-        standard = Environment(LAYOUT, STANDARD)
-        standard.append(table)
-        env = Environment(LAYOUT, LAYOUTS[depth + 1], text=title)
+        table = create_table(table)
+        father = Environment('inset', 'Tabular')
+        father.append(table)
+        standard = Environment('layout', 'Standard')
+        standard.append(father)
+        env = Environment('layout', LAYOUTS[depth + 1], text=title)
         section = Section(env)
         section.append(standard)
         tables[i] = section
@@ -90,7 +94,7 @@ def one_file(full_path: str, depth=2):
     name = splitext(split(full_path)[1])[0]
     if depth >= 2:
         name = name.upper()
-    env = Environment(LAYOUT, LAYOUTS[depth], text=name)
+    env = Environment('layout', LAYOUTS[depth], text=name)
     section = Section(env)
     for t in tables:
         section.append(t)
@@ -114,7 +118,7 @@ def write_all_files(full_path: str, final_path: str):
         remove(final_path + '~')
 
     obj, files = one_file(full_path)
-    files.append(join(PERSONAL_PATH, PERSONAL_NAME))
+    files.append(join(PERSONAL_PATH, 'user.bind'))
     result = LyX(final_path)
     result.write(obj)
     recursive_write(split(full_path)[0], files, result)
@@ -123,16 +127,11 @@ def write_all_files(full_path: str, final_path: str):
 DEFAULT_PATH = join(SYS_DIR, 'bind')
 DEFAULT_NAME = 'cua.bind'
 PERSONAL_PATH = join(USER_DIR, 'bind')
-PERSONAL_NAME = 'user.bind'
-FINAL_PATH = f'{USER}\\Downloads'
-FINAL_NAME = 'table_of_shortcuts.lyx'
-COMPLETE_MESSAGE = 'Mission complete: your shortcuts lyx file can be found in '
-NOTATION = 'Note: files in the user directory take precedence over files in the system directory.'
 
 
 def main():
     path, name = DEFAULT_PATH, DEFAULT_NAME
-    final_path, final_name = FINAL_PATH, FINAL_NAME
+    final_path, final_name = f'{USER}\\Downloads', 'table_of_shortcuts.lyx'
     if len(argv) == 1:
         pass
     elif len(argv) == 2:
@@ -143,13 +142,14 @@ def main():
         print(f'Too many inputs, I will ignore any input in {argv[4:]}.')
 
     if path == DEFAULT_PATH and exists(join(PERSONAL_PATH, DEFAULT_NAME)):
+        print('Note: files in the user directory take precedence over files in the system directory.')
         path, name = PERSONAL_PATH, DEFAULT_NAME
-        print(NOTATION)
 
     path = join(path, name)
     final_path = join(final_path, final_name)
     write_all_files(path, final_path)
-    print(COMPLETE_MESSAGE + final_path)
+
+    print(f'Mission complete: your shortcuts lyx file can be found in: {final_path}')
 
 
 if __name__ == '__main__':

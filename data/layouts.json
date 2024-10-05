@@ -5,8 +5,8 @@
 
             "Labeling": {"": {}},
             "Description": {"": {}},
-            "Itemize": {"": {"tag": "ul"}},
-            "Enumerate": {"": {"tag": "ol"}},
+            "Itemize": {"": {}},
+            "Enumerate": {"": {}},
 
             "Part": {"": { "rank": 0, "he": "חלק"}},
             "Chapter": {"": { "rank": 1, "he": "פרק"}},

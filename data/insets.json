@@ -2,13 +2,13 @@
 "inset": {
           "Formula": {"": {}},
           "CommandInset": {
-                          "href": {"tag": "a", "required": {"target": "href", "name": "text", "more": "LatexCommand plural caps noprefix nolink"}},
+                          "href": {"tag": "a", "required": {"target": "href", "name": "text", "more": "LatexCommand literal plural caps noprefix nolink"}},
                           "ref": {"tag": "a", "required": {"reference": "href", "more": "LatexCommand plural caps noprefix nolink"}},
                           "label": {"required": {"name": "id", "more": "LatexCommand"}},
                           "include": {"tag": "meta", "required": {"filename": "content", "more": "LatexCommand literal"}},
                           "bibitem": {"tag": "a", "required": {"key": "href", "more": "LatexCommand"}}
                           },
-          "Tabular": {"": {"tag": "table"}},
+          "Tabular": {"": {}},
 
           "space": {"\\space{}": {"text": " "}},
           "Text": {"": {}},
@@ -24,8 +24,8 @@
                     "table": {},
                     "figure": {}
                     },
-          "ERT": {"": {}},
-          "Argument": {"1": {}},
+          "ERT": {"": {"required": {"more": "status"}}},
+          "Argument": {"1": {"required": {"more": "status"}}},
           "Marginal": {"": {}},
           "Box": {"Frameless": {}},
           "Caption": {"standard": {}},

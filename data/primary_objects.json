@@ -1,9 +1,9 @@
 {
 "document": {"": {"": {"tag": "html", "rank": -3}}},
     "header": {"": {"": {"tag": "head", "rank": -2}}},
-        "preamble": {"": {"": {}}},
-        "modules": {"": {"": {}}},
-        "local_layout": {"": {"": {}}},
-        "index": {"Index": {"": {}}},
+        "preamble": {"": {"": {"rank": -1}}},
+        "modules": {"": {"": {"rank":  -1}}},
+        "local_layout": {"": {"": {"rank": -1}}},
+        "index": {"Index": {"": {"rank": -1}}},
     "body": {"": {"": {"tag": "body", "rank": -2}}}
 }
