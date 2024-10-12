@@ -2,33 +2,49 @@
 "inset": {
           "Formula": {"": {}},
           "CommandInset": {
-                          "href": {"tag": "a", "required": {"target": "href", "name": "text", "more": "LatexCommand literal plural caps noprefix nolink"}},
-                          "ref": {"tag": "a", "required": {"reference": "href", "more": "LatexCommand plural caps noprefix nolink"}},
-                          "label": {"required": {"name": "id", "more": "LatexCommand"}},
-                          "include": {"tag": "meta", "required": {"filename": "content", "more": "LatexCommand literal"}},
-                          "bibitem": {"tag": "a", "required": {"key": "href", "more": "LatexCommand"}}
+                          "href": {"required": ["LatexCommand", "name", "target"], "optional": ["type", "literal"]},
+                          "ref": {"required": ["LatexCommand", "reference"], "optional":  ["plural", "caps", "noprefix", "nolink", "lyx"]},
+                          "label": {"required": ["LatexCommand", "name"]},
+                          "include": {"required": ["LatexCommand", "filename"], "optional": ["literal"]},
+                          "bibitem": {"required": ["LatexCommand", "key"]},
+                          "toc": {}
                           },
           "Tabular": {"": {}},
 
-          "space": {"\\space{}": {"text": " "}},
+          "space": {
+                    "\\space{}": {},
+                    "\\enskip{}": {},
+                    "\\negthinspace{}": {},
+                    "\\quad{}": {},
+                    "\\qquad{}": {},
+                    "\\negthickspace": {},
+                    "\\thinspace{}":  {},
+                    "\\medspace{}": {},
+                    "\\thickspace{}": {},
+                    "\\negmedspace{}": {},
+                    "\\negthickspace{}": {},
+                    "~": {}
+                    },
           "Text": {"": {}},
-          "Foot": {"": {}},
+          "Foot": {"": {"required": ["status"]}},
           "Quotes":   {
-                      "qrd": {"text": "\""},
-                      "qld": {"text": "\""}
+                      "qrd": {},
+                      "qld": {}
                       },
-          "Newline": {"newline": {"tag": "br"}},
+          "Newline": {"newline": {}},
           "Newpage": {"newpage": {}},
-          "Graphics": {"": {"tag": "img", "required": {"filename": "src"}}},
+          "Graphics": {"": {"required": ["filename"]}},
           "Float": {
                     "table": {},
-                    "figure": {}
+                    "figure": { "required": ["placement", "alignment", "wide", "sideways"]}
                     },
-          "ERT": {"": {"required": {"more": "status"}}},
-          "Argument": {"1": {"required": {"more": "status"}}},
+          "ERT": {"": {"required": ["status"]}},
+          "Argument": {"1": {"required": ["status"]}},
           "Marginal": {"": {}},
           "Box": {"Frameless": {}},
-          "Caption": {"standard": {}},
-          "Note": {"Note": {}}
+          "Caption": {"Standard": {}},
+          "Note": {"Note": {}},
+          "Separator": {"plain": {}},
+          "VSpace": {"vfill":  {}}
           }
 }

@@ -2,10 +2,10 @@ from os import remove
 from os.path import split, splitext, exists, join
 from sys import argv
 from json import load
-from PyLyX.general.lyx import LyX
-from PyLyX.general.objects import Environment, Section
-from PyLyX import USER, USER_DIR, SYS_DIR
-from PyLyX.general.tables_loader import create_table
+from PyLyX import USER, USER_DIR, SYS_DIR, PACKAGE_PATH
+from PyLyX.Environment import Environment, Container
+from PyLyX.LyX import LyX
+from tables_creator import create_table
 from compare_bind import scan_file
 
 
@@ -46,13 +46,13 @@ def command2lyx(code: str):
     elif code.startswith('math-insert '):
         code = code[len('math-insert '):]
         code = code.replace('\\\\', '\\')
-        code = Environment('inset', 'Formula', text=f'\\({code}\\)')
+        code = Environment('inset', 'Formula', text=f'${code}$')
     elif code.startswith('math-delim '):
         code = code[len('math-delim '):]
         code.replace('langle', '<')
         code.replace('rangle', '>')
         code = f'\\left{code[0]} \\right{code[-1]}'
-        code = Environment('inset', 'Formula', text=f'\\({code}\\)')
+        code = Environment('inset', 'Formula', text=f'${code}$')
 
     return code
 
@@ -84,10 +84,12 @@ def one_file(full_path: str, depth=2):
         table = create_table(table)
         father = Environment('inset', 'Tabular')
         father.append(table)
+        align = Environment('align', 'center')
+        align.append(father)
         standard = Environment('layout', 'Standard')
-        standard.append(father)
+        standard.append(align)
         env = Environment('layout', LAYOUTS[depth + 1], text=title)
-        section = Section(env)
+        section = Container(env)
         section.append(standard)
         tables[i] = section
 
@@ -95,7 +97,7 @@ def one_file(full_path: str, depth=2):
     if depth >= 2:
         name = name.upper()
     env = Environment('layout', LAYOUTS[depth], text=name)
-    section = Section(env)
+    section = Container(env)
     for t in tables:
         section.append(t)
     return section, files
@@ -119,8 +121,9 @@ def write_all_files(full_path: str, final_path: str):
 
     obj, files = one_file(full_path)
     files.append(join(PERSONAL_PATH, 'user.bind'))
-    result = LyX(final_path)
+    result = LyX(final_path, join(PACKAGE_PATH, 'data\\template.lyx'))
     result.write(obj)
+    result.find_and_replace('\\align default', '')
     recursive_write(split(full_path)[0], files, result)
 
 

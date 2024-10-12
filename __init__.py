@@ -17,14 +17,17 @@ DOWNLOADS_DIR = f'{USER}\\Downloads'
 DRIVE = USER[0]
 VERSION, LYX_PATH, USER_DIR = find_version()
 LYX_EXE, SYS_DIR = join(LYX_PATH, 'bin\\LyX.exe'), join(LYX_PATH, 'Resources')
-
 PACKAGE_PATH = split(abspath(__file__))[0]
 
 CUR_FORMAT = 620
+
 OBJECTS = {}
 with open(join(PACKAGE_PATH, 'data\\designs.json'), 'r', encoding='utf8') as f:
     DESIGNS = load(f)
     OBJECTS.update(DESIGNS)
+with open(join(PACKAGE_PATH, 'data\\par_set.json'), 'r', encoding='utf8') as f:
+    PAR_SET = load(f)
+    OBJECTS.update(PAR_SET)
 with open(join(PACKAGE_PATH, 'data\\layouts.json'), 'r', encoding='utf8') as f:
     LAYOUTS = load(f)
     OBJECTS.update(LAYOUTS)
@@ -34,6 +37,8 @@ with open(join(PACKAGE_PATH, 'data\\insets.json'), 'r', encoding='utf8') as f:
 with open(join(PACKAGE_PATH, 'data\\primary_objects.json'), 'r', encoding='utf8') as f:
     PRIMARIES = load(f)
     OBJECTS.update(PRIMARIES)
+with open(join(PACKAGE_PATH, 'data\\ends.json'), 'r', encoding='utf8') as f:
+    ENDS = load(f)
 
 
 def detect_lang(text: str):
@@ -51,3 +56,15 @@ def correct_name(full_path: str, extension: str):
     name = splitext(name)[0]
     path = join(path, name + extension)
     return path
+
+
+def xml2txt(text: str):
+    dictionary = {'quot;': '"', 'amp;': '&', 'apos;': "'", 'lt;': '<', 'gt;': '>'}
+    for key in dictionary:
+        text = text.replace('&' + key, dictionary[key])
+        text = text.replace(key, dictionary[key])
+    return text
+
+
+def is_known_object(command: str, category: str, details: str):
+    return command in OBJECTS and category in OBJECTS[command] and details in OBJECTS[command][category]

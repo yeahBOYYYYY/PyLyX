@@ -8,28 +8,33 @@
             "Itemize": {"": {}},
             "Enumerate": {"": {}},
 
-            "Part": {"": { "rank": 0, "he": "חלק"}},
-            "Chapter": {"": { "rank": 1, "he": "פרק"}},
-            "Section": {"": {"tag": "h2", "rank": 2, "he": "סעיף"}},
-            "Subsection": {"": {"tag": "h3", "rank": 3, "he": "תת-סעיף"}},
-            "Subsubsection": {"": {"tag": "h4", "rank": 4, "he": "תת-תת-סעיף"}},
-            "Paragraph": {"": {"tag": "h5", "rank": 5, "he": "פסקה"}},
-            "Subparagraph": {"": {"tag": "h6", "rank": 6, "he": "תת-פסקה"}},
+            "Part": {"": {"rank": 0, "he": "חלק"}},
+            "Chapter": {"": {"rank": 1, "he": "פרק"}},
+            "Section": {"": {"rank": 2, "he": "סעיף"}},
+            "Subsection": {"": {"rank": 3, "he": "תת-סעיף"}},
+            "Subsubsection": {"": {"rank": 4, "he": "תת-תת-סעיף"}},
+            "Paragraph": {"": {"rank": 5, "he": "פסקה"}},
+            "Subparagraph": {"": {"rank": 6, "he": "תת-פסקה"}},
 
-            "Part*": {"": { "rank": 0, "he": "חלק"}},
-            "Chapter*": {"": { "rank": 1, "he": "פרק"}},
-            "Section*": {"": {"tag": "h2", "rank": 2, "he": "סעיף"}},
-            "Subsection*": {"": {"tag": "h3", "rank": 3, "he": "תת-סעיף"}},
-            "Subsubsection*": {"": {"tag": "h4", "rank": 4, "he": "תת-תת-סעיף"}},
-            "Paragraph*": {"": {"tag": "h5", "rank": 5, "he": "פסקה"}},
-            "Subparagraph*": {"": {"tag": "h6", "rank": 6, "he": "תת-פסקה"}},
+            "Part*": {"": {"rank": 0, "he": "חלק"}},
+            "Chapter*": {"": {"rank": 1, "he": "פרק"}},
+            "Section*": {"": {"rank": 2, "he": "סעיף"}},
+            "Subsection*": {"": {"rank": 3, "he": "תת-סעיף"}},
+            "Subsubsection*": {"": {"rank": 4, "he": "תת-תת-סעיף"}},
+            "Paragraph*": {"": {"rank": 5, "he": "פסקה"}},
+            "Subparagraph*": {"": {"rank": 6, "he": "תת-פסקה"}},
 
-            "Title": {"": {"tag": "h1", "rank": -1, "he": "כותרת"}},
+            "Title": {"": {"rank": -1, "he": "כותרת"}},
             "Author": {"": { "rank": -1, "he": "מחבר"}},
             "Date": {"": { "rank": -1, "he": "כותרת"}},
             "Address": {"": { "rank": -1, "he": "כתובת"}},
             "Abstract": {"": { "rank": -1, "he": "תקציר"}},
-            "Right": {"Address": {"rank": -1, "he": "כתובת"}},
+            "Right": {"Address": {"rank": -1, "he": "כתובת"},
+
+                      "Header": {}, "Footer": {}
+                      },
+            "Center": {"Header": {}, "Footer": {}},
+            "Left": {"Header": {}, "Footer": {}},
 
             "Bibliography": {"": {"rank": 2, "he": "ביבליוגרפיה"}},
 
@@ -69,6 +74,7 @@
             "Quote": {"": {}},
             "Quotation": {"": {}},
             "Verse": {"": {}},
-            "Verbatim": {"": {}}
+            "Verbatim": {"": {}},
+            "Verbatim*": {"": {}}
             }
 }

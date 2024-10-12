@@ -1,0 +1,15 @@
+{
+  "align":              {
+                        "block": {"": {}},
+                        "left": {"": {}},
+                        "right": {"": {}},
+                        "center": {"": {}}
+                        },
+  "paragraph_spacing":  {
+                        "single": {"": {}},
+                        "onehalf": {"": {}},
+                        "double": {"": {}},
+                        "other": {"some_number!!!": {}}
+                        },
+  "noindent":           {"": {"": {}}}
+}

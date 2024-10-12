@@ -22,34 +22,24 @@
                       "small": {"": {}},
                       "large": {"": {}},
                       "larger": {"": {}},
-                      "largest": {"": {}}
+                      "largest": {"": {}},
+                      "huge": {"": {}}
                       },
-  "emph":             {"on": {"": {"tag": "em"}}},
+  "emph":             {"on": {"": {}}},
   "bar":              {
-                      "under": {"": {"tag": "u"}}
+                      "under": {"": {}}
                       },
-  "strikeout":        {"on": {"": {"tag": "del"}}},
-  "xout":             {"on": {"": {"tag": "del"}}},
-  "uuline":           {"on": {"": {"tag": "u"}}},
-  "uwave":            {"on": {"": {"tag": "u"}}},
+  "strikeout":        {"on": {"": {}}},
+  "xout":             {"on": {"": {}}},
+  "uuline":           {"on": {"": {}}},
+  "uwave":            {"on": {"": {}}},
   "color":            {
                       "blue": {"": {}},
                       "red": {"": {}}
                       },
   "noun":             {"on": {"": {}}},
-  "align":            {
-                      "block": {"": {}},
-                      "left": {"": {}},
-                      "right": {"": {}},
-                      "center": {"": {}}
-                      },
-  "deeper":           {"": {"": {}}},
-  "backslash":        {"": {"": {"text": "\\"}}},
-  "labelwidthstring": {"": {"": {}}},
-  "paragraph_spacing":          {
-                      "single": {"": {}},
-                      "onehalf": {"": {}},
-                      "double": {"": {}},
-                      "other": {"some_number!!!": {}}
-  }
+  "backslash":        {"": {"": {}}},
+  "labelwidthstring": {"00.00.0000": {"": {}}},
+  "Caption":          {"Standard": {"": {}}},
+  "numeric":          {"on": {"": {}}}
 }

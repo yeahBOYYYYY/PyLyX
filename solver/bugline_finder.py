@@ -1,5 +1,5 @@
 from os.path import split, join
-from PyLyX.general.lyx import LyX
+from PyLyX.LyX import LyX
 
 def finder(path, fmt='pdf4'):
     file = LyX(path, None)

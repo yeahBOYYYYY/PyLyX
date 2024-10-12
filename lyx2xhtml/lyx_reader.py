@@ -1,6 +1,6 @@
 from xml.etree.ElementTree import Element
 from PyLyX.general.helper import *
-from PyLyX.general.lyx import load, Environment
+from PyLyX.LyX import load, Environment
 
 SPAN = 'span'
 
