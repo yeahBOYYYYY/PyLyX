@@ -17,7 +17,7 @@ class Environment(LyXobj):
             raise TypeError(f'invalid tail: {tail}.')
 
         rank = OBJECTS[command][category][details].get('rank', DEFAULT_RANK)
-        if command == 'backslash' or category == 'space':
+        if command in ('backslash', 'labelwidthstring') or category == 'space':
             is_open = False
         super().__init__(command, command, category, details, text, tail, {}, is_open, rank)
 
@@ -26,8 +26,6 @@ class Environment(LyXobj):
             return False
         elif not father.is_open():
             return False
-        elif self.is_command('deeper'):
-            return type(father) is Container and father.rank() > 6 and not father.is_command('Standard')
         elif self.is_command('layout') or self.is_command('inset'):
             if self.is_section_title():
                 return type(father) is Container and not bool(father) and self.rank() == father.rank()
@@ -38,9 +36,14 @@ class Environment(LyXobj):
                     return self.rank() == father.rank() and self.obj_props() == father.obj_props()
             elif father.is_category('Formula'):
                 return False
-            elif father.is_command('deeper'):
-                return True
-            elif father.is_command('layout') or father.command() in DESIGNS or father.command() in PAR_SET:
+            elif father.is_category('Box'):
+                return self.rank() > 6
+            elif father.is_command('layout'):
+                if father.is_category('Standard'):
+                    return self.is_command('inset')
+                else:
+                    return self.rank() > 6
+            elif father.command() in DESIGNS or father.command() in PAR_SET:
                 return self.is_command('inset')
             elif father.is_command('inset'):
                 if self.obj_props() != father.obj_props():
@@ -49,10 +52,10 @@ class Environment(LyXobj):
                 return self.is_command('layout')
             elif father.tag == 'cell':
                 return self.is_category('Text')
-        elif self.tag == 'lyxtabular':
-            return father.is_category('Tabular')
+        elif self.is_command('lang') and father.is_command('lang'):
+            return False
         elif self.command() in DESIGNS:
-            return father.is_command('layout') or father.is_command('inset') or father.command() in DESIGNS
+            return father.is_command('layout') or father.is_command('inset') or father.command() in DESIGNS or father.command() in PAR_SET
         elif self.command() in PAR_SET:
             return father.is_command('layout')
         elif self.rank() < 0:
@@ -60,33 +63,33 @@ class Environment(LyXobj):
         else:
             return False
 
-    def obj2lyx(self, to_end=True):
+    def obj2lyx(self):
         text = ''
-        if self.is_category('Formula') and self.text.startswith('$'):
-            text += f'\\begin_{self.obj_props()} '
-        elif self.command() in DESIGNS or self.command() in PAR_SET:
+        if self.command() in DESIGNS or self.command() in PAR_SET:
             text += f'\\{self.obj_props()}\n'
         else:
             text += f'\\begin_{self.obj_props()}\n'
 
-        if 'required' in self.get_dict():
-            text += perform_required(self)
+        if 'options' in self.get_dict():
+            text += perform_options(self)
 
         if self.text:
             text += self.text + '\n'
 
-        if self:
-            for i in range(len(self) - 1):
-                text += self[i].obj2lyx()
-            text += self[-1].obj2lyx(False)
+        deeper = ''
+        for i in range(len(self)):
+            if self.is_command('layout') and self[i].is_command('layout') and not deeper:
+                text += '\\end_layout\n\n\\begin_deeper\n'
+                deeper = '\\end_deeper\n'
+            text += self[i].obj2lyx()
+        text += deeper
 
         if self.command() in DESIGNS:
-            if to_end or self.tail:
-                magic_word = ENDS['usually'].get(self.command(), 'default')
-                if magic_word:
-                    text += f'\\{self.command()} {magic_word}\n'
-        elif self.command() not in PAR_SET:
-            text += f'\\end_{self.command()}\n\n'
+            magic_word = ENDS['usually'].get(self.command(), 'default')
+            if magic_word:
+                text += f'\\{self.command()} {magic_word}\n'
+        elif self.command() not in PAR_SET and not deeper:
+            text += f'\\end_{self.command()}\n'
 
         if self.tail:
             text += self.tail
@@ -132,19 +135,17 @@ class Container(LyXobj):
         return text
 
 
-def perform_required(obj: Environment):
-    lst1, lst2 = obj.get_dict().get('required', []), obj.get_dict().get('optional', [])
-    lst = lst1 + lst2
+def perform_options(obj: Environment):
+    lst = obj.get_dict().get('options', [])
     text = ''
     for command in lst:
-        if command in lst1 and not command in obj.attrib:
+        if command in obj.attrib:
+            text += f'{command} {obj.get(command)}\n'
+        else:
             for key in obj.attrib:
                 new_commands = obj.attrib[key].split(command, maxsplit=1)
                 if len(new_commands) == 2:
+                    new_commands[1] = new_commands[1].replace(' ', '')
                     obj.attrib[key], obj.attrib[command] = new_commands
-                    return perform_required(obj)
-            else:
-                raise Exception(f'command {command} is missed in {obj}.\nattributes: {obj.attrib},')
-        elif command in obj.attrib:
-            text += f'{command} {obj.get(command)}\n'
+                    return perform_options(obj)
     return text

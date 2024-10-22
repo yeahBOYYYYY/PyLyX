@@ -36,8 +36,6 @@
             "Center": {"Header": {}, "Footer": {}},
             "Left": {"Header": {}, "Footer": {}},
 
-            "Bibliography": {"": {"rank": 2, "he": "ביבליוגרפיה"}},
-
             "Theorem": {"": {"he": "משפט"}},
             "Corollary": {"": {"he": "מסקנה"}},
             "Lemma": {"": {"he": "למה"}},

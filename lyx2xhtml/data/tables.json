@@ -1,0 +1,6 @@
+{
+  "lyxtabular": {"tag": "table"},
+  "column": {"tag": "col", "options": {"alignment": "align", "valignment": "vertiacl-align"}},
+  "row": {"tag": "tr"},
+  "cell": {"tag": "td", "options": {"multirow": "rowspan", "multicolumn": "colspan", "alignment": "align", "valignment": "vertiacl-align"}}
+}

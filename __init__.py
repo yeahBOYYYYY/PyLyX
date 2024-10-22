@@ -66,5 +66,12 @@ def xml2txt(text: str):
     return text
 
 
+def txt2xml(text: str):
+    dictionary = {'"': 'quot;', '&': 'amp;', "'": 'apos;', '<': 'lt;', '>': 'gt;'}
+    for key in dictionary:
+        text = text.replace(key, '&' + dictionary[key])
+    return text
+
+
 def is_known_object(command: str, category: str, details: str):
     return command in OBJECTS and category in OBJECTS[command] and details in OBJECTS[command][category]

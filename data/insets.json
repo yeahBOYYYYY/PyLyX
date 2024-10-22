@@ -2,11 +2,10 @@
 "inset": {
           "Formula": {"": {}},
           "CommandInset": {
-                          "href": {"required": ["LatexCommand", "name", "target"], "optional": ["type", "literal"]},
-                          "ref": {"required": ["LatexCommand", "reference"], "optional":  ["plural", "caps", "noprefix", "nolink", "lyx"]},
-                          "label": {"required": ["LatexCommand", "name"]},
-                          "include": {"required": ["LatexCommand", "filename"], "optional": ["literal"]},
-                          "bibitem": {"required": ["LatexCommand", "key"]},
+                          "href": {"options": ["LatexCommand", "name", "target", "type", "literal"]},
+                          "ref": {"options": ["LatexCommand", "reference", "plural", "caps", "noprefix", "nolink"]},
+                          "label": {"options": ["LatexCommand", "name"]},
+                          "include": {"options": ["LatexCommand", "filename", "literal"]},
                           "toc": {}
                           },
           "Tabular": {"": {}},
@@ -14,36 +13,42 @@
           "space": {
                     "\\space{}": {},
                     "\\enskip{}": {},
-                    "\\negthinspace{}": {},
                     "\\quad{}": {},
                     "\\qquad{}": {},
-                    "\\negthickspace": {},
                     "\\thinspace{}":  {},
                     "\\medspace{}": {},
                     "\\thickspace{}": {},
+                    "\\negthinspace{}": {},
                     "\\negmedspace{}": {},
                     "\\negthickspace{}": {},
                     "~": {}
                     },
           "Text": {"": {}},
-          "Foot": {"": {"required": ["status"]}},
+          "Foot": {"": {"options": ["status"]}},
           "Quotes":   {
                       "qrd": {},
                       "qld": {}
                       },
           "Newline": {"newline": {}},
           "Newpage": {"newpage": {}},
-          "Graphics": {"": {"required": ["filename"]}},
+          "Graphics": {"": {"options": ["filename", "scale"]}},
           "Float": {
-                    "table": {},
-                    "figure": { "required": ["placement", "alignment", "wide", "sideways"]}
+                    "table": {"options": ["placement", "alignment", "wide", "sideways", "status"]},
+                    "figure": {"options": ["placement", "alignment", "wide", "sideways", "status"]}
                     },
-          "ERT": {"": {"required": ["status"]}},
-          "Argument": {"1": {"required": ["status"]}},
-          "Marginal": {"": {}},
-          "Box": {"Frameless": {}},
+          "ERT": {"": {"options": ["status"]}},
+          "Argument": {"1": {"options": ["status"]}},
+          "Marginal": {"": {"options": ["status"]}},
+          "Box": {
+                  "Frameless": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_makebox",
+                                          "width", "special", "height", "height_special", "thickness", "separation",
+                                          "shadowsize", "framecolor", "backgroundcolor", "status", "use_parbox"]},
+                  "Boxed": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_makebox",
+                                          "width", "special", "height", "height_special", "thickness", "separation",
+                                          "shadowsize", "framecolor", "backgroundcolor", "status", "use_parbox"]}
+                  },
           "Caption": {"Standard": {}},
-          "Note": {"Note": {}},
+          "Note": {"Note": {"options": ["status"]}},
           "Separator": {"plain": {}},
           "VSpace": {"vfill":  {}}
           }

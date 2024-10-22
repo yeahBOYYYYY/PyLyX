@@ -67,7 +67,7 @@ class LyX:
                     if type(template) is not str or not exists(template):
                         with open(self.__full_path, 'x', encoding='utf8') as file:
                             file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n')
-                            file.write(f'\\lyxformat {doc_obj.get('data-lyxformat')}\n')
+                            file.write(f'\\lyxformat {doc_obj.get('lyxformat')}\n')
                     write_obj(self.__full_path, doc_obj)
             elif doc_obj is not None:
                 if type(doc_obj) is not Environment:
@@ -80,7 +80,9 @@ class LyX:
                 create_empty_file(self.__full_path)
 
     def load(self) -> Environment:
-        return load(self.__full_path)
+        doc = load(self.__full_path)
+        doc.set('original_file', self.__full_path)
+        return doc
 
     def get_path(self) -> str:
         return self.__full_path

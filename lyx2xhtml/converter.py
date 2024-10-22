@@ -1,154 +1,95 @@
-from xml.etree.ElementTree import Element, indent, tostring
-from PyLyX.LyXobj import LyXobj
-from PyLyX.loader import one_line
+from PyLyX import PAR_SET
+from PyLyX.Environment import Environment, Container
+from PyLyX.lyx2xhtml.helper import *
+
+with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
+    TAGS = load(f)
+with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tables.json'), 'r', encoding='utf8') as f:
+    TABLES = load(f)
 
 
-# def correct_formula(formula: str):
-#     if formula.startswith('\\[') and formula.endswith('\\]'):
-#         return formula
-#
-#     if formula.startswith('$'):
-#         formula = formula[1:]
-#     if formula.endswith('$'):
-#         formula = formula[:-1]
-#     if formula.startswith('\\('):
-#         formula = formula[2:]
-#     if formula.endswith('\\)'):
-#         formula = formula[:-2]
-#
-#     if formula.startswith('\\['):
-#         return formula +'\\]'
-#     if formula.endswith('\\]'):
-#         return '\\[' + formula
-
-    return '\\(' + formula + '\\)'
+def create_dict(obj):
+    if type(obj) is Environment and obj.is_in(TAGS):
+        dictionary = TAGS[obj.command()][obj.category()][obj.details()]
+    elif type(obj) is Container or obj.is_command('deeper'):
+        dictionary = {'tag': 'section'}
+    elif type(obj) is LyXobj and obj.tag in TABLES:
+        dictionary = TABLES[obj.tag]
+    else:
+        dictionary = {}
+    if (obj.is_command('layout') and not (obj.is_category('Plain') and obj.is_details('Layout'))) or \
+            obj.command() in PAR_SET:
+        dictionary.setdefault('tag', 'div')
+    else:
+        dictionary.setdefault('tag', 'span')
+    return dictionary
 
 
-def lyxml2xhtml_style(cell, new_cell):
-    if cell.tag == 'cell':  # else cell.tag == 'column'
-        new_cell.set('data-usebox', cell.get('usebox'))
+def create_attributes(obj, dictionary: dict):
+    old_attrib = obj.attrib.copy()
+    new_attrib = {}
 
-    style = []
-    align = cell.get('alignment')
-    valign = cell.get('valignment')
-    if align is not None:
-        style.append(f'text-align: {align}')
-    if valign is not None:
-        style.append(f'vertiacl-align: {valign}')
-    for side in ('top', 'bottom', 'right', 'left'):
-        value = cell.get(f'{side}line')
-        if value is not None:
-            style.append(f'border-{side}: solid black')
-    if style:
-        style = '; '.join(style)
-        new_cell.set('style', style)
-
-    rowspan = cell.get('multirow')
-    colspan = cell.get('multicolumn')
-    if rowspan is not None:
-        new_cell.set('rowspan', rowspan)
-    if colspan is not None:
-        new_cell.set('colspan', colspan)
-
-
-def lyxml2xhtml_cell(cell: Element):
-    new_cell = LyXobj('td')
-    lyxml2xhtml_style(cell, new_cell)
-    text = cell.text
-    for e in cell:
-        indent(e, space='')
-        text += tostring(e, encoding='unicode')
-    branch = [new_cell]
-    text = text.splitlines(keepends=True)
-    for line in text:
-        one_line(text, line, branch)
-    return new_cell
-
-
-def lyxml2xhtml(xml: Element):
-    new_table = LyXobj('table')
-    for info in {'version', 'rows', 'columns'}:
-        new_table.set(f'data-{info}', xml.get(info))
-    new_table.set('data-tabularvalignment', xml[0].get('tabularvalignment'))
-
-    colgroup = LyXobj('colgroup')
-    new_table.append(colgroup)
-
-    for item in xml:
-        if item.tag == 'row':
-            new_row = LyXobj('tr')
-            new_table.append(new_row)
-            for cell in item:
-                new_cell = lyxml2xhtml_cell(cell)
-                new_row.append(new_cell)
-        elif item.tag == 'column':
-            new_col = LyXobj('col')
-            colgroup.append(new_col)
-            lyxml2xhtml_style(item, new_col)
-
-    indent(new_table, space='')
-    return new_table
-
-
-def xhtml2lyxml_style(cell, new_cell):
-    if cell.tag == 'td':
-        new_cell.set('usebox', cell.get('data-usebox'))
-
-    style = cell.get('style')
-    if style is not None:
-        style = style.split('; ')
-        style = [style[i].split(': ') for i in range(len(style))]
-        style = dict(style)
-        align = style.get('text-align')
-        valign = style.get('vertiacl-align')
-        if align is not None:
-            new_cell.set('alignment', align)
-        if valign is not None:
-            new_cell.set('valignment', valign)
+    if 'options' in dictionary:
+        for key in dictionary['options']:
+            if key in old_attrib:
+                new_key, value = dictionary['options'][key], old_attrib.pop(key).replace('"', '')  # todo: official func instead repkace
+                new_attrib[new_key] = value
+    if 'class' in old_attrib:
+        new_attrib['class'] = old_attrib.pop('class')
+    if obj.tag == 'cell':
+        style = []
         for side in ('top', 'bottom', 'right', 'left'):
-            value = style.get(f'border-{side}')
-            if value is not None and value != 'false':
-                new_cell.set(f'{side}line', 'true')
+            value = old_attrib.pop(f'{side}line', None)
+            if value == 'true':
+                style.append(f'border-{side}: solid 1px')
+        if style:
+            style = '; '.join(style)
+            new_attrib['style'] = style
 
-    multirow = cell.get('rowspan')
-    multicolumn = cell.get('colspan')
-    if multirow is not None:
-        new_cell.set('rowspan', multirow)
-    if multicolumn is not None:
-        new_cell.set('colspan', multicolumn)
+    for key in old_attrib:
+        new_attrib[f'data-{key}'] = old_attrib[key]
 
-
-def xhtml2lyxml_cell(cell):
-    new_cell = Element('cell')
-    xhtml2lyxml_style(cell, new_cell)
-    for e in cell:
-        if e.is_category('Tabular'):
-            new_cell.append(xhtml2lyxml(e))
-        elif new_cell:
-            new_cell[-1].tail += e.obj2lyx()
-        else:
-            new_cell.text += e.obj2lyx()
-    return new_cell
+    return new_attrib
 
 
-def xhtml2lyxml(table: LyxObj):
-    new_table = Element('lyxtabular')
-    for info in {'version', 'rows', 'columns'}:
-        new_table.set(info, table.get(f'data-{info}'))
-    new_table.append(Element('features', {'tabularvalignment': table.get('data-tabularvalignment')}))
+def create_text(obj, new_attrib: dict):
+    if obj.is_command('header'):  # todo: head will be create better in the future
+        return ''
+    elif obj.is_category('Formula'):
+        return correct_formula(obj.text)
+    elif 'text' in new_attrib:
+        return new_attrib.pop('text')
+    else:
+        return obj.text
 
-    for item in table:
-        if item.tag == 'tr':
-            new_row = Element('row')
-            new_table.append(new_row)
-            for cell in item:
-                new_cell = xhtml2lyxml_cell(cell)
-                new_row.append(new_cell)
-        elif item.tag == 'colgroup':
-            for col in item:
-                new_col = Element('column')
-                new_table.append(new_col)
-                xhtml2lyxml_style(col, new_col)
 
-    indent(new_table, space='')
-    return new_table
+def one_obj(obj):
+    dictionary = create_dict(obj)
+    attrib = create_attributes(obj, dictionary)
+    text = create_text(obj, attrib)
+    properties = obj.command(), obj.category(), obj.details()
+    new_obj = LyXobj(dictionary['tag'], *properties, text, obj.tail, attrib)
+    if 'class' in new_obj.attrib:
+        new_obj.set('class', new_obj.get('class').replace('*', '_'))
+    return new_obj
+
+
+def recursive_convert(obj):
+    new_obj = one_obj(obj)
+    for child in obj:
+        child = recursive_convert(child)
+        new_obj.append(child)
+    return new_obj
+
+
+def convert(root, css_path=DEFAULT_CSS):
+    root = recursive_convert(root)
+    root.set('xmlns', 'http://www.w3.org/1999/xhtml')
+    head, body = root[0], root[1]
+    head.extend((mathjax(), viewport(), create_css(css_path)))
+    create_title(head, body)
+    create_macros(head, body)
+    order_tables(body)
+    order_lists(body)
+    obj2text(body)
+    return root

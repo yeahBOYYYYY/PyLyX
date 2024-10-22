@@ -1,3 +1,4 @@
+from os.path import split, join
 from xml.etree.ElementTree import fromstring, tostring, Element, indent
 from PyLyX import ENDS, is_known_object, DESIGNS
 from PyLyX.LyXobj import LyXobj
@@ -5,9 +6,7 @@ from PyLyX.Environment import Environment, Container
 
 
 ############################################### MAIN ###############################################
-def one_line(file, line: str, branch: list, unknowns: dict, index=None):
-    # print([str(branch[i]) for i in range(len(branch))])
-    # print(line[:-1])
+def one_line(file, line: str, branch: list, unknowns: dict, index=None, path=None):
     last = branch[-1]
     if type(index) is int:
         line = file[index]
@@ -19,16 +18,16 @@ def one_line(file, line: str, branch: list, unknowns: dict, index=None):
         if is_end(line):
             perform_end(branch, command)
         elif command == 'deeper':
-            perform_deeper(branch)
+            perform_deeper(file, last, unknowns, index)
         else:
             perform_new_obj(branch, unknowns, command, category, details, text)
     elif line.startswith('<lyxtabular'):
-        perform_table(branch, unknowns, file, line, index)
+        perform_table(file, line, branch, unknowns, index)
 
     elif last.is_open():
        lst = line[:-1].split(maxsplit=1)
-       if 'required' in last.get_dict() and len(lst) == 2:
-           result = perform_required(last, *lst)
+       if 'options' in last.get_dict() and len(lst) == 2:
+           result = perform_options(last, *lst, path)
        else:
            result = False
        if not result:
@@ -50,7 +49,7 @@ def load(full_path: str):
             line = file.readline()
         cmd = extract_cmd(line)
         root = Environment(*cmd)
-        root.set('data-lyxformat', fmt)
+        root.set('lyxformat', fmt)
 
         while line != f'\\begin_header\n':
             line = file.readline()
@@ -67,7 +66,7 @@ def load(full_path: str):
         branch = [root]
         unknowns = {}
         for line in file:
-            one_line(file, line, branch, unknowns)
+            one_line(file, line, branch, unknowns, path=full_path)
 
         if unknowns:
             print('unknown objects:', unknowns)
@@ -84,7 +83,7 @@ def extract_cmd(line: str):
     if command.startswith('\\'):
         command = command.replace('\\begin_', '', 1)
         command = command.replace('\\end_', '', 1)
-        if not line.startswith('\\begin{align*}') and not line.startswith('\\end{align*}'):
+        if not (line.startswith('\\begin{') or line.startswith('\\end{')):
             command = command.replace('\\', '', 1)
     else:
         raise Exception(f'invalid command: {line[:-1]}')
@@ -119,12 +118,26 @@ def perform_new_obj(branch: list, unknowns: dict, command: str, category: str, d
         obj = Environment(command, category, details, text)
         if obj.is_section_title():
             obj = Container(obj)
-        order_object(branch, obj)
+            order_object(branch, obj)
+        else:
+            order_object(branch, obj)
     else:
         unknowns[command] = {category: {details: {}}}
-        print(f'unknown object: {command}-{category}-{details}')
-        obj = LyXobj('div', command, category, details, text)
+        obj = LyXobj('unknown', command, category, details, text)
         order_object(branch, obj)
+
+
+def is_end(line: str) -> bool:
+    if line.startswith('\\'):
+        if line.endswith('default\n'):
+            return True
+        for key in ENDS:
+            for design in ENDS[key]:
+                if line == f'\\{design} {ENDS[key][design]}\n':
+                    return True
+        return line.startswith('\\end_')
+
+    return False
 
 
 def perform_end(branch: list, command: str):
@@ -143,43 +156,34 @@ def perform_end(branch: list, command: str):
                 if new_tail:
                     branch.pop()
                     branch.extend(new_tail)
-            elif command == 'deeper':
-                branch.pop()
-                branch[-1].close()
             break
 
 
-def perform_deeper(branch: list):
-    deeper = Environment('deeper')
-    obj = Container(branch[-1])
-    obj.append(deeper)
-    branch[-2].remove(branch[-1])
-    branch[-2].append(obj)
-    branch.pop()
-    branch.append(obj)
-    branch.append(deeper)
-
-
-def perform_required(obj: Environment, first: str, second: str):
-    lst = obj.get_dict().get('required', []) + obj.get_dict().get('optional', [])
+def perform_options(obj: Environment, first: str, second: str, path=None):
+    lst = obj.get_dict().get('options', [])
     if first in lst:
+        if path is not None and first == 'filename':
+            path = split(path)[0]
+            new_second = second[1:] if second.startswith('"') else second
+            if len(new_second) > 1 and new_second[1] != ':':  # i.e. second is not absolute path
+                new_second = join(path, new_second)
+                second = '"' + new_second if second.startswith('"') else new_second
+            second = second.replace('/', '\\')
         obj.set(first, second)
         return True
     else:
         return False
 
 
-def is_end(line: str) -> bool:
-    if line.startswith('\\'):
-        if line.endswith('default\n'):
-            return True
-        for key in ENDS:
-            for design in ENDS[key]:
-                if line == f'\\{design} {ENDS[key][design]}\n':
-                    return True
-        return line.startswith('\\end_')
-
-    return False
+def perform_deeper(file, last, unknowns: dict, index=None):
+    last.open()
+    branch = [last]
+    for line in file:
+        if line == '\\end_deeper\n':
+            break
+        else:
+            one_line(file, line, branch, unknowns, index)
+    last.close()
 
 
 #################### tables ####################
@@ -232,7 +236,7 @@ def table2lyxobj(table: Element, unknowns: dict):
     return new_table
 
 
-def perform_table(branch: list, unknowns: dict, file, line, index):
+def perform_table(file, line: str, branch: list, unknowns: dict, index=None):
     if type(file) is list and type(index) is int:
         new_lst = file[index + 1:]
         file.clear()

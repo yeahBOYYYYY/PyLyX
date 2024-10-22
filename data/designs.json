@@ -1,20 +1,52 @@
 {
   "lang":             {
                       "hebrew": {"": {}},
-                      "english": {"": {}}
-                      },
+                      "english": {"": {}},
+  "numeric":          {"on": {"": {}}}},
+
+  "noun":             {"on": {"": {}}},
   "family":           {
                       "roman": {"": {}}
                       },
+
   "series":           {
                       "medium": {"": {}},
-                      "bold": {"": {"tag": "b"}}
+                      "bold": {"": {}}
                       },
   "shape":            {
-                      "italic": {"": {"tag": "i"}},
-                      "slanted": {"": {"tag": "i"}},
+                      "italic": {"": {}},
+                      "slanted": {"": {}},
                       "smallcaps": {"": {}}
                       },
+  "emph":             {"on": {"": {}}},
+  "bar":              {"under": {"": {}}},
+  "uuline":           {"on": {"": {}}},
+  "uwave":            {"on": {"": {}}},
+  "strikeout":        {"on": {"": {}}},
+  "xout":             {"on": {"": {}}},
+
+  "color":            {
+                      "blue": {"": {}},
+                      "brown": {"": {}},
+                      "cyan": {"": {}},
+                      "darkgray": {"": {}},
+                      "gray": {"": {}},
+                      "green": {"": {}},
+                      "lightgray": {"": {}},
+                      "lime green": {"": {}},
+                      "magenta": {"": {}},
+                      "olive green": {"": {}},
+                      "orange": {"": {}},
+                      "pink": {"": {}},
+                      "purple": {"": {}},
+                      "red": {"": {}},
+                      "teal": {"": {}},
+                      "violet": {"": {}},
+                      "yellow": {"": {}}
+                      },
+
+  "Caption":          {"Standard": {"": {}}},
+
   "size":             {
                       "tiny": {"": {}},
                       "scriptsize": {"": {}},
@@ -25,21 +57,7 @@
                       "largest": {"": {}},
                       "huge": {"": {}}
                       },
-  "emph":             {"on": {"": {}}},
-  "bar":              {
-                      "under": {"": {}}
-                      },
-  "strikeout":        {"on": {"": {}}},
-  "xout":             {"on": {"": {}}},
-  "uuline":           {"on": {"": {}}},
-  "uwave":            {"on": {"": {}}},
-  "color":            {
-                      "blue": {"": {}},
-                      "red": {"": {}}
-                      },
-  "noun":             {"on": {"": {}}},
+
   "backslash":        {"": {"": {}}},
-  "labelwidthstring": {"00.00.0000": {"": {}}},
-  "Caption":          {"Standard": {"": {}}},
-  "numeric":          {"on": {"": {}}}
+  "labelwidthstring": {"00.00.0000": {"": {}}}
 }

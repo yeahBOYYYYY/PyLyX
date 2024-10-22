@@ -1,0 +1,52 @@
+{
+  "document": {"": {"": {"tag": "html"}}},
+  "header": {"": {"": {"tag": "head"}}},
+  "body": {"": {"": {"tag": "body"}}},
+
+
+
+  "layout": {
+            "Itemize": {"": {"tag": "li"}},
+            "Enumerate": {"": {"tag": "li"}},
+
+            "Section": {"": {"tag": "h2"}},
+            "Subsection": {"": {"tag": "h3"}},
+            "Subsubsection": {"": {"tag": "h4"}},
+            "Paragraph": {"": {"tag": "h5"}},
+            "Subparagraph": {"": {"tag": "h6"}},
+
+            "Section*": {"": {"tag": "h2"}},
+            "Subsection*": {"": {"tag": "h3"}},
+            "Subsubsection*": {"": {"tag": "h4"}},
+            "Paragraph*": {"": {"tag": "h5"}},
+            "Subparagraph*": {"": {"tag": "h6"}},
+
+            "Title": {"": {"tag": "h1"}}
+            },
+
+
+
+  "inset":  {
+            "CommandInset": {
+                            "href": {"tag": "a", "options": {"name": "text", "target": "href"}},
+                            "ref": {"tag": "a", "options": {"reference": "href"}},
+                            "label": {"options": {"name": "id"}}
+                            },
+            "Newline": {"newline": {"tag": "br"}},
+            "Graphics": {"": {"tag": "img", "options": {"filename": "src"}}}
+            },
+
+
+
+  "series":     {"bold": {"": {"tag": "b"}}},
+  "shape":      {
+                "italic": {"": {"tag": "i"}},
+                "slanted": {"": {"tag": "i"}}
+                },
+  "emph":       {"on": {"": {"tag": "em"}}},
+  "bar":        {"under": {"": {"tag": "u"}}},
+  "uuline":     {"on": {"": {"tag": "u"}}},
+  "uwave":      {"on": {"": {"tag": "u"}}},
+  "strikeout":  {"on": {"": {"tag": "del"}}},
+  "xout":       {"on": {"": {"tag": "del"}}}
+}

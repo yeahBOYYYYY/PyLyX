@@ -1,5 +1,5 @@
 from xml.etree.ElementTree import Element, tostring
-from PyLyX import OBJECTS, is_known_object, xml2txt
+from PyLyX import OBJECTS, xml2txt
 
 DEFAULT_RANK = 100
 
@@ -10,8 +10,10 @@ class LyXobj(Element):
         super().__init__(tag)
         self.text = str(text)
         self.tail = str(tail)
-        if attrib is not None:
+        if type(attrib) is dict:
             self.attrib = attrib
+        elif attrib is not None:
+            print('attrib must be a dictionary.')
 
         self.__command = str(command)
         self.__category = str(category)
@@ -20,25 +22,14 @@ class LyXobj(Element):
         self.__is_open = bool(is_open)
 
         if command + category + details:
-            class_ = self.obj_props('_')
-            if class_ != self.tag:
-                self.set('class', class_)
+            self.set('class', self.obj_props('_'))
 
     def can_be_nested_in(self, father) -> bool:
         from PyLyX.Environment import Environment, Container
-        if type(father) in (Environment, Container) and father.is_open():
-            return True
-        elif self.__rank >= father.__rank and father.is_open():
-            return True
-        elif is_known_object(self.__command, self.__category, self.__details) and \
-                is_known_object(father.__command, father.__category, father.__details) and \
-                father.__rank == self.__rank == DEFAULT_RANK and father.is_open():
-            return True
+        if type(father) in (LyXobj, Environment, Container):
+            return father.is_open() and self.__rank >= father.__rank
         else:
             return False
-
-    def makeelement(self, sub_element, attrib=None):
-        self.append(sub_element)
 
     def append(self, obj):
         from PyLyX.Environment import Environment, Container
@@ -53,7 +44,7 @@ class LyXobj(Element):
         else:
             raise TypeError(f'invalid {self.NAME}: {obj}.')
 
-    def obj2lyx(self, is_not_last=True):
+    def obj2lyx(self):
         if self.tag not in ('lyxtabular', 'features', 'column', 'row', 'cell'):
             code = f'\\{self.obj_props()}\n'
             if self.text:
@@ -71,7 +62,7 @@ class LyXobj(Element):
                 new_element.text += item.obj2lyx()
             code = tostring(new_element, encoding='unicode')
             code = xml2txt(code)
-            dictionary = {'/>': '>', '\n\n</cell>': '\n</cell>', '</lyxtabular>': '</lyxtabular>\n',
+            dictionary = {'\n\n</cell>': '\n</cell>', '</lyxtabular>': '</lyxtabular>\n',
                           '</column>\n': '', '</features>\n': ''}
             for key in dictionary:
                 code = code.replace(key, dictionary[key])
@@ -81,7 +72,6 @@ class LyXobj(Element):
         self.__is_open = True
 
     def close(self):
-        #  todo: check all required
         self.__is_open = False
 
     def command(self):
@@ -128,7 +118,16 @@ class LyXobj(Element):
         return f'<{self.NAME} {string} at {id(self)}>'
 
     def get_dict(self):
-        if is_known_object(self.__command, self.__category, self.__details):
+        if self.is_in():
             return OBJECTS[self.__command][self.__category][self.__details]
         else:
             return {}
+
+    def is_in(self, dictionary=None):
+        dictionary = OBJECTS if dictionary is None else dictionary
+        if self.__command in dictionary:
+            if self.__category in dictionary[self.__command]:
+                if self.__details in dictionary[self.__command][self.__category]:
+                    return True
+
+        return False

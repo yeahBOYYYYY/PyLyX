@@ -1,8 +1,9 @@
 {
   "usually":      {
                   "color": "inherit",
+                  "numeric": "off",
                   "backslash": "",
-                  "numeric": "off"
+                  "labelwidthstring": ""
                   },
   "lang change":  {
                   "color": "none",
