@@ -1,0 +1,162 @@
+:root {color-scheme: light dark;}
+
+
+body  {
+      font-family: sans-serif;
+      max-width: 21cm;
+      margin: 0 auto;
+      color: light-dark(black, white);
+      background-color: light-dark(white, black);
+      text-align: left;
+      }
+
+div.layout  {
+            margin-bottom: 0.7ex;
+            margin-top: 0.7ex;
+            }
+
+
+
+/* LAYOUTS */
+
+h1.layout.Title {
+                font-size: xx-large;
+                text-align: center;
+                }
+
+div.layout.Author {
+                  font-size: large;
+                  margin-top: 1.3ex;
+                  margin-bottom: 0.7ex;
+                  text-align: center;
+                  }
+
+div.layout.Date   {
+                  font-size: large;
+                  margin-top: 0.9ex;
+                  margin-bottom: 0.5ex;
+                  text-align: center;
+                  }
+
+div.layout.Abstract     {
+                        font-size: small;
+                        margin-top: 0.7ex;
+                        margin-bottom: 0.7ex;
+                        margin-left: 3ex;
+                        margin-right: 3ex;
+                        text-align: left;
+                        }
+
+div.layout.Address      {
+                        margin-bottom: 1.5ex;
+                        text-align: left;
+                        }
+
+div.layout.Right.Address      {
+                              margin-bottom: 1.5ex;
+                              text-align: right;
+                              }
+
+div.layout.Part {
+                font-weight: bold;
+                font-size: xx-large;
+                }
+
+div.layout.chapter      {
+                        text-align: center;
+                        }
+
+h2.layout.Section {
+                  font-weight: bold;
+                  font-style: normal;
+                  font-variant: small-caps;
+                  font-size: x-large;
+                  margin-top: 0.7ex;
+                  margin-top: 0.7ex;
+                  }
+
+h3.layout.Subsection  {
+                      font-weight: bold;
+                      font-size: large;
+                      margin-top: 0.7ex;
+                      margin-bottom: 0.7ex;
+                      }
+
+h4.layout.Subsubsection, h5.layout.Paragraph, h6.layout.Subparagraph 
+                        {
+                        font-weight: bold;
+                        font-size: medium;
+                        margin-top: 0.7ex;
+                        margin-bottom: 0.7ex;
+                        }
+
+ol.enumi   {list-style-type: decimal;}
+ol.enumii  {list-style-type: lower-latin;}
+ol.enumiii {list-style-type: lower-roman;}
+ol.enumiiii  {list-style-type: upper-latin;}
+
+ul.lyxitemi {list-style-type: disc;}
+ul.lyxitemii {list-style-type: circle;}
+ul.lyxitemiii {list-style-type: square;}
+
+
+
+/* INSETS */
+
+table, td  {
+           border-collapse: collapse;
+           }
+
+a {color: light-dark(blue, lightblue);}
+
+
+
+/* DESIGNS */
+
+/* span  {
+      color: inherit; text-align: inherit
+      } */
+
+del.strikeout.on {text-decoration: line-through;}
+del.xout.on {text-decoration: line-through;}
+
+span.noun.on {font-variant: small-caps;}
+span.shape.smallcaps {font-variant: small-caps;}
+
+span.size.tiny, span.size.scriptsize {font-size: xx-small;}
+span.size.footnotesize {font-size: x-small;}
+span.size.small {font-size: small;}
+span.size.large {font-size: large;}
+span.size.larger {font-size: x-large;}
+span.size.largest {font-size: xx-large;}
+
+span.color.blue {color: blue}
+span.color.brown {color: brown}
+span.color.cyan {color: cyan}
+span.color.darkgray {color: darkgray}
+span.color.gray {color: gray}
+span.color.green {color: green}
+span.color.lightgray {color: lightgrey}
+span.color.lime.green {color: limegreen}
+span.color.magenta {color: magenta}
+span.color.olive.green {color: olive}
+span.color.orange {color: orange}
+span.color.pink {color: pink}
+span.color.purple {color: purple}
+span.color.red {color: red}
+span.color.teal {color: teal}
+span.color.violet {color: violet}
+span.color.yellow {color: yellow}
+
+div.align.block {text-align: justify;}
+div.align.right {text-align: right;}
+div.align.center {text-align: center;}
+div.align.left {text-align: left;}
+div.paragraph.spacing.single {line-height: 1;}
+div.paragraph.spacing.onehalf {line-height: 1.5;}
+div.paragraph.spacing.double {line-height: 2;}
+div.noindent {text-indent: 0%;}
+
+span.family.roman {font-family: serif;}
+span.family.sans {font-family: sans-serif;}
+span.family.typewriter {font-family: monospace;}

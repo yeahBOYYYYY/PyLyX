@@ -3,7 +3,8 @@
                   "color": "inherit",
                   "numeric": "off",
                   "backslash": "",
-                  "labelwidthstring": ""
+                  "labelwidthstring": "",
+                  "language": ""
                   },
   "lang change":  {
                   "color": "none",

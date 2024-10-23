@@ -34,9 +34,12 @@ with open(join(PACKAGE_PATH, 'data\\layouts.json'), 'r', encoding='utf8') as f:
 with open(join(PACKAGE_PATH, 'data\\insets.json'), 'r', encoding='utf8') as f:
     INSETS = load(f)
     OBJECTS.update(INSETS)
-with open(join(PACKAGE_PATH, 'data\\primary_objects.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, 'data\\primaries.json'), 'r', encoding='utf8') as f:
     PRIMARIES = load(f)
     OBJECTS.update(PRIMARIES)
+with open(join(PACKAGE_PATH, 'data\\doc_set.json'), 'r', encoding='utf8') as f:
+    DOC_SET = load(f)
+    OBJECTS.update(DOC_SET)
 with open(join(PACKAGE_PATH, 'data\\ends.json'), 'r', encoding='utf8') as f:
     ENDS = load(f)
 
@@ -71,7 +74,3 @@ def txt2xml(text: str):
     for key in dictionary:
         text = text.replace(key, '&' + dictionary[key])
     return text
-
-
-def is_known_object(command: str, category: str, details: str):
-    return command in OBJECTS and category in OBJECTS[command] and details in OBJECTS[command][category]

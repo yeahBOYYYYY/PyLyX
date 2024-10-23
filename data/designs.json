@@ -6,7 +6,9 @@
 
   "noun":             {"on": {"": {}}},
   "family":           {
-                      "roman": {"": {}}
+                      "roman": {"": {}},
+                      "sans": {"": {}},
+                      "typewriter": {"": {}}
                       },
 
   "series":           {

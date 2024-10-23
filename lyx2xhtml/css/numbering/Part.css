@@ -1,0 +1,6 @@
+body {counter-reset: part;}
+
+div.layout.Part::before     {
+                            counter-increment: part;
+                            content: counter(part, upper-roman) " ";
+                            }

@@ -7,7 +7,9 @@ with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\texts.json'), 'r', encoding='utf8
     TEXTS = load(f)
 
 MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
-DEFAULT_CSS = join(PACKAGE_PATH, 'lyx2xhtml\\data\\default.css')
+CSS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\css')
+BASIC_CSS = join(CSS_FOLDER, 'basic.css')
+SECTIONS = ['Part', 'Chapter', 'Sections', 'Subsection', 'Subsubsection', 'Paragraph', 'Subparagraph']
 
 
 def mathjax():
@@ -15,7 +17,7 @@ def mathjax():
     return LyXobj('script', attrib=attrib)
 
 
-def create_css(path=DEFAULT_CSS):
+def create_css(path=BASIC_CSS):
     attrib = {'rel': 'stylesheet', 'type': 'text/css', 'href': path}
     return LyXobj('link', attrib=attrib)
 
@@ -34,6 +36,21 @@ def create_title(head: LyXobj, body: LyXobj):
 
 def create_macros(head: LyXobj, body: LyXobj):
     pass
+
+
+def order_head(head, css_path=BASIC_CSS):
+    head.extend((mathjax(), viewport(), create_css(css_path)))
+    for child in head:
+        if child.is_command('modules'):
+            modules = child.text.split()
+            for module in modules:
+                module_css = create_css(join(CSS_FOLDER, f'modules\\{module}.css'))
+                head.append(module_css)
+        elif child.is_command('secnumdepth'):
+            depth = int(child.get('class')[-1]) + 1
+            if depth >= 0:
+                depth_css = create_css(join(CSS_FOLDER, f'numbering\\{SECTIONS[depth]}.css'))
+                head.append(depth_css)
 
 
 def order_tables(root: LyXobj):
@@ -99,3 +116,17 @@ def correct_formula(formula: str):
     if formula.endswith('\\)'):
         formula = formula[:-2]
     return '\\(' + formula + '\\)'
+
+
+def order_body(body: LyXobj):
+    order_tables(body)
+    order_lists(body)
+    obj2text(body)
+
+
+def order_document(head: LyXobj, body: LyXobj, css_path: str):
+    order_head(head, css_path)
+    order_body(body)
+    create_title(head, body)
+    create_macros(head, body)
+

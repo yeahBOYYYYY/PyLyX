@@ -22,7 +22,7 @@ class LyXobj(Element):
         self.__is_open = bool(is_open)
 
         if command + category + details:
-            self.set('class', self.obj_props('_'))
+            self.set('class', self.obj_props())
 
     def can_be_nested_in(self, father) -> bool:
         from PyLyX.Environment import Environment, Container
@@ -56,7 +56,7 @@ class LyXobj(Element):
             code = xml2txt(code)
             return code
         else:
-            new_element = Element(self.tag, attrib=self.attrib)
+            new_element = Element(self.tag, self.attrib)
             new_element.text = '\n'
             for item in self:
                 new_element.text += item.obj2lyx()

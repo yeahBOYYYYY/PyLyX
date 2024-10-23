@@ -82,14 +82,11 @@ def recursive_convert(obj):
     return new_obj
 
 
-def convert(root, css_path=DEFAULT_CSS):
+def convert(root, css_path=BASIC_CSS):
     root = recursive_convert(root)
     root.set('xmlns', 'http://www.w3.org/1999/xhtml')
-    head, body = root[0], root[1]
-    head.extend((mathjax(), viewport(), create_css(css_path)))
-    create_title(head, body)
-    create_macros(head, body)
-    order_tables(body)
-    order_lists(body)
-    obj2text(body)
-    return root
+    if len(root) == 2:
+        order_document(*root, css_path)
+        return root
+    else:
+        raise Exception(f'root must contain 2 subelements exactly, not {len(root)}.')

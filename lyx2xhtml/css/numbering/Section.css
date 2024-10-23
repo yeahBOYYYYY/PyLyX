@@ -1,0 +1,8 @@
+@import "Part.css";
+
+div.layout.Part {counter-reset: section;}
+
+h2.layout.Section::before   {
+                            counter-increment: section;
+                            content: counter(section) " ";
+                            }

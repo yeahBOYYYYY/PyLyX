@@ -1,4 +1,4 @@
-from PyLyX import OBJECTS, DESIGNS, PAR_SET, ENDS, xml2txt
+from PyLyX import OBJECTS, DESIGNS, PAR_SET, ENDS, xml2txt, DOC_SET
 from PyLyX.LyXobj import LyXobj, DEFAULT_RANK
 
 
@@ -65,7 +65,7 @@ class Environment(LyXobj):
 
     def obj2lyx(self):
         text = ''
-        if self.command() in DESIGNS or self.command() in PAR_SET:
+        if self.command() in DESIGNS or self.command() in PAR_SET or self.command() in DOC_SET:
             text += f'\\{self.obj_props()}\n'
         else:
             text += f'\\begin_{self.obj_props()}\n'
@@ -88,7 +88,7 @@ class Environment(LyXobj):
             magic_word = ENDS['usually'].get(self.command(), 'default')
             if magic_word:
                 text += f'\\{self.command()} {magic_word}\n'
-        elif self.command() not in PAR_SET and not deeper:
+        elif not (self.command() in PAR_SET or self.command() in DOC_SET or deeper) or self.is_command('index'):
             text += f'\\end_{self.command()}\n'
 
         if self.tail:

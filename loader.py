@@ -1,28 +1,29 @@
 from os.path import split, join
 from xml.etree.ElementTree import fromstring, tostring, Element, indent
-from PyLyX import ENDS, is_known_object, DESIGNS
+from PyLyX import ENDS, OBJECTS, DESIGNS
 from PyLyX.LyXobj import LyXobj
 from PyLyX.Environment import Environment, Container
 
 
 ############################################### MAIN ###############################################
-def one_line(file, line: str, branch: list, unknowns: dict, index=None, path=None):
+def one_line(file, line: str, branch: list, unknowns=None, path=None, index=None):
+    unknowns = {} if type(unknowns) is not dict else unknowns
     last = branch[-1]
     if type(index) is int:
         line = file[index]
-    if last.is_category('Formula') and last.is_open() and not is_end(line):
+    if (last.is_category('Formula') or last.is_command('preamble')) and last.is_open() and not is_end(line, branch):
         last.text += line
 
     elif line.startswith('\\'):
         command, category, details, text = extract_cmd(line)
-        if is_end(line):
+        if is_end(line, branch):
             perform_end(branch, command)
         elif command == 'deeper':
-            perform_deeper(file, last, unknowns, index)
+            perform_deeper(file, last, unknowns, path, index)
         else:
             perform_new_obj(branch, unknowns, command, category, details, text)
     elif line.startswith('<lyxtabular'):
-        perform_table(file, line, branch, unknowns, index)
+        perform_table(file, line, branch, unknowns, path, index)
 
     elif last.is_open():
        lst = line[:-1].split(maxsplit=1)
@@ -31,7 +32,10 @@ def one_line(file, line: str, branch: list, unknowns: dict, index=None, path=Non
        else:
            result = False
        if not result:
-           last.text += line[:-1]
+           if last.is_command('modules') or last.is_command('local_layout'):
+               last.text += line
+           else:
+               last.text += line[:-1]
     else:
         last.tail += line[:-1]
 
@@ -51,22 +55,22 @@ def load(full_path: str):
         root = Environment(*cmd)
         root.set('lyxformat', fmt)
 
-        while line != f'\\begin_header\n':
-            line = file.readline()
-        cmd = extract_cmd(line)
-        head = Environment(*cmd)
-        root.append(head)
-
-        line = file.readline()
-        while line != '\\end_header\n':
-            head.text += line
-            line = file.readline()
-        head.close()
+        # while line != f'\\begin_header\n':
+        #     line = file.readline()
+        # cmd = extract_cmd(line)
+        # head = Environment(*cmd)
+        # root.append(head)
+        #
+        # line = file.readline()
+        # while line != '\\end_header\n':
+        #     head.text += line
+        #     line = file.readline()
+        # head.close()
 
         branch = [root]
         unknowns = {}
         for line in file:
-            one_line(file, line, branch, unknowns, path=full_path)
+            one_line(file, line, branch, unknowns, full_path)
 
         if unknowns:
             print('unknown objects:', unknowns)
@@ -106,29 +110,44 @@ def order_object(branch: list, obj):
             branch.pop()
     except IndexError:
         raise Exception(f'an error occurred when ordering object {obj} in branch: {[str(_) for _ in copy_branch]}')
-    branch[-1].append(obj)
+
+    if len(branch) > 2 and branch[2].is_command('index'):
+        branch[2].append(obj)
+    elif len(branch) > 1 and branch[1].is_command('header'):
+        branch[1].append(obj)
+    else:
+        branch[-1].append(obj)
+
     branch.append(obj)
 
     if type(obj) is Container:
         branch.append(obj[0])
 
 
+def is_known_object(command: str, category: str):
+    return command in OBJECTS and category in OBJECTS[command]
+
+
 def perform_new_obj(branch: list, unknowns: dict, command: str, category: str, details: str, text: str):
-    if is_known_object(command, category, details):
-        obj = Environment(command, category, details, text)
-        if obj.is_section_title():
-            obj = Container(obj)
-            order_object(branch, obj)
+    if is_known_object(command, category):
+        if details in OBJECTS[command][category]:
+            obj = Environment(command, category, details, text)
+            if obj.is_section_title():
+                obj = Container(obj)
         else:
-            order_object(branch, obj)
+            obj = LyXobj(command, command, category, details, text)
+        order_object(branch, obj)
     else:
-        unknowns[command] = {category: {details: {}}}
+        if len(branch) <= 1 or not branch[1].is_command('header'):
+            unknowns[command] = {category: {details: {}}}
         obj = LyXobj('unknown', command, category, details, text)
         order_object(branch, obj)
 
 
-def is_end(line: str) -> bool:
-    if line.startswith('\\'):
+def is_end(line: str, branch: list) -> bool:
+    if len(branch) > 1 and branch[1].is_command('header'):
+        return line.startswith('\\end_')
+    elif line.startswith('\\'):
         if line.endswith('default\n'):
             return True
         for key in ENDS:
@@ -175,14 +194,14 @@ def perform_options(obj: Environment, first: str, second: str, path=None):
         return False
 
 
-def perform_deeper(file, last, unknowns: dict, index=None):
+def perform_deeper(file, last, unknowns: dict, path: str, index=None):
     last.open()
     branch = [last]
     for line in file:
         if line == '\\end_deeper\n':
             break
         else:
-            one_line(file, line, branch, unknowns, index)
+            one_line(file, line, branch, unknowns, path, index)
     last.close()
 
 
@@ -210,7 +229,7 @@ def load_table_code(file, line, index=None):
     return code
 
 
-def one_cell(cell: Element, unknowns: dict):
+def one_cell(cell: Element, unknowns: dict, path: str):
     new_cell = LyXobj(cell.tag, attrib=cell.attrib)
     text = cell.text
     for e in cell:
@@ -220,28 +239,28 @@ def one_cell(cell: Element, unknowns: dict):
     text = text.splitlines(keepends=True)
     index = 0
     for line in text:
-        one_line(text, line, branch, unknowns, index)
+        one_line(text, line, branch, unknowns, path, index)
         index += 1
     return new_cell
 
 
-def table2lyxobj(table: Element, unknowns: dict):
+def table2lyxobj(table: Element, unknowns: dict, path: str):
     new_table = LyXobj(table.tag, attrib=table.attrib)
     for item in table:
         new_item = LyXobj(item.tag, attrib=item.attrib)
         new_table.append(new_item)
         for cell in item:
-            new_cell = one_cell(cell, unknowns)
+            new_cell = one_cell(cell, unknowns, path)
             new_item.append(new_cell)
     return new_table
 
 
-def perform_table(file, line: str, branch: list, unknowns: dict, index=None):
+def perform_table(file, line: str, branch: list, unknowns: dict, path: str, index):
     if type(file) is list and type(index) is int:
         new_lst = file[index + 1:]
         file.clear()
         file.extend(new_lst)
     code = load_table_code(file, line, index)
     table = fromstring(code)
-    table = table2lyxobj(table, unknowns)
+    table = table2lyxobj(table, unknowns, path)
     branch[-1].append(table)

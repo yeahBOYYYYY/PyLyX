@@ -40,12 +40,12 @@
           "Argument": {"1": {"options": ["status"]}},
           "Marginal": {"": {"options": ["status"]}},
           "Box": {
-                  "Frameless": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_makebox",
-                                          "width", "special", "height", "height_special", "thickness", "separation",
-                                          "shadowsize", "framecolor", "backgroundcolor", "status", "use_parbox"]},
-                  "Boxed": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_makebox",
-                                          "width", "special", "height", "height_special", "thickness", "separation",
-                                          "shadowsize", "framecolor", "backgroundcolor", "status", "use_parbox"]}
+                  "Frameless": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
+                                          "use_makebox", "width", "special", "height", "height_special", "thickness",
+                                          "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]},
+                  "Boxed": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
+                                          "use_makebox", "width", "special", "height", "height_special", "thickness",
+                                          "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]}
                   },
           "Caption": {"Standard": {}},
           "Note": {"Note": {"options": ["status"]}},
