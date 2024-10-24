@@ -70,13 +70,26 @@ def order_lists(father):
     last = father
     children = []
     for child in list(father):
-        if child.tag == 'li':
+        if child.is_category('Enumerate') or child.is_category('Itemize'):
             tag = 'ol' if child.is_category('Enumerate') else 'ul'
             class_ = 'enumi' if child.is_category('Enumerate') else 'lyxitemi'
             if last.tag != tag:
                 last = LyXobj(tag, attrib={'class': class_})
                 children.append(last)
             last.append(child)
+        elif child.is_category('Labeling') or child.is_category('Description'):
+            children.append(child)
+            prefix = LyXobj('span')
+            child.insert(0, prefix)
+            if child.is_category('Labeling'):
+                prefix.set('class', 'Labeling')
+                prefix.text = child[1].tail.split()[0]
+                child[1].tail = child[1].tail[len(prefix.text):]
+            else:
+                prefix.set('class', 'Description')
+                prefix.text = child.text.split()[0]
+                prefix.tail = child.text[len(prefix.text):]
+                child.text = ''
         else:
             children.append(child)
         order_lists(child)

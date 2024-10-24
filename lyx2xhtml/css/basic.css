@@ -99,6 +99,11 @@ ul.lyxitemi {list-style-type: disc;}
 ul.lyxitemii {list-style-type: circle;}
 ul.lyxitemiii {list-style-type: square;}
 
+div.layout.Labeling {text-indent: -3.42em;
+      margin-left: 5em;}
+
+div.layout.Description {text-indent: -3.42em;
+      margin-left: 5em;}
 
 
 /* INSETS */
