@@ -1,4 +1,70 @@
 document.addEventListener("DOMContentLoaded", function() {
+    function isScript(name) {
+        // Select all <script> elements in the document
+        const scripts = document.querySelectorAll('script');
+        
+        // Loop through each <script> and check if its src ends with the given string
+        for (let script of scripts) {
+            if (script.src.endsWith(name)) {
+                return true; // Found a matching script element
+            }
+        }
+        return false
+    }
+    
+    function createPrefix(current, last, last_index, counter) {
+        if (isScript("theorems-sec.js")) {
+            let element = current
+            while (element !== null && element.className != `layout ${"Section"}`) {
+                    element = element.parentElement;
+            }
+            if (element !== null && element !== last) {
+                last = element
+                if (last !== null && last.getAttribute("id") !== null) {
+                    last_index = parseInt(last.getAttribute("id").replace(/\D/g, ""))
+                }
+                counter = 0
+            }
+            counter++;
+            return [`${last_index}.${counter}`, last, last_index, counter]
+        } else {
+            counter++;
+            return [counter, last, last_index, counter]
+        }
+    }
+    
+    const names = new Map([
+        ["Theorem", "b"],
+        ["Corollary", "b"],
+        ["Lemma", "i"],
+        ["Proposition", "b"],
+        ["Conjecture", "b"],
+        ["Definition", "b"],
+        ["Example", "b"],
+        ["Problem", "b"],
+        ["Exercise", "b"],
+        ["Solution", "b"],
+        ["Remark", ""],
+        ["Claim", "b"],
+        ["Fact", "b"]
+    ])
+
+    const selectors = [
+        "div.layout.Theorem",
+        "div.layout.Corollary",
+        "div.layout.Lemma",
+        "div.layout.Proposition",
+        "div.layout.Conjecture",
+        "div.layout.Definition",
+        "div.layout.Example",
+        "div.layout.Problem",
+        "div.layout.Exercise",
+        "div.layout.Solution",
+        "div.layout.Remark",
+        "div.layout.Claim",
+        "div.layout.Fact"
+    ]
+
     let last = null
     let last_index = 0
     let counter = 0
@@ -6,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const theorems = document.querySelectorAll(selectors.join(", "))
     theorems.forEach(t => {
         [prefix, last, last_index, counter] = createPrefix(t, last, last_index, counter)
-        t.setAttribute("data-index", prefix)
+        t.id = `${t.classList.item(1)}_${prefix}`
 
         let start = ""
         let end = ""
@@ -19,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (t.querySelector("span.inset.Argument") == null) {
             end += "."
         }
-        t.innerHTML = `${start}${key} ${t.getAttribute("data-index")}${end} ${t.innerHTML}`
+        t.innerHTML = `${start}${key} ${prefix}${end} ${t.innerHTML}`;
     })
 
     for (const [key, value] of names) {
@@ -56,77 +122,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const links = document.querySelectorAll("a.inset.CommandInset.ref")
     links.forEach (l => {
-        let id = l.getAttribute("href")
+        let id = l.getAttribute("href").slice(1)
         let parent = document.getElementById(id).parentElement
         if (parent.querySelector("span.inset.Argument") != null) {
             l.innerHTML = parent.querySelector("span.inset.Argument").innerHTML
         } else {
-            l.innerHTML = parent.getAttribute("data-index")
+            l.innerHTML = parent.getAttribute("id").replace(/[^0-9.]/g, "")
         }
     })
 });
-
-function isScript(name) {
-    // Select all <script> elements in the document
-    const scripts = document.querySelectorAll('script');
-    
-    // Loop through each <script> and check if its src ends with the given string
-    for (let script of scripts) {
-        if (script.src.endsWith(name)) {
-            return true; // Found a matching script element
-        }
-    }
-    return false
-}
-
-function createPrefix(current, last, last_index, counter) {
-    if (isScript("theorems-sec.js")) {
-        let element = current
-        while (element !== null && element.className != `layout ${"Section"}`) {
-                element = element.parentElement;
-        }
-        if (element !== null && element !== last) {
-            last = element
-            if (last !== null && last.getAttribute("data-index") !== null) {
-                last_index = last.getAttribute("data-index")
-            }
-            counter = 0
-        }
-        counter++;
-        return [`${last_index}.${counter}`, last, last_index, counter]
-    } else {
-        counter++;
-        return [counter, last, last_index, counter]
-    }
-}
-
-const names = new Map([
-    ["Theorem", "b"],
-    ["Corollary", "b"],
-    ["Lemma", "i"],
-    ["Proposition", "b"],
-    ["Conjecture", "b"],
-    ["Definition", "b"],
-    ["Example", "b"],
-    ["Problem", "b"],
-    ["Exercise", "b"],
-    ["Solution", "b"],
-    ["Remark", ""],
-    ["Claim", "b"],
-    ["Fact", "b"]
-])
-const selectors = [
-    "div.layout.Theorem",
-    "div.layout.Corollary",
-    "div.layout.Lemma",
-    "div.layout.Proposition",
-    "div.layout.Conjecture",
-    "div.layout.Definition",
-    "div.layout.Example",
-    "div.layout.Problem",
-    "div.layout.Exercise",
-    "div.layout.Solution",
-    "div.layout.Remark",
-    "div.layout.Claim",
-    "div.layout.Fact"
-]

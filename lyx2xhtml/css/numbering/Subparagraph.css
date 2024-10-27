@@ -1,0 +1,8 @@
+@import "Paragraph.css";
+
+section.layout.Paragraph {counter-reset: subparagraph;}
+
+h6.layout.Subparagraph::before {
+    counter-increment: subparagraph;
+    content: counter(section) "." counter(subsection) "." counter(subsubsection) "." counter(paragraph) "." counter(subparagraph) " ";
+}

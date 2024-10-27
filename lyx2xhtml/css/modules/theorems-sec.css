@@ -1,0 +1,18 @@
+@import "theorems-ams.css";
+@import "../numbering/Section.css";
+
+div.layout.Section {counter-reset: ams;}
+
+div.layout.Theorem::before {content: "Theorem "  counter(section) "." counter(ams);}
+div.layout.Corollary::before {content: "Corollary "  counter(section) "." counter(ams);}
+div.layout.Lemma::before {content: "Lemma "  counter(section) "." counter(ams);}
+div.layout.Proposition::before {content: "Proposition "  counter(section) "." counter(ams);}
+div.layout.Conjecture::before {content: "Conjecture "  counter(section) "." counter(ams);}
+div.layout.Definition::before {content: "Definition "  counter(section) "." counter(ams);}
+div.layout.Example::before {content: "Example "  counter(section) "." counter(ams);}
+div.layout.Problem::before {content: "Problem "  counter(section) "." counter(ams);}
+div.layout.Exercise::before {content: "Exercise "  counter(section) "." counter(ams);}
+div.layout.Solution::before {content: "Solution "  counter(section) "." counter(ams);}
+div.layout.Remark::before {content: "Remark "  counter(section) "." counter(ams);}
+div.layout.Claim::before {content: "Claim "  counter(section) "." counter(ams);}
+div.layout.Fact::before {content: "Fact "  counter(section) "." counter(ams);}

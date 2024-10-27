@@ -1,0 +1,8 @@
+@import "Section.css";
+
+section.layout.Section {counter-reset: subsection;}
+
+h3.layout.Subsection::before {
+    counter-increment: subsection;
+    content: counter(section) "." counter(subsection) " ";
+}

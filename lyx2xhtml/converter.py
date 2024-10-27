@@ -41,6 +41,9 @@ def perform_box(obj, old_attrib: dict, new_attrib: dict):
         style = '; '.join(style)
         new_attrib['style'] = style
 
+    if 'width' in new_attrib:
+        new_attrib['width'] = new_attrib['width'].replace('col%', '%')
+
 
 def perform_cell(old_attrib: dict, new_attrib: dict):
     style = []
@@ -60,17 +63,18 @@ def create_attributes(obj, dictionary: dict):
     if 'options' in dictionary:
         for key in dictionary['options']:
             if key in old_attrib:
-                new_key, value = dictionary['options'][key], old_attrib.pop(key).replace('"', '').replace('col', '')  # todo: official func instead repkace
+                new_key, value = dictionary['options'][key], old_attrib.pop(key).replace('"', '')  # todo: official func instead repkace
                 new_attrib[new_key] = value
     if 'class' in old_attrib:
         new_attrib['class'] = old_attrib.pop('class')
 
     if obj.is_category('Box'):
         perform_box(obj, old_attrib, new_attrib)
-    if obj.tag == 'cell':
+    elif obj.tag == 'cell':
         perform_cell(old_attrib, new_attrib)
-
-    if obj.is_category('other'):
+    elif obj.is_details('ref'):
+        new_attrib['href'] = '#' + new_attrib['href']
+    elif obj.is_category('other'):
         old_attrib['details'] = obj.details()
     for key in old_attrib:
         new_attrib[f'data-{key}'] = old_attrib[key].replace('"', '')
@@ -102,15 +106,17 @@ def recursive_convert(obj):
     new_obj = one_obj(obj)
     for child in obj:
         child = recursive_convert(child)
+        if new_obj.tag in {'head', 'meta'}:
+            child.tag = 'meta'
         new_obj.append(child)
     return new_obj
 
 
-def convert(root, css_file=BASIC_CSS, css_folder=CSS_FOLDER):
+def convert(root, css_files=(BASIC_CSS, ), css_folder=CSS_FOLDER, js_files=(NUM_TOC, ), js_folder=JS_FOLDER):
     root = recursive_convert(root)
     root.set('xmlns', 'http://www.w3.org/1999/xhtml')
     if len(root) == 2:
-        order_document(*root, css_file, css_folder)
+        order_document(*root, css_files, css_folder, js_files, js_folder)
         return root
     else:
         raise Exception(f'root must contain 2 subelements exactly, not {len(root)}.')

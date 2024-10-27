@@ -1,5 +1,5 @@
 from json import load
-from os.path import join
+from os.path import join, exists
 from PyLyX import PACKAGE_PATH
 from PyLyX.LyXobj import LyXobj
 
@@ -8,8 +8,9 @@ with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\texts.json'), 'r', encoding='utf8
 
 MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
 CSS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\css')
-JS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\js')
 BASIC_CSS = 'basic.css'
+JS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\js')
+NUM_TOC = 'numbering_and_toc.js'
 SECTIONS = ('Part', 'Chapter', 'Section', 'Subsection', 'Subsubsection', 'Paragraph', 'Subparagraph')
 
 
@@ -41,9 +42,23 @@ def create_macros(head: LyXobj, body: LyXobj):
     pass
 
 
-def order_head(head, css_file=BASIC_CSS, css_folder=CSS_FOLDER):
-    css_path = join(css_folder, css_file)
-    head.extend((create_script(MATHJAX, 'async'), viewport(), create_css(css_path)))
+def order_head(head, css_files=(BASIC_CSS, ), css_folder=CSS_FOLDER, js_files=(NUM_TOC, ), js_folder=JS_FOLDER):
+    head.extend((create_script(MATHJAX, 'async'), viewport()))
+    for file in css_files:
+        css_path = join(css_folder, file)
+        head.append(create_css(css_path))
+    for file in js_files:
+        js_path = join(js_folder, file)
+        head.append(create_script(js_path))
+    for child in head:
+        if child.is_command('modules'):
+            modules = child.text.split()
+            modules_folder = join(JS_FOLDER, f'modules')
+            for module in modules:
+                path = join(modules_folder, module + '.js')
+                if exists(path):
+                    module_js = create_script(path)
+                    head.append(module_js)
 
 
 def order_tables(root: LyXobj):
@@ -152,23 +167,15 @@ def correct_formula(formula: str):
     return '\\(' + formula + '\\)'
 
 
-def order_body(head, body: LyXobj):
+def order_body(body: LyXobj):
     order_tables(body)
     order_lists(body)
     obj2text(body)
-    body.append(create_script(join(JS_FOLDER, 'counters.js')))
-
-    for child in head:
-        if child.is_command('modules'):
-            modules = child.text.split()
-            for module in modules:
-                module_js = create_script(join(JS_FOLDER, f'modules\\{module}.js'))
-                body.append(module_js)
 
 
-def order_document(head: LyXobj, body: LyXobj, css_file: str, css_folder: str):
-    order_head(head, css_file, css_folder)
-    order_body(head, body)
+def order_document(head: LyXobj, body: LyXobj, css_files: tuple[str], css_folder: str, js_files: tuple[str], js_folder: str):
+    order_head(head, css_files, css_folder, js_files, js_folder)
+    order_body(body)
     create_title(head, body)
     create_macros(head, body)
 
