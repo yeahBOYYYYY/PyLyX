@@ -1,18 +1,18 @@
 {
-  "inset":  {
-            "space":  {
-                      "\\space{}": "\\:",
-                      "\\enskip{}": "\\:",
-                      "\\quad{}": "\\:",
-                      "\\qquad{}": "\\:",
-                      "\\thinspace{}": "\\,",
-                      "\\medspace{}": "\\:",
-                      "\\thickspace{}": "\\;",
-                      "\\negthinspace{}": "\\!",
-                      "\\negmedspace{}": "\\!\\!",
-                      "\\negthickspace{}": "\\!\\!\\!",
-                      "~": "\\:"
-                      }
-            },
+  "inset": {
+    "space": {
+      "\\space{}": "\\:",
+      "\\enskip{}": "\\:",
+      "\\quad{}": "\\:",
+      "\\qquad{}": "\\:",
+      "\\thinspace{}": "\\,",
+      "\\medspace{}": "\\:",
+      "\\thickspace{}": "\\;",
+      "\\negthinspace{}": "\\!",
+      "\\negmedspace{}": "\\!\\!",
+      "\\negthickspace{}": "\\!\\!\\!",
+      "~": "\\:"
+    }
+  },
   "backslash": {"": {"": "\\"}}
 }

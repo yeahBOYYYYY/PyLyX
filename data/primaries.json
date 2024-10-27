@@ -1,8 +1,8 @@
 {
 "document": {"": {"": {"rank": -3}}},
-    "header": {"": {"": {"rank": -2}}},
-        "preamble": {"": {"": {"rank": -1}}},
-        "modules": {"": {"": {"rank":  -1}}},
-        "local_layout": {"": {"": {"rank": -1}}},
-    "body": {"": {"": {"rank": -2}}}
+"header": {"": {"": {"rank": -2}}},
+"preamble": {"": {"": {"rank": -1}}},
+"modules": {"": {"": {"rank":  -1}}},
+"local_layout": {"": {"": {"rank": -1}}},
+"body": {"": {"": {"rank": -2}}}
 }

@@ -55,18 +55,6 @@ def load(full_path: str):
         root = Environment(*cmd)
         root.set('lyxformat', fmt)
 
-        # while line != f'\\begin_header\n':
-        #     line = file.readline()
-        # cmd = extract_cmd(line)
-        # head = Environment(*cmd)
-        # root.append(head)
-        #
-        # line = file.readline()
-        # while line != '\\end_header\n':
-        #     head.text += line
-        #     line = file.readline()
-        # head.close()
-
         branch = [root]
         unknowns = {}
         for line in file:
@@ -168,7 +156,10 @@ def perform_end(branch: list, command: str):
             for _ in range(-i-1):
                 branch[-1].close()
                 branch.pop()
-            if branch[-1].command() in DESIGNS:
+
+            if branch[-1].is_command('modules'):
+                branch[-1].text = branch[-1].text[:-1]
+            elif branch[-1].command() in DESIGNS:
                 for item in tail:
                     if item.command() in DESIGNS and item.is_open():
                         new_tail.append(Environment(item.command(), item.category(), item.details()))
@@ -257,7 +248,7 @@ def table2lyxobj(table: Element, unknowns: dict, path: str):
 
 def perform_table(file, line: str, branch: list, unknowns: dict, path: str, index):
     if type(file) is list and type(index) is int:
-        new_lst = file[index + 1:]
+        new_lst = file[index+1:]
         file.clear()
         file.extend(new_lst)
     code = load_table_code(file, line, index)

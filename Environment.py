@@ -95,7 +95,8 @@ class Environment(LyXobj):
             text += self.tail
 
         text = xml2txt(text)
-        return text + '\n'
+        text = text if text.endswith('\n\n') else text + '\n'
+        return text
 
     def is_section_title(self):
         return 0 <= self.rank() <= 6

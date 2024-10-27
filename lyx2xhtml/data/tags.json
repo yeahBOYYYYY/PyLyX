@@ -6,47 +6,64 @@
 
 
   "layout": {
-            "Itemize": {"": {"tag": "li"}},
-            "Enumerate": {"": {"tag": "li"}},
+    "Itemize": {"": {"tag": "li"}},
+    "Enumerate": {"": {"tag": "li"}},
+    "Labeling": {"": {"tag": "dd"}},
+    "Description": {"": {"tag": "dd"}},
 
-            "Section": {"": {"tag": "h2"}},
-            "Subsection": {"": {"tag": "h3"}},
-            "Subsubsection": {"": {"tag": "h4"}},
-            "Paragraph": {"": {"tag": "h5"}},
-            "Subparagraph": {"": {"tag": "h6"}},
+    "Section": {"": {"tag": "h2"}},
+    "Subsection": {"": {"tag": "h3"}},
+    "Subsubsection": {"": {"tag": "h4"}},
+    "Paragraph": {"": {"tag": "h5"}},
+    "Subparagraph": {"": {"tag": "h6"}},
 
-            "Section*": {"": {"tag": "h2"}},
-            "Subsection*": {"": {"tag": "h3"}},
-            "Subsubsection*": {"": {"tag": "h4"}},
-            "Paragraph*": {"": {"tag": "h5"}},
-            "Subparagraph*": {"": {"tag": "h6"}},
+    "Section*": {"": {"tag": "h2"}},
+    "Subsection*": {"": {"tag": "h3"}},
+    "Subsubsection*": {"": {"tag": "h4"}},
+    "Paragraph*": {"": {"tag": "h5"}},
+    "Subparagraph*": {"": {"tag": "h6"}},
 
-            "Title": {"": {"tag": "h1"}}
-            },
-
-
-
-  "inset":  {
-            "CommandInset": {
-                            "href": {"tag": "a", "options": {"name": "text", "target": "href"}},
-                            "ref": {"tag": "a", "options": {"reference": "href"}},
-                            "label": {"options": {"name": "id"}}
-                            },
-            "Newline": {"newline": {"tag": "br"}},
-            "Graphics": {"": {"tag": "img", "options": {"filename": "src"}}}
-            },
+    "Title": {"": {"tag": "h1"}}
+  },
 
 
 
-  "series":     {"bold": {"": {"tag": "b"}}},
-  "shape":      {
-                "italic": {"": {"tag": "i"}},
-                "slanted": {"": {"tag": "i"}}
-                },
-  "emph":       {"on": {"": {"tag": "em"}}},
-  "bar":        {"under": {"": {"tag": "u"}}},
-  "uuline":     {"on": {"": {"tag": "u"}}},
-  "uwave":      {"on": {"": {"tag": "u"}}},
-  "strikeout":  {"on": {"": {"tag": "del"}}},
-  "xout":       {"on": {"": {"tag": "del"}}}
+  "inset": {
+    "CommandInset": {
+      "href": {"tag": "a", "options": {"name": "text", "target": "href"}},
+      "ref": {"tag": "a", "options": {"reference": "href"}},
+      "label": {"options": {"name": "id"}},
+      "toc": {"tag": "div"}
+    },
+    "Newline": {"newline": {"tag": "br"}},
+    "Graphics": {"": {"tag": "img", "options": {"filename": "src"}}},
+    "Float": {
+    "table": {"tag": "div"},
+    "figure": {"tag": "div"}
+    },
+    "Box": {
+      "Frameless": {"tag": "div", "options": {"width": "width"}},
+      "Boxed": {"tag": "div", "options": {"width": "width"}},
+      "Doublebox": {"tag": "div", "options": {"width": "width"}},
+      "ovalbox": {"tag": "div", "options": {"width": "width"}},
+      "Ovalbox": {"tag": "div", "options": {"width": "width"}},
+      "Shaded": {"tag": "div", "options": {"width": "width"}},
+      "Shadowbox": {"tag": "div", "options": {"width": "width"}}
+    },
+    "Caption": {"Standard": {"tag": "div"}}
+  },
+
+
+
+  "series": {"bold": {"": {"tag": "b"}}},
+  "shape": {
+    "italic": {"": {"tag": "i"}},
+    "slanted": {"": {"tag": "i"}}
+  },
+  "emph": {"on": {"": {"tag": "em"}}},
+  "bar": {"under": {"": {"tag": "u"}}},
+  "uuline": {"on": {"": {"tag": "u"}}},
+  "uwave": {"on": {"": {"tag": "u"}}},
+  "strikeout": {"on": {"": {"tag": "del"}}},
+  "xout": {"on": {"": {"tag": "del"}}}
 }

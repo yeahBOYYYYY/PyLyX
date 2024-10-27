@@ -1,8 +1,0 @@
-@import "Subsubsection.css";
-
-h4.layout.Subsubsection {counter-reset: paragraph;}
-
-h5.layout.Paragraph::before {
-                            counter-increment: paragrph;
-                            content: counter(section) "." counter(subsection) "." counter(subsubsection) "." counter(paragraph) " ";
-                            }

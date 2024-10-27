@@ -1,55 +1,74 @@
 {
 "inset": {
-          "Formula": {"": {}},
-          "CommandInset": {
-                          "href": {"options": ["LatexCommand", "name", "target", "type", "literal"]},
-                          "ref": {"options": ["LatexCommand", "reference", "plural", "caps", "noprefix", "nolink"]},
-                          "label": {"options": ["LatexCommand", "name"]},
-                          "include": {"options": ["LatexCommand", "filename", "literal"]},
-                          "toc": {}
-                          },
-          "Tabular": {"": {}},
+  "Formula": {"": {}},
+  "CommandInset": {
+    "href": {"options": ["LatexCommand", "name", "target", "type", "literal"]},
+    "ref": {"options": ["LatexCommand", "reference", "plural", "caps", "noprefix", "nolink"]},
+    "label": {"options": ["LatexCommand", "name"]},
+    "include": {"options": ["LatexCommand", "filename", "literal"]},
+    "toc": {"options": ["LatexCommand"]},
+    "bibitem": {"options": ["LatexCommand", "key"]}
+  },
+  "Tabular": {"": {}},
 
-          "space": {
-                    "\\space{}": {},
-                    "\\enskip{}": {},
-                    "\\quad{}": {},
-                    "\\qquad{}": {},
-                    "\\thinspace{}":  {},
-                    "\\medspace{}": {},
-                    "\\thickspace{}": {},
-                    "\\negthinspace{}": {},
-                    "\\negmedspace{}": {},
-                    "\\negthickspace{}": {},
-                    "~": {}
-                    },
-          "Text": {"": {}},
-          "Foot": {"": {"options": ["status"]}},
-          "Quotes":   {
-                      "qrd": {},
-                      "qld": {}
-                      },
-          "Newline": {"newline": {}},
-          "Newpage": {"newpage": {}},
-          "Graphics": {"": {"options": ["filename", "scale"]}},
-          "Float": {
-                    "table": {"options": ["placement", "alignment", "wide", "sideways", "status"]},
-                    "figure": {"options": ["placement", "alignment", "wide", "sideways", "status"]}
-                    },
-          "ERT": {"": {"options": ["status"]}},
-          "Argument": {"1": {"options": ["status"]}},
-          "Marginal": {"": {"options": ["status"]}},
-          "Box": {
-                  "Frameless": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
-                                          "use_makebox", "width", "special", "height", "height_special", "thickness",
-                                          "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]},
-                  "Boxed": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
-                                          "use_makebox", "width", "special", "height", "height_special", "thickness",
-                                          "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]}
-                  },
-          "Caption": {"Standard": {}},
-          "Note": {"Note": {"options": ["status"]}},
-          "Separator": {"plain": {}},
-          "VSpace": {"vfill":  {}}
-          }
+  "space": {
+    "\\space{}": {},
+    "\\enskip{}": {},
+    "\\quad{}": {},
+    "\\qquad{}": {},
+    "\\thinspace{}":  {},
+    "\\medspace{}": {},
+    "\\thickspace{}": {},
+    "\\negthinspace{}": {},
+    "\\negmedspace{}": {},
+    "\\negthickspace{}": {},
+    "~": {}
+  },
+  "Text": {"": {}},
+  "Foot": {"": {"options": ["status"]}},
+  "Quotes": {
+    "qrd": {},
+    "qld": {}
+  },
+  "Newline": {"newline": {}},
+  "Newpage": {
+    "newpage": {},
+    "pagebreak": {}
+  },
+  "Graphics": {"": {"options": ["filename", "scale"]}},
+  "Float": {
+    "table": {"options": ["placement", "alignment", "wide", "sideways", "status"]},
+    "figure": {"options": ["placement", "alignment", "wide", "sideways", "status"]}
+  },
+  "ERT": {"": {"options": ["status"]}},
+  "Argument": {"1": {"options": ["status"]}},
+  "Marginal": {"": {"options": ["status"]}},
+  "Box": {
+    "Frameless": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
+                            "use_makebox", "width", "special", "height", "height_special", "thickness",
+                            "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]},
+    "Boxed": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
+                            "use_makebox", "width", "special", "height", "height_special", "thickness",
+                            "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]},
+    "Doublebox": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
+                            "use_makebox", "width", "special", "height", "height_special", "thickness",
+                            "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]},
+    "ovalbox": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
+                            "use_makebox", "width", "special", "height", "height_special", "thickness",
+                            "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]},
+    "Ovalbox": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
+                            "use_makebox", "width", "special", "height", "height_special", "thickness",
+                            "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]},
+    "Shaded": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
+                            "use_makebox", "width", "special", "height", "height_special", "thickness",
+                            "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]},
+    "Shadowbox": {"options": ["position", "hor_pos", "has_inner_box", "inner_pos", "use_parbox",
+                            "use_makebox", "width", "special", "height", "height_special", "thickness",
+                            "separation", "shadowsize", "framecolor", "backgroundcolor", "status"]}
+  },
+  "Caption": {"Standard": {}},
+  "Note": {"Note": {"options": ["status"]}},
+  "Separator": {"plain": {}},
+  "VSpace": {"vfill":  {}}
+}
 }

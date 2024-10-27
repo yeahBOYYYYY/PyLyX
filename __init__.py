@@ -31,6 +31,10 @@ with open(join(PACKAGE_PATH, 'data\\par_set.json'), 'r', encoding='utf8') as f:
 with open(join(PACKAGE_PATH, 'data\\layouts.json'), 'r', encoding='utf8') as f:
     LAYOUTS = load(f)
     OBJECTS.update(LAYOUTS)
+with open(join(PACKAGE_PATH, 'data\\theorems-ams.json'), 'r', encoding='utf8') as f:
+    THEOREMS = load(f)['layout']
+    LAYOUTS['layout'].update(THEOREMS)
+    OBJECTS.update(THEOREMS)
 with open(join(PACKAGE_PATH, 'data\\insets.json'), 'r', encoding='utf8') as f:
     INSETS = load(f)
     OBJECTS.update(INSETS)

@@ -1,7 +1,7 @@
 {
   "language": {
-              "hebrew": {"": {"rank": -1}},
-              "english": {"": {"rank": -1}}
-              },
+    "hebrew": {"": {"rank": -1}},
+    "english": {"": {"rank": -1}}
+  },
   "index": {"Index": {"": {"rank": -1}}}
 }

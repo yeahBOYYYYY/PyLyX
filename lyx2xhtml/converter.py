@@ -11,18 +11,46 @@ with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tables.json'), 'r', encoding='utf
 def create_dict(obj):
     if type(obj) is Environment and obj.is_in(TAGS):
         dictionary = TAGS[obj.command()][obj.category()][obj.details()]
-    elif type(obj) is Container or obj.is_command('deeper'):
+    elif type(obj) is Container:
         dictionary = {'tag': 'section'}
     elif type(obj) is LyXobj and obj.tag in TABLES:
         dictionary = TABLES[obj.tag]
     else:
         dictionary = {}
-    if (obj.is_command('layout') and not (obj.is_category('Plain') and obj.is_details('Layout'))) or \
-            obj.command() in PAR_SET:
-        dictionary.setdefault('tag', 'div')
+
+    if obj.is_command('layout') and not (obj.is_category('Plain') and obj.is_details('Layout')):
+        tag = 'div'
+    elif obj.command() in PAR_SET:
+        tag = 'div'
     else:
-        dictionary.setdefault('tag', 'span')
+        tag = 'span'
+    dictionary.setdefault('tag', tag)
     return dictionary
+
+
+def perform_box(obj, old_attrib: dict, new_attrib: dict):
+    style = []
+    if 'framecolor' in old_attrib:
+        if not obj.is_command('Frameless'):
+            if old_attrib['framecolor'] != '"default"':
+                style.append(f'border-color: {old_attrib.pop('framecolor')}')
+    if 'backgroundcolor' in old_attrib:
+        if old_attrib['backgroundcolor'] != '"none"':
+            style.append(f'background-color: {old_attrib.pop('backgroundcolor')}')
+    if style:
+        style = '; '.join(style)
+        new_attrib['style'] = style
+
+
+def perform_cell(old_attrib: dict, new_attrib: dict):
+    style = []
+    for side in ('top', 'bottom', 'right', 'left'):
+        value = old_attrib.pop(f'{side}line', None)
+        if value == 'true':
+            style.append(f'border-{side}: solid 1px')
+    if style:
+        style = '; '.join(style)
+        new_attrib['style'] = style
 
 
 def create_attributes(obj, dictionary: dict):
@@ -32,30 +60,26 @@ def create_attributes(obj, dictionary: dict):
     if 'options' in dictionary:
         for key in dictionary['options']:
             if key in old_attrib:
-                new_key, value = dictionary['options'][key], old_attrib.pop(key).replace('"', '')  # todo: official func instead repkace
+                new_key, value = dictionary['options'][key], old_attrib.pop(key).replace('"', '').replace('col', '')  # todo: official func instead repkace
                 new_attrib[new_key] = value
     if 'class' in old_attrib:
         new_attrib['class'] = old_attrib.pop('class')
-    if obj.tag == 'cell':
-        style = []
-        for side in ('top', 'bottom', 'right', 'left'):
-            value = old_attrib.pop(f'{side}line', None)
-            if value == 'true':
-                style.append(f'border-{side}: solid 1px')
-        if style:
-            style = '; '.join(style)
-            new_attrib['style'] = style
 
+    if obj.is_category('Box'):
+        perform_box(obj, old_attrib, new_attrib)
+    if obj.tag == 'cell':
+        perform_cell(old_attrib, new_attrib)
+
+    if obj.is_category('other'):
+        old_attrib['details'] = obj.details()
     for key in old_attrib:
-        new_attrib[f'data-{key}'] = old_attrib[key]
+        new_attrib[f'data-{key}'] = old_attrib[key].replace('"', '')
 
     return new_attrib
 
 
 def create_text(obj, new_attrib: dict):
-    if obj.is_command('header'):  # todo: head will be create better in the future
-        return ''
-    elif obj.is_category('Formula'):
+    if obj.is_category('Formula'):
         return correct_formula(obj.text)
     elif 'text' in new_attrib:
         return new_attrib.pop('text')
@@ -82,11 +106,11 @@ def recursive_convert(obj):
     return new_obj
 
 
-def convert(root, css_path=BASIC_CSS):
+def convert(root, css_file=BASIC_CSS, css_folder=CSS_FOLDER):
     root = recursive_convert(root)
     root.set('xmlns', 'http://www.w3.org/1999/xhtml')
     if len(root) == 2:
-        order_document(*root, css_path)
+        order_document(*root, css_file, css_folder)
         return root
     else:
         raise Exception(f'root must contain 2 subelements exactly, not {len(root)}.')
