@@ -1,5 +1,5 @@
-from PyLyX import OBJECTS, DESIGNS, PAR_SET, ENDS, xml2txt, DOC_SET
-from PyLyX.LyXobj import LyXobj, DEFAULT_RANK
+from PyLyX.data.data import OBJECTS, DESIGNS, PAR_SET, ENDS, DOC_SET
+from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK, xml2txt
 
 
 class Environment(LyXobj):
@@ -36,8 +36,8 @@ class Environment(LyXobj):
                     return self.rank() == father.rank() and self.obj_props() == father.obj_props()
             elif father.is_category('Formula'):
                 return False
-            elif father.is_category('Box'):
-                return self.rank() > 6
+            elif father.category() in {'Box', 'Note'}:
+                return True
             elif father.is_command('layout'):
                 if father.is_category('Standard'):
                     return self.is_command('inset')

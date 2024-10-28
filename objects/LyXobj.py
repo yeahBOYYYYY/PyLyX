@@ -1,5 +1,5 @@
 from xml.etree.ElementTree import Element, tostring
-from PyLyX import OBJECTS, xml2txt
+from PyLyX.data.data import OBJECTS
 
 DEFAULT_RANK = 100
 
@@ -25,14 +25,14 @@ class LyXobj(Element):
             self.set('class', self.obj_props())
 
     def can_be_nested_in(self, father) -> bool:
-        from PyLyX.Environment import Environment, Container
+        from PyLyX.objects.Environment import Environment, Container
         if type(father) in (LyXobj, Environment, Container):
             return father.is_open() and self.__rank >= father.__rank
         else:
             return False
 
     def append(self, obj):
-        from PyLyX.Environment import Environment, Container
+        from PyLyX.objects.Environment import Environment, Container
         if type(obj) in (LyXobj, Environment, Container):
             if self.__is_open:
                 if obj.can_be_nested_in(self):
@@ -131,3 +131,18 @@ class LyXobj(Element):
                     return True
 
         return False
+
+
+def xml2txt(text: str):
+    dictionary = {'quot;': '"', 'amp;': '&', 'apos;': "'", 'lt;': '<', 'gt;': '>'}
+    for key in dictionary:
+        text = text.replace('&' + key, dictionary[key])
+        text = text.replace(key, dictionary[key])
+    return text
+
+
+def txt2xml(text: str):
+    dictionary = {'"': 'quot;', '&': 'amp;', "'": 'apos;', '<': 'lt;', '>': 'gt;'}
+    for key in dictionary:
+        text = text.replace(key, '&' + dictionary[key])
+    return text

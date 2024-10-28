@@ -2,9 +2,9 @@ from os import remove
 from os.path import split, splitext, exists, join
 from sys import argv
 from json import load
-from PyLyX import USER, USER_DIR, SYS_DIR, PACKAGE_PATH
-from PyLyX.Environment import Environment, Container
-from PyLyX.LyX import LyX
+from PyLyX import LyX
+from PyLyX.data.data import USER, USER_DIR, SYS_DIR, PACKAGE_PATH
+from PyLyX.objects.Environment import Environment, Container
 from tables_creator import create_table
 from compare_bind import scan_file
 

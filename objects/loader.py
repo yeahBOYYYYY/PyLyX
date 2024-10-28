@@ -1,8 +1,8 @@
 from os.path import split, join
 from xml.etree.ElementTree import fromstring, tostring, Element, indent
-from PyLyX import ENDS, OBJECTS, DESIGNS
-from PyLyX.LyXobj import LyXobj
-from PyLyX.Environment import Environment, Container
+from PyLyX.data.data import ENDS, OBJECTS, DESIGNS
+from PyLyX.objects.LyXobj import LyXobj
+from PyLyX.objects.Environment import Environment, Container
 
 
 ############################################### MAIN ###############################################

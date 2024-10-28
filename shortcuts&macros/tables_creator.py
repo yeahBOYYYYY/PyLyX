@@ -1,5 +1,5 @@
-from PyLyX.LyXobj import LyXobj
-from PyLyX.Environment import Environment
+from PyLyX.objects.LyXobj import LyXobj
+from PyLyX.objects.Environment import Environment
 
 
 def is_table(table):

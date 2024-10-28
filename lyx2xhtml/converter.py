@@ -1,5 +1,5 @@
-from PyLyX import PAR_SET
-from PyLyX.Environment import Environment, Container
+from PyLyX.data.data import PAR_SET
+from PyLyX.objects.Environment import Environment, Container
 from PyLyX.lyx2xhtml.helper import *
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
@@ -98,6 +98,18 @@ def create_text(obj, new_attrib: dict):
         return obj.text
 
 
+def perform_include(obj: LyXobj):
+    if 'data-filename' in obj.attrib:
+        path = obj.get('data-filename')
+        if path.endswith('.lyx'):
+            from PyLyX.__init__ import LyX
+            root = LyX(path).load()
+            root = convert(root)
+            body = root[1]
+            for element in body:
+                obj.append(element)
+
+
 def one_obj(obj):
     dictionary = create_dict(obj)
     attrib = create_attributes(obj, dictionary)
@@ -106,6 +118,8 @@ def one_obj(obj):
     new_obj = LyXobj(dictionary['tag'], *properties, text, obj.tail, attrib)
     if 'class' in new_obj.attrib and new_obj.attrib['class'].endswith('*'):
         new_obj.set('class', new_obj.get('class')[:-1] + '_')
+    if new_obj.is_details('include'):
+        perform_include(new_obj)
     return new_obj
 
 
