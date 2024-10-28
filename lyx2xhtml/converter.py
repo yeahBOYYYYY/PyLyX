@@ -76,6 +76,10 @@ def create_attributes(obj, dictionary: dict):
         new_attrib['href'] = '#' + new_attrib['href']
     elif obj.is_category('other'):
         old_attrib['details'] = obj.details()
+    elif obj.is_category('FormulaMacro'):
+        lines = obj.text.splitlines()[1:]
+        lines = '\n'.join(lines)
+        old_attrib['lines'] = lines
     for key in old_attrib:
         new_attrib[f'data-{key}'] = old_attrib[key].replace('"', '')
 
@@ -85,6 +89,9 @@ def create_attributes(obj, dictionary: dict):
 def create_text(obj, new_attrib: dict):
     if obj.is_category('Formula'):
         return correct_formula(obj.text)
+    elif obj.is_category('FormulaMacro'):
+        macro = obj.text.splitlines()[0]
+        return correct_formula(macro)
     elif 'text' in new_attrib:
         return new_attrib.pop('text')
     else:
@@ -97,8 +104,8 @@ def one_obj(obj):
     text = create_text(obj, attrib)
     properties = obj.command(), obj.category(), obj.details()
     new_obj = LyXobj(dictionary['tag'], *properties, text, obj.tail, attrib)
-    if 'class' in new_obj.attrib:
-        new_obj.set('class', new_obj.get('class').replace('*', '_'))
+    if 'class' in new_obj.attrib and new_obj.attrib['class'].endswith('*'):
+        new_obj.set('class', new_obj.get('class')[:-1] + '_')
     return new_obj
 
 

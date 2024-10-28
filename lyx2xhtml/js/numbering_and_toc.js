@@ -25,48 +25,61 @@ document.addEventListener("DOMContentLoaded", function() {
         return roman;
     }
 
-    function create (tocContainer, level=0, roman=false) {
-        const tocList = document.createElement("ul");
-        const elements = document.querySelectorAll(sections[level]);
+    function create (tocContainer=null) {
+        const elements = document.querySelectorAll(sections.slice(0, maxDepth+1));
+        let last_level = 0;
+        let tocList = document.createElement("ul")
+        if (tocContainer !== null) {
+            tocContainer.appendChild(tocList)
+        }
         elements.forEach(element => {
-            if (level < maxDepth) {
-                // Update counters up to the allowed depth
+            let level = sections.indexOf(`${element.tagName}.${element.classList.item(0)}.${element.classList.item(1)}`)
+            if (level != -1) {
+                // Update counters
                 counters[level]++;
+                let counter = counters[level]
                 if (level > 1) {
                     for (let i = level + 1; i < counters.length; i++) {
                         counters[i] = 0;
+                    counter = counters.slice(2, level+1).join(".")
                     }
                 }
-                let counter = counters[level]
                 element.parentElement.id = `${element.classList.item(1)}_${counter}`;
         
                 // Generate numbering prefix within the allowed depth
                 if (level-2 < sectionMaxDepth) {
-                    if (roman) {
+                    if (level === 0) {
                         element.innerHTML = `${element.classList.item(1)} ${toRoman(counter)}<br />${element.innerHTML}`;
                     } else {
                         element.innerHTML = element.parentElement.id.replace("_", " ");
                     }
                 }
-                let tocItem = tocContainer
                 if (level-2 < tocMaxDepth) {
                     tocItem = document.createElement("li");
                     let link = document.createElement("a");
                     link.href = `#${element.parentElement.id}`;
                     link.textContent = element.parentElement.id.replace("_", " ");
                     tocItem.appendChild(link);
-                    tocList.appendChild(tocItem)
-                    tocContainer.appendChild(tocList)
+                    if (level > last_level) {
+                        let lastItem = tocList.lastElementChild
+                        tocList = document.createElement("ul")
+                        lastItem.appendChild(tocList);
+                    } else  {
+                        for (let i = 0; i < last_level - level; i++) {
+                            tocList = tocList.parentElement
+                        }
+                    }
+                    last_level = level
+                    tocList.appendChild(tocItem);
                 }
-                level = level+1
-                create(tocItem, level)
             }
         })
     }
 
+    // create()
     tocs = document.querySelectorAll(".inset.CommandInset.toc")
     tocs.forEach(toc => {
         toc.innerHTML = "<h2>Table of Contents</h2>" + toc.innerHTML;
-        create(toc, 0, true)
+        create(toc)
     })
 });

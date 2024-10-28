@@ -11,7 +11,8 @@ def one_line(file, line: str, branch: list, unknowns=None, path=None, index=None
     last = branch[-1]
     if type(index) is int:
         line = file[index]
-    if (last.is_category('Formula') or last.is_command('preamble')) and last.is_open() and not is_end(line, branch):
+    if (last.is_category('Formula') or last.is_category('FormulaMacro') or last.is_command('preamble')) \
+            and last.is_open() and not is_end(line, branch):
         last.text += line
 
     elif line.startswith('\\'):
@@ -67,11 +68,39 @@ def load(full_path: str):
 
 
 ############################################### HELPERS ###############################################
-def extract_cmd(line: str):
+def start_extract_cmd(line: str):
     cmd = line.split()
-    if len(cmd) < 3:
-        cmd += ['', '', 'is not cmd']
-    command, category, details = cmd[:3]
+    new_cmd = []
+    i = 0
+    while i < len(cmd):
+        if cmd[i].startswith('"'):
+            word = []
+            while i < len(cmd) and not cmd[i].endswith('"'):
+                word.append(cmd[i])
+                i += 1
+            if i < len(cmd):
+                word.append(cmd[i])
+            word = ' '.join(word)
+        elif cmd[i][0] in '1234567890-':
+            word = []
+            while i < len(cmd) and cmd[i][0] in '1234567890-' and (not cmd[i][1:] or cmd[i][1:].isnumeric()):
+                word.append(cmd[i])
+                i += 1
+            if i < len(cmd):
+                word.append(cmd[i])
+            word = ' '.join(word)
+        else:
+            word = cmd[i]
+        new_cmd.append(word)
+        i += 1
+
+    if len(new_cmd) < 3:
+        new_cmd += ['', '', 'is not cmd']
+    return new_cmd[:3]
+
+
+def extract_cmd(line: str):
+    command, category, details = start_extract_cmd(line)
     if command.startswith('\\'):
         command = command.replace('\\begin_', '', 1)
         command = command.replace('\\end_', '', 1)

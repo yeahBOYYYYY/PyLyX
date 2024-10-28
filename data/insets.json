@@ -1,6 +1,7 @@
 {
 "inset": {
   "Formula": {"": {}},
+  "FormulaMacro": {"": {}},
   "CommandInset": {
     "href": {"options": ["LatexCommand", "name", "target", "type", "literal"]},
     "ref": {"options": ["LatexCommand", "reference", "plural", "caps", "noprefix", "nolink"]},

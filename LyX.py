@@ -1,11 +1,15 @@
 from os import rename, remove
-from os.path import exists, split
+from os.path import exists, split, join
+from re import sub
+from xml.etree.ElementTree import indent, tostring
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
-from PyLyX import LYX_EXE, VERSION, CUR_FORMAT, correct_name, detect_lang
+from PyLyX import LYX_EXE, VERSION, CUR_FORMAT, correct_name, detect_lang, DOWNLOADS_DIR
 from PyLyX.LyXobj import LyXobj
 from PyLyX.Environment import Environment, Container
 from PyLyX.loader import load
+from PyLyX.lyx2xhtml.converter import convert
+from PyLyX.lyx2xhtml.helper import BASIC_CSS, CSS_FOLDER, NUM_TOC, JS_FOLDER
 
 
 def create_empty_file(full_path: str):
@@ -141,6 +145,31 @@ class LyX:
         except FileNotFoundError:
             raise FileNotFoundError(f'Make sure the path "{LYX_EXE}" is correct.')
         return False
+
+    def export2xhtml(self, css_files=(BASIC_CSS, ), css_folder=CSS_FOLDER, js_files=(NUM_TOC, ), js_folder=JS_FOLDER, output_path=''):
+        if not output_path:
+            output_path = join(DOWNLOADS_DIR, split(self.__full_path)[1].replace('.lyx', '.xhtml'))
+        else:
+            output_path = correct_name(output_path, '.xhtml')
+
+        root = self.load()
+        root = convert(root, css_files, css_folder, js_files, js_folder)
+        if exists(output_path):
+            answer = input(f'File {output_path} is exist.\nDo you want delete it? (Y/N) ')
+            if answer == 'Y':
+                remove(output_path)
+            else:
+                return False
+        with open(output_path, 'wb') as f:
+            indent(root)
+            string = tostring(root, encoding='utf8').decode('utf8')
+            for tag in {'span', 'b'}:
+                string = sub(f'</{tag}>\\s\\s+', f'</{tag}>', string)
+                string = sub(f'\\s\\s+<{tag} ', f'<{tag} ', string)
+                string = sub(f'\\s\\s+<{tag}>', f'<{tag}>', string)
+            string = string.encode('utf8')
+            f.write(string)
+        return True
 
     def reverse_hebrew_links(self) -> bool:
         def one_link(line: str):

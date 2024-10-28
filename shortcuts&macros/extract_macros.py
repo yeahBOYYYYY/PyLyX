@@ -48,14 +48,12 @@ def one_macro(line: str):
 
 
 def extract_macros(macros_file: str):
-    dictionary = {}
+    lines = []
     with open(macros_file, 'r', encoding='utf8') as file:
         for line in file:
             if line ==  '\\begin_inset FormulaMacro\n':
-                line = file.readline()
-                key, value = one_macro(line)
-                dictionary[key]= value
-    return dictionary
+                lines.append(file.readline())
+    return lines
 
 
 def main():
@@ -65,7 +63,8 @@ def main():
     else:
         raise Exception('input is empty')
 
-    dictionary = extract_macros(input_path)
+    lines = extract_macros(input_path)
+    dictionary = dict([one_macro(line) for line in lines])
     string = dumps(dictionary)
     with open(output_path, 'w', encoding='utf8') as file:
         file.write(string)

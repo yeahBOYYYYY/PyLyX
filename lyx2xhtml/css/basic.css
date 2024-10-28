@@ -120,7 +120,8 @@ div.layout.LyX-Code, div.layout.Verbatim, div.layout.Verbatim_ {font-family: mon
 
 table, td  {border-collapse: collapse;}
 
-a {color: light-dark(blue, rgb(0, 150, 255));}
+a {color: light-dark(blue, rgb(0, 150, 255)); text-decoration: inherit;}
+a:hover {text-decoration: underline;}
 
 span.inset.Argument::before {content: " ("}
 span.inset.Argument::after {content: "). "}
@@ -130,7 +131,10 @@ span.inset.Argument::after {content: "). "}
 /* DESIGNS */
 
 del.strikeout.on {text-decoration: line-through;}
-del.xout.on {text-decoration: line-through;}
+del.xout.on {text-decoration: line-through wavy;}
+
+u.uuline.on {text-decoration: underline double;}
+u.uwave.on {text-decoration: underline wavy;}
 
 span.noun.on {font-variant: small-caps;}
 span.shape.smallcaps {font-variant: small-caps;}

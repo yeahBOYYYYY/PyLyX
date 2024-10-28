@@ -38,10 +38,6 @@ def create_title(head: LyXobj, body: LyXobj):
         head.append(head_title)
 
 
-def create_macros(head: LyXobj, body: LyXobj):
-    pass
-
-
 def order_head(head, css_files=(BASIC_CSS, ), css_folder=CSS_FOLDER, js_files=(NUM_TOC, ), js_folder=JS_FOLDER):
     head.extend((create_script(MATHJAX, 'async'), viewport()))
     for file in css_files:
@@ -177,5 +173,3 @@ def order_document(head: LyXobj, body: LyXobj, css_files: tuple[str], css_folder
     order_head(head, css_files, css_folder, js_files, js_folder)
     order_body(body)
     create_title(head, body)
-    create_macros(head, body)
-
