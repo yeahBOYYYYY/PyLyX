@@ -13,14 +13,6 @@ from PyLyX.lyx2xhtml.converter import convert
 from PyLyX.lyx2xhtml.helper import BASIC_CSS, CSS_FOLDER, NUM_TOC, JS_FOLDER
 
 
-def correct_name(full_path: str, extension: str):
-    extension = extension if extension.startswith('.') else '.' + extension
-    path, name = split(full_path)
-    name = splitext(name)[0]
-    path = join(path, name + extension)
-    return path
-
-
 def create_empty_file(full_path: str):
     with open(full_path, 'x', encoding='utf8') as file:
         file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {CUR_FORMAT}\n')
@@ -155,7 +147,7 @@ class LyX:
             raise FileNotFoundError(f'Make sure the path "{LYX_EXE}" is correct.')
         return False
 
-    def export2xhtml(self, css_files=(BASIC_CSS, ), css_folder=CSS_FOLDER, js_files=(NUM_TOC, ), js_folder=JS_FOLDER, output_path=''):
+    def export2xhtml(self, output_path='', css_files=(BASIC_CSS, ), css_folder=CSS_FOLDER, js_files=(NUM_TOC, ), js_folder=JS_FOLDER):
         if not output_path:
             output_path = self.__full_path.replace('.lyx', '.xhtml')
         else:
@@ -207,6 +199,14 @@ class LyX:
             self.reverse_hebrew_links()
 
         return not already_updated
+
+
+def correct_name(full_path: str, extension: str):
+    extension = extension if extension.startswith('.') else '.' + extension
+    path, name = split(full_path)
+    name = splitext(name)[0]
+    path = join(path, name + extension)
+    return path
 
 
 def detect_lang(text: str):
