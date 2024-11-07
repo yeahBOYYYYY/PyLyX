@@ -33,21 +33,21 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
     
-    const names = new Map([
-        ["Theorem", "b"],
-        ["Corollary", "b"],
-        ["Lemma", "i"],
-        ["Proposition", "b"],
-        ["Conjecture", "b"],
-        ["Definition", "b"],
-        ["Example", "b"],
-        ["Problem", "b"],
-        ["Exercise", "b"],
-        ["Solution", "b"],
-        ["Remark", ""],
-        ["Claim", "b"],
-        ["Fact", "b"]
-    ])
+    const names = {
+        "Theorem": "b",
+        "Corollary": "b",
+        "Lemma": "i",
+        "Proposition": "b",
+        "Conjecture": "b",
+        "Definition": "b",
+        "Example": "b",
+        "Problem": "b",
+        "Exercise": "b",
+        "Solution": "b",
+        "Remark": "",
+        "Claim": "b",
+        "Fact": "b"
+    }
 
     const selectors = [
         "div.layout.Theorem",
@@ -70,17 +70,16 @@ document.addEventListener("DOMContentLoaded", function() {
     let counter = 0
     let prefix = ""
     const theorems = document.querySelectorAll(selectors.join(", "))
-    theorems.forEach(t => {
+    theorems.keys().forEach(t => {
         [prefix, last, last_index, counter] = createPrefix(t, last, last_index, counter)
         t.id = `${t.classList.item(1)}_${prefix}`
 
         let start = ""
         let end = ""
         let key = t.className.split(" ").at(-1)
-        let value = names.get(key)
-        if (value) {
-            start += `<${value}>`
-            end += `</${value}>`
+        if (Boolean(names.key)) {
+            start += `<${names.key}>`
+            end += `</${names.key}>`
         }
         if (t.querySelector("span.inset.Argument") == null) {
             end += "."
@@ -88,12 +87,12 @@ document.addEventListener("DOMContentLoaded", function() {
         t.innerHTML = `${start}${key} ${prefix}${end} ${t.innerHTML}`;
     })
 
-    for (const [key, value] of names) {
+    names.forEach(key => {
         const theorems = document.querySelectorAll(`div.layout.${key}_`)
         theorems.forEach(t => {
             let text = ""
-            if (value) {
-                text += `<${value}>${key}</${value}>`
+            if (names.key) {
+                text += `<${names.key}>${key}</${names.key}>`
             } else {
                 text += `${key}`
             }
@@ -102,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             t.innerHTML = `${text} ${t.innerHTML}`
         })
-    }
+    })
 
     const cases = document.querySelectorAll("div.layout.Case")
     let index = 0

@@ -44,5 +44,8 @@ with open(join(PACKAGE_PATH, 'data\\primaries.json'), 'r', encoding='utf8') as f
 with open(join(PACKAGE_PATH, 'data\\doc_set.json'), 'r', encoding='utf8') as f:
     DOC_SET = load(f)
     OBJECTS.update(DOC_SET)
+with open(join(PACKAGE_PATH, 'data\\xml_obj.json'), 'r', encoding='utf8') as f:
+    XML_OBJ = load(f)
+    OBJECTS.update(XML_OBJ)
 with open(join(PACKAGE_PATH, 'data\\ends.json'), 'r', encoding='utf8') as f:
     ENDS = load(f)

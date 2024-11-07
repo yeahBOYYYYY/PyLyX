@@ -10,6 +10,7 @@
     "toc": {"options": ["LatexCommand"]},
     "bibitem": {"options": ["LatexCommand", "key"]}
   },
+  "External": {"": {"options": ["template", "filename"]}},
   "Tabular": {"": {}},
 
   "space": {
@@ -38,7 +39,7 @@
   },
   "Graphics": {"": {"options": ["filename", "scale"]}},
   "Float": {
-    "table": {"options": ["placement", "alignment", "wide", "sideways", "status"]},
+    "table": {"options": ["placement", "alignment", "wide", "sideways", "status"], "rank": 7},
     "figure": {"options": ["placement", "alignment", "wide", "sideways", "status"]}
   },
   "ERT": {"": {"options": ["status"]}},
@@ -70,6 +71,7 @@
   "Caption": {"Standard": {}},
   "Note": {"Note": {"options": ["status"]}},
   "Separator": {"plain": {}},
-  "VSpace": {"vfill":  {}}
+  "VSpace": {"vfill":  {}},
+  "Branch": {"": {}}
 }
 }

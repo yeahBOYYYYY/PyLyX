@@ -1,42 +1,29 @@
-from os.path import split, join
-from xml.etree.ElementTree import fromstring, tostring, Element, indent
-from PyLyX.data.data import ENDS, OBJECTS, DESIGNS
+from os.path import split, join, exists
+from xml.etree.ElementTree import fromstring, tostring, Element, indent, ParseError
+from PyLyX.data.data import ENDS, OBJECTS, DESIGNS, DOWNLOADS_DIR, XML_OBJ
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment, Container
 
 
 ############################################### MAIN ###############################################
-def one_line(file, line: str, branch: list, unknowns=None, path=None, index=None):
+def one_line(file, line: str, branch: list, unknowns=None, path=None):
     unknowns = {} if type(unknowns) is not dict else unknowns
     last = branch[-1]
-    if type(index) is int:
-        line = file[index]
     if (last.is_category('Formula') or last.is_category('FormulaMacro') or last.is_command('preamble')) \
             and last.is_open() and not is_end(line, branch):
         last.text += line
 
-    elif line.startswith('\\'):
+    elif line.startswith('\\') or xml_command(line):
         command, category, details, text = extract_cmd(line)
         if is_end(line, branch):
             perform_end(branch, command)
         elif command == 'deeper':
-            perform_deeper(file, last, unknowns, path, index)
+            perform_deeper(file, last, unknowns, path)
         else:
-            perform_new_obj(branch, unknowns, command, category, details, text)
-    elif line.startswith('<lyxtabular'):
-        perform_table(file, line, branch, unknowns, path, index)
+            perform_new_obj(branch, unknowns, command, category, details, text, line)
 
     elif last.is_open():
-       lst = line[:-1].split(maxsplit=1)
-       if 'options' in last.get_dict() and len(lst) == 2:
-           result = perform_options(last, *lst, path)
-       else:
-           result = False
-       if not result:
-           if last.is_command('modules') or last.is_command('local_layout'):
-               last.text += line
-           else:
-               last.text += line[:-1]
+       perform_text(last, line, path)
     else:
         last.tail += line[:-1]
 
@@ -95,7 +82,7 @@ def start_extract_cmd(line: str):
         i += 1
 
     if len(new_cmd) < 3:
-        new_cmd += ['', '', 'is not cmd']
+        new_cmd += ['', '', '']
     return new_cmd[:3]
 
 
@@ -106,6 +93,8 @@ def extract_cmd(line: str):
         command = command.replace('\\end_', '', 1)
         if not (line.startswith('\\begin{') or line.startswith('\\end{')):
             command = command.replace('\\', '', 1)
+    elif command.startswith('<') and xml_command(line):
+        command, category, details = xml_command(line), 'xml', ''
     else:
         raise Exception(f'invalid command: {line[:-1]}')
     if category == 'Formula' and details.startswith('$'):
@@ -121,12 +110,15 @@ def extract_cmd(line: str):
 
 def order_object(branch: list, obj):
     copy_branch = branch.copy()
-    try:
-        while not obj.can_be_nested_in(branch[-1]):
-            branch[-1].close()
-            branch.pop()
-    except IndexError:
-        raise Exception(f'an error occurred when ordering object {obj} in branch: {[str(_) for _ in copy_branch]}')
+    while True:
+        if branch:
+            if obj.can_be_nested_in(branch[-1]):
+                break
+            else:
+                branch[-1].close()
+                branch.pop()
+        else:
+            raise Exception(f'an error occurred when ordering object {obj} in branch: {[str(_) for _ in copy_branch]}')
 
     if len(branch) > 2 and branch[2].is_command('index'):
         branch[2].append(obj)
@@ -145,12 +137,30 @@ def is_known_object(command: str, category: str):
     return command in OBJECTS and category in OBJECTS[command]
 
 
-def perform_new_obj(branch: list, unknowns: dict, command: str, category: str, details: str, text: str):
+def xml_command(line: str):
+    if line.startswith('</'):
+        command = line.split('<')[0][2:-1]
+    elif line.startswith('<'):
+        command = line.split()[0][1:]
+    else:
+        return ''
+
+    if command in XML_OBJ:
+        return command
+    else:
+        return ''
+
+
+def perform_new_obj(branch: list, unknowns: dict, command: str, category: str, details: str, text: str, line: str):
     if is_known_object(command, category):
         if details in OBJECTS[command][category]:
-            obj = Environment(command, category, details, text)
-            if obj.is_section_title():
-                obj = Container(obj)
+            if line.startswith('<'):
+                element = fromstring(line.replace('">', '" />'))
+                obj = Environment(element.tag, 'xml', attrib=element.attrib)
+            else:
+                obj = Environment(command, category, details, text)
+                if obj.is_section_title():
+                    obj = Container(obj)
         else:
             obj = LyXobj(command, command, category, details, text)
         order_object(branch, obj)
@@ -172,6 +182,8 @@ def is_end(line: str, branch: list) -> bool:
                 if line == f'\\{design} {ENDS[key][design]}\n':
                     return True
         return line.startswith('\\end_')
+    elif line.startswith('</'):
+        return line.split('>')[0][2:] in XML_OBJ
 
     return False
 
@@ -198,6 +210,17 @@ def perform_end(branch: list, command: str):
             break
 
 
+def perform_deeper(file, last, unknowns: dict, path: str):
+    last.open()
+    branch = [last]
+    for line in file:
+        if line == '\\end_deeper\n':
+            break
+        else:
+            one_line(file, line, branch, unknowns, path)
+    last.close()
+
+
 def perform_options(obj: Environment, first: str, second: str, path=None):
     lst = obj.get_dict().get('options', [])
     if first in lst:
@@ -214,18 +237,22 @@ def perform_options(obj: Environment, first: str, second: str, path=None):
         return False
 
 
-def perform_deeper(file, last, unknowns: dict, path: str, index=None):
-    last.open()
-    branch = [last]
-    for line in file:
-        if line == '\\end_deeper\n':
-            break
+def perform_text(last, line, path):
+    lst = line[:-1].split(maxsplit=1)
+    if 'options' in last.get_dict() and len(lst) == 2:
+        result = perform_options(last, *lst, path)
+    else:
+        result = False
+    if not result:
+        if last.is_command('modules') or last.is_command('local_layout'):
+            last.text += line
         else:
-            one_line(file, line, branch, unknowns, path, index)
-    last.close()
+            last.text += line[:-1]
 
 
 #################### tables ####################
+
+
 def load_table_code(file, line, index=None):
     code = line
     counter = 1
@@ -259,7 +286,7 @@ def one_cell(cell: Element, unknowns: dict, path: str):
     text = text.splitlines(keepends=True)
     index = 0
     for line in text:
-        one_line(text, line, branch, unknowns, path, index)
+        one_line(text, line, branch, unknowns, path)
         index += 1
     return new_cell
 
@@ -281,6 +308,16 @@ def perform_table(file, line: str, branch: list, unknowns: dict, path: str, inde
         file.clear()
         file.extend(new_lst)
     code = load_table_code(file, line, index)
-    table = fromstring(code)
-    table = table2lyxobj(table, unknowns, path)
-    branch[-1].append(table)
+    try:
+        table = fromstring(code)
+        table = table2lyxobj(table, unknowns, path)
+        branch[-1].append(table)
+    except ParseError as e:
+        name = 'log.xml'
+        full_path = join(DOWNLOADS_DIR, name)
+        while exists(full_path):
+            name = '2' + name
+            full_path = join(DOWNLOADS_DIR, name)
+        with open(full_path, 'x', encoding='utf8') as log:
+            log.write(code)
+        print(f'{e}\nThe invalid code is in {full_path}.\n')

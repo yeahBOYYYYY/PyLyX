@@ -8,7 +8,8 @@ with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\texts.json'), 'r', encoding='utf8
 
 MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
 CSS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\css')
-BASIC_CSS = 'basic.css'
+BASIC_LTR_CSS = 'basic_ltr.css'
+BASIC_RTL_CSS = 'basic_rtl.css'
 JS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\js')
 NUM_TOC = 'numbering_and_toc.js'
 SECTIONS = ('Part', 'Chapter', 'Section', 'Subsection', 'Subsubsection', 'Paragraph', 'Subparagraph')
@@ -21,7 +22,7 @@ def create_script(source: str, async_=''):
     return LyXobj('script', attrib=attrib)
 
 
-def create_css(path=BASIC_CSS):
+def create_css(path: str):
     attrib = {'rel': 'stylesheet', 'type': 'text/css', 'href': path}
     return LyXobj('link', attrib=attrib)
 
@@ -38,14 +39,8 @@ def create_title(head: LyXobj, body: LyXobj):
         head.append(head_title)
 
 
-def order_head(head, css_files=(BASIC_CSS, ), css_folder=CSS_FOLDER, js_files=(NUM_TOC, ), js_folder=JS_FOLDER):
+def order_head(head, css_files=(), js_files=()):
     head.extend((create_script(MATHJAX, 'async'), viewport()))
-    for file in css_files:
-        css_path = join(css_folder, file)
-        head.append(create_css(css_path))
-    for file in js_files:
-        js_path = join(js_folder, file)
-        head.append(create_script(js_path))
     for child in head:
         if child.is_command('modules'):
             modules = child.text.split()
@@ -55,6 +50,16 @@ def order_head(head, css_files=(BASIC_CSS, ), css_folder=CSS_FOLDER, js_files=(N
                 if exists(path):
                     module_js = create_script(path)
                     head.append(module_js)
+        if child.is_command('language'):
+            if child.is_category({'hebrew'}):
+                head.append(create_css(join(CSS_FOLDER, BASIC_RTL_CSS)))
+            else:
+                head.append(create_css(join(CSS_FOLDER, BASIC_LTR_CSS)))
+    head.append(create_script(join(JS_FOLDER, NUM_TOC)))
+    for file in js_files:
+        head.append(create_script(file))
+    for file in css_files:
+        head.append(create_css(file))
 
 
 def order_tables(root: LyXobj):
@@ -78,7 +83,7 @@ def extract_first_word(obj, edit=False):
         return first
 
     for e in obj:
-        first = extract_first_word(e)
+        first = extract_first_word(e, edit)
         if first:
             return first
 
@@ -145,9 +150,13 @@ def obj2text(root):
 def correct_formula(formula: str):
     if formula.startswith('\\[') and formula.endswith('\\]'):
         return formula
+    elif formula.startswith('\\[') and formula.endswith('\\]\n'):
+        return formula
+    elif formula.startswith('\\[') and formula.endswith('\\]\n\n'):
+        return formula[:-1]
     elif formula.startswith('\\['):
         return formula +'\\]'
-    elif formula.endswith('\\]'):
+    elif formula.endswith('\\]\n'):
         return '\\[' + formula
     elif formula.startswith('\\begin{'):
         return '\\[' + formula + '\\]'
@@ -156,10 +165,14 @@ def correct_formula(formula: str):
         formula = formula[1:]
     if formula.endswith('$'):
         formula = formula[:-1]
+    if formula.endswith('$\n'):
+        formula = formula[:-2]
     if formula.startswith('\\('):
         formula = formula[2:]
     if formula.endswith('\\)'):
         formula = formula[:-2]
+    if formula.endswith('\\)\n'):
+        formula = formula[:-3]
     return '\\(' + formula + '\\)'
 
 
@@ -169,7 +182,7 @@ def order_body(body: LyXobj):
     obj2text(body)
 
 
-def order_document(head: LyXobj, body: LyXobj, css_files: tuple[str], css_folder: str, js_files: tuple[str], js_folder: str):
-    order_head(head, css_files, css_folder, js_files, js_folder)
+def order_document(head: LyXobj, body: LyXobj, css_files=(), js_files=()):
+    order_head(head, css_files, js_files)
     order_body(body)
     create_title(head, body)

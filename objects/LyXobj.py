@@ -1,4 +1,4 @@
-from xml.etree.ElementTree import Element, tostring
+from xml.etree.ElementTree import Element
 from PyLyX.data.data import OBJECTS
 
 DEFAULT_RANK = 100
@@ -45,28 +45,16 @@ class LyXobj(Element):
             raise TypeError(f'invalid {self.NAME}: {obj}.')
 
     def obj2lyx(self):
-        if self.tag not in ('lyxtabular', 'features', 'column', 'row', 'cell'):
-            code = f'\\{self.obj_props()}\n'
-            if self.text:
-                code += self.text + '\n'
-            for e in self:
-                code += e.obj2lyx()
-            if self.tail:
-                code += self.tail + '\n'
-            code = xml2txt(code)
-            return code
-        else:
-            new_element = Element(self.tag, self.attrib)
-            new_element.text = '\n'
-            for item in self:
-                new_element.text += item.obj2lyx()
-            code = tostring(new_element, encoding='unicode')
-            code = xml2txt(code)
-            dictionary = {'\n\n</cell>': '\n</cell>', '</lyxtabular>': '</lyxtabular>\n',
-                          '</column>\n': '', '</features>\n': ''}
-            for key in dictionary:
-                code = code.replace(key, dictionary[key])
-            return code + '\n'
+        code = f'\\{self.obj_props()}\n'
+        if self.text:
+            code += self.text + '\n'
+        for e in self:
+            code += e.obj2lyx()
+        if self.tail:
+            code += self.tail + '\n'
+        code = xml2txt(code)
+        return code
+
 
     def open(self):
         self.__is_open = True
@@ -92,14 +80,32 @@ class LyXobj(Element):
     def is_section_title(self):
         return False
     
-    def is_command(self, command):
-        return self.__command == command
+    def is_command(self, commands):
+        if type(commands) is str:
+            commands = commands.split()
+        for command in commands:
+            if self.__command == command:
+                return True
+        else:
+            return False
     
-    def is_category(self, category: str):
-        return self.__category == category
+    def is_category(self, categories):
+        if type(categories) is str:
+            categories = categories.split()
+        for category in categories:
+            if self.__category == category:
+                return True
+        else:
+            return False
 
-    def is_details(self, details: str):
-        return self.__details == details
+    def is_details(self, details):
+        if type(details) is str:
+            details = details.split()
+        for det in details:
+            if self.__details == det:
+                return True
+        else:
+            return False
 
     def obj_props(self, sep=' '):
         lst = []
@@ -138,11 +144,4 @@ def xml2txt(text: str):
     for key in dictionary:
         text = text.replace('&' + key, dictionary[key])
         text = text.replace(key, dictionary[key])
-    return text
-
-
-def txt2xml(text: str):
-    dictionary = {'"': 'quot;', '&': 'amp;', "'": 'apos;', '<': 'lt;', '>': 'gt;'}
-    for key in dictionary:
-        text = text.replace(key, '&' + dictionary[key])
     return text

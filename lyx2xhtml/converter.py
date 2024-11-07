@@ -133,11 +133,11 @@ def recursive_convert(obj):
     return new_obj
 
 
-def convert(root, css_files=(BASIC_CSS, ), css_folder=CSS_FOLDER, js_files=(NUM_TOC, ), js_folder=JS_FOLDER):
+def convert(root, css_files=(), js_files=()):
     root = recursive_convert(root)
     root.set('xmlns', 'http://www.w3.org/1999/xhtml')
     if len(root) == 2:
-        order_document(*root, css_files, css_folder, js_files, js_folder)
+        order_document(*root, css_files, js_files)
         return root
     else:
         raise Exception(f'root must contain 2 subelements exactly, not {len(root)}.')

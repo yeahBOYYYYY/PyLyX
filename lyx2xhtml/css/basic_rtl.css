@@ -3,11 +3,11 @@
 
 body {
       font-family: sans-serif;
+      direction: rtl;
       margin: 0 auto;
       max-width: 21cm;
       color: light-dark(black, white);
       background-color: light-dark(white, black);
-      text-align: left;
       counter-reset: footnote, figure_float, table_float;
       position: relative;
 }
@@ -51,17 +51,15 @@ div.layout.Abstract {
       margin-bottom: 0.7ex;
       margin-left: 3ex;
       margin-right: 3ex;
-      text-align: left;
 }
 
 div.layout.Address {
       margin-bottom: 1.5ex;
-      text-align: left;
 }
 
 div.layout.Right.Address {
       margin-bottom: 1.5ex;
-      text-align: right;
+      text-align: left;
 }
 
 div.layout.Part {
@@ -106,12 +104,12 @@ ul li ul li ul li ul {list-style-type: "- ";}
 
 div.layout.Labeling.item, div.layout.Description.item {display: flex;}
 dt.layout.Labeling, dt.layout.Description {min-width: 1.7cm;}
-dd.layout.Labeling, dd.layout.Description {flex: 1; margin-left: 1em;}
+dd.layout.Labeling, dd.layout.Description {flex: 1; margin-right: 1em;}
 dt.layout.Description {font-weight: bold;}
 
-div.layout.LyX-Code, div.layout.Quote, div.layout.Verse {margin-left: 1cm;}
+div.layout.LyX-Code, div.layout.Quote, div.layout.Verse {margin-right: 1cm;}
 
-div.layout.Quotation {margin-left: 1.5cm;}
+div.layout.Quotation {margin-right: 1.5cm;}
 
 div.layout.LyX-Code, div.layout.Verbatim, div.layout.Verbatim_ {font-family: monospace;}
 
@@ -121,7 +119,7 @@ div.layout.LyX-Code, div.layout.Verbatim, div.layout.Verbatim_ {font-family: mon
 table, td  {border-collapse: collapse;}
 
 a {color: light-dark(blue, rgb(0, 150, 255)); text-decoration: inherit;}
-a:hover {text-decoration: underline;}
+a:hover {text-decoration: underline; cursor: pointer;}
 
 span.inset.Argument::before {content: " ("}
 span.inset.Argument::after {content: "). "}
@@ -196,11 +194,12 @@ span.inset.Foot:hover span.layout.Plain.Layout  {
       padding: 0.3em;
       padding-left: 0.5em;
       padding-right: 0.5em;
+      z-index: 1;
 }
 
 span.inset.Marginal {
       position: absolute;
-      left: -150px;
+      right: -150px;
       width: fit-content;
       max-width: 120px;
       font-size: 0.85em;

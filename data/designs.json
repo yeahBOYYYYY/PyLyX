@@ -3,6 +3,7 @@
     "hebrew": {"": {}},
     "english": {"": {}}
    },
+  "nospellcheck": {"on": {"": {}}},
   "numeric": {"on": {"": {}}},
 
   "noun": {"on": {"": {}}},
@@ -11,8 +12,9 @@
   "sans": {"": {}},
   "typewriter": {"": {}}
   },
+  "SpecialChar": {"LyX": {"": {}}},
 
- "series": {
+  "series": {
   "medium": {"": {}},
   "bold": {"": {}}
   },
@@ -29,6 +31,7 @@
   "xout": {"on": {"": {}}},
 
   "color": {
+    "black": {"": {}},
     "blue": {"": {}},
     "brown": {"": {}},
     "cyan": {"": {}},
@@ -36,9 +39,9 @@
     "gray": {"": {}},
     "green": {"": {}},
     "lightgray": {"": {}},
-    "lime green": {"": {}},
+    "lime": {"": {}},
     "magenta": {"": {}},
-    "olive green": {"": {}},
+    "olive": {"": {}},
     "orange": {"": {}},
     "pink": {"": {}},
     "purple": {"": {}},
