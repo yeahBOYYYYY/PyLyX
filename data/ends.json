@@ -1,24 +1,7 @@
 {
-  "usually": {
-    "color": "inherit",
-    "numeric": "off",
-    "backslash": "",
-    "labelwidthstring": "",
-    "language": ""
-  },
-  "lang change": {
-    "color": "none",
-    "emph": "off",
-    "nospellcheck": "off",
-    "bar": "no",
-    "strikeout": "off",
-    "xout": "off",
-    "uuline": "off",
-    "uwave": "off",
-    "noun": "off",
-    "shape": "up",
-    "size": "normal",
-    "series": "medium",
-    "family": "roman"
-  }
+  "color": "inherit",
+  "numeric": "off",
+  "backslash": "",
+  "labelwidthstring": "",
+  "language": ""
 }

@@ -177,10 +177,9 @@ def is_end(line: str, branch: list) -> bool:
     elif line.startswith('\\'):
         if line.endswith('default\n'):
             return True
-        for key in ENDS:
-            for design in ENDS[key]:
-                if line == f'\\{design} {ENDS[key][design]}\n':
-                    return True
+        for design in ENDS:
+            if line == f'\\{design} {ENDS[design]}\n':
+                return True
         return line.startswith('\\end_')
     elif line.startswith('</'):
         return line.split('>')[0][2:] in XML_OBJ
@@ -221,7 +220,7 @@ def perform_deeper(file, last, unknowns: dict, path: str):
     last.close()
 
 
-def perform_options(obj: Environment, first: str, second: str, path=None):
+def perform_options(obj: Environment, first: str, second: str, path=None):  # todo: sometimes the options are in one line only
     lst = obj.get_dict().get('options', [])
     if first in lst:
         if path is not None and first == 'filename':

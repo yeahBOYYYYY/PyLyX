@@ -3,10 +3,10 @@
     "hebrew": {"": {}},
     "english": {"": {}}
    },
-  "nospellcheck": {"on": {"": {}}},
+  "nospellcheck": {"on": {"": {}}, "off": {"": {}}},
   "numeric": {"on": {"": {}}},
 
-  "noun": {"on": {"": {}}},
+  "noun": {"on": {"": {}}, "off": {"": {}}},
   "family": {
   "roman": {"": {}},
   "sans": {"": {}},
@@ -21,16 +21,18 @@
   "shape": {
     "italic": {"": {}},
     "slanted": {"": {}},
-    "smallcaps": {"": {}}
+    "smallcaps": {"": {}},
+    "up": {"": {}}
   },
-  "emph": {"on": {"": {}}},
-  "bar": {"under": {"": {}}},
-  "uuline": {"on": {"": {}}},
-  "uwave": {"on": {"": {}}},
-  "strikeout": {"on": {"": {}}},
-  "xout": {"on": {"": {}}},
+  "emph": {"on": {"": {}}, "off": {"": {}}},
+  "bar": {"under": {"": {}}, "no": {"": {}}},
+  "uuline": {"on": {"": {}}, "off": {"": {}}},
+  "uwave": {"on": {"": {}}, "off": {"": {}}},
+  "strikeout": {"on": {"": {}}, "off": {"": {}}},
+  "xout": {"on": {"": {}}, "off": {"": {}}},
 
   "color": {
+    "none": {"": {}},
     "black": {"": {}},
     "blue": {"": {}},
     "brown": {"": {}},
@@ -58,6 +60,7 @@
   "scriptsize": {"": {}},
   "footnotesize": {"": {}},
   "small": {"": {}},
+  "normal": {"": {}},
   "large": {"": {}},
   "larger": {"": {}},
   "largest": {"": {}},
