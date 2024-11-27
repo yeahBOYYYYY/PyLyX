@@ -236,12 +236,16 @@ def perform_options(obj: Environment, first: str, second: str, path=None):  # to
         return False
 
 
-def perform_text(last, line, path):
-    lst = line[:-1].split(maxsplit=1)
-    if 'options' in last.get_dict() and len(lst) == 2:
-        result = perform_options(last, *lst, path)
-    else:
-        result = False
+def perform_text(last, line: str, path: str):
+    dictionary = last.get_dict()
+    result = False
+    if 'options' in dictionary:
+        options = dictionary['options']
+        if line.split() and line.split()[0] in options:
+            lst = line.split('"')
+            for i in range(0, len(lst)//2):
+                first, second = lst[2*i][:-1], lst[2*i+1]
+                result = result or perform_options(last, first, second, path)
     if not result:
         if last.is_command('modules') or last.is_command('local_layout'):
             last.text += line

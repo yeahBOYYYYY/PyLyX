@@ -13,6 +13,7 @@ BASIC_RTL_CSS = 'basic_rtl.css'
 JS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\js')
 NUM_TOC = 'numbering_and_toc.js'
 SECTIONS = ('Part', 'Chapter', 'Section', 'Subsection', 'Subsubsection', 'Paragraph', 'Subparagraph')
+RTL_LANGS = {'hebrew': 'He-IL'}
 
 
 def create_script(source: str, async_=''):
@@ -25,41 +26,6 @@ def create_script(source: str, async_=''):
 def create_css(path: str):
     attrib = {'rel': 'stylesheet', 'type': 'text/css', 'href': path}
     return LyXobj('link', attrib=attrib)
-
-
-def viewport():
-    attrib = {'name': 'viewport', 'content': 'width=device-width'}
-    return LyXobj('meta', attrib=attrib)
-
-
-def create_title(head: LyXobj, body: LyXobj):
-    title = body.find('h1')
-    if title is not None:
-        head_title = LyXobj('title', text=title.text)
-        head.append(head_title)
-
-
-def order_head(head, css_files=(), js_files=()):
-    head.extend((create_script(MATHJAX, 'async'), viewport()))
-    for child in head:
-        if child.is_command('modules'):
-            modules = child.text.split()
-            modules_folder = join(JS_FOLDER, f'modules')
-            for module in modules:
-                path = join(modules_folder, module + '.js')
-                if exists(path):
-                    module_js = create_script(path)
-                    head.append(module_js)
-        if child.is_command('language'):
-            if child.is_category({'hebrew'}):
-                head.append(create_css(join(CSS_FOLDER, BASIC_RTL_CSS)))
-            else:
-                head.append(create_css(join(CSS_FOLDER, BASIC_LTR_CSS)))
-    head.append(create_script(join(JS_FOLDER, NUM_TOC)))
-    for file in js_files:
-        head.append(create_script(file))
-    for file in css_files:
-        head.append(create_css(file))
 
 
 def order_tables(root: LyXobj):
@@ -176,13 +142,104 @@ def correct_formula(formula: str):
     return '\\(' + formula + '\\)'
 
 
-def order_body(body: LyXobj):
+def viewport():
+    attrib = {'name': 'viewport', 'content': 'width=device-width'}
+    return LyXobj('meta', attrib=attrib)
+
+
+def create_title(head: LyXobj, body: LyXobj):
+    title = body.find('h1')
+    if title is not None:
+        head_title = LyXobj('title', text=title.text)
+        head.append(head_title)
+
+
+def perform_lang(root, head):
+    for lang in RTL_LANGS:
+        language = head.find(f'meta[@class="language {lang}"]').text.split()
+        if language is not None:
+            head.append(create_css(join(CSS_FOLDER, BASIC_RTL_CSS)))
+            root.set('lang', RTL_LANGS[lang])
+            break
+    else:
+        head.append(create_css(join(CSS_FOLDER, BASIC_LTR_CSS)))
+
+
+def pre_design(root):
+    root.set('xmlns', 'http://www.w3.org/1999/xhtml')
+    head, body = root[0], root[1]
+    head.extend((create_script(MATHJAX, 'async'), viewport()))
+    create_title(head, body)
     order_tables(body)
     order_lists(body)
     obj2text(body)
 
 
-def order_document(head: LyXobj, body: LyXobj, css_files=(), js_files=()):
-    order_head(head, css_files, js_files)
-    order_body(body)
-    create_title(head, body)
+def num_and_toc(element, secnumdepth=-1, tocdepth=-1, prefix=''):
+    i = 0
+    for sub in element:
+        if sub.tag == 'section' and sub.rank() <= max(secnumdepth, tocdepth):
+            if len(sub) and sub[0].attrib.get('class', '') in {f'layout {sec}' for sec in SECTIONS}:
+                i += 1
+                sub.set('id', sub.attrib['class'].split()[1])
+                title = sub[0]
+                if sub.rank() <= secnumdepth:
+                    pre = LyXobj('span', text=f'{prefix}.{i} ')
+                    title.text, pre.tail = '', title.text
+                    title.insert(0, pre)
+                if sub.rank() <= tocdepth:
+                    pass  # todo:
+            num_and_toc(sub, secnumdepth, tocdepth, f'{prefix}.{i}')
+
+
+def extract_depths(head):
+    secnumdepth = tocdepth = -1
+    for i in range(-1, 7):
+        if head.find(f'meta[@class="secnumdepth {i}"]'):
+            secnumdepth = i
+        if head.find(f'meta[@class="tocdepth {i}"]'):
+            tocdepth = i
+    return secnumdepth, tocdepth
+
+
+
+def css_and_js(head, body, css_files=(), js_files=()):
+    for file in css_files:
+        head.append(create_css(file))
+    for file in js_files:
+        body.append(create_script(file))
+
+
+def perform_modules(head, body):
+    modules = head.find('meta[@class="modules"]').text.split()
+    for m in modules:
+        path = join(PACKAGE_PATH, 'modules', f'{m}.py')
+        if exists(path):
+            pass  # todo: perform module
+        else:
+            print(f'unknown module: {m}.')
+
+
+def designer(root, css_files=(), js_files=()):
+    head, body = root[0], root[1]
+    perform_lang(root, head)
+    secnumdepth, tocdepth = extract_depths(head)
+    num_and_toc(body, secnumdepth, tocdepth)
+    css_and_js(head, body, css_files, js_files)
+    perform_modules(head, body)
+
+
+def recursive_clean(element):
+    for key in element.attrib:
+        if key.startswith('data-'):
+            element.attrib.pop(key)
+    for sub in element:
+        recursive_clean(sub)
+
+
+def cleaner(root: LyXobj):
+    head, body = root[0], root[1]
+    for sub in head.iter('meta'):
+        if sub.attrib.get('name') != 'viewport':
+            head.remove(sub)
+    recursive_clean(body)

@@ -15,12 +15,12 @@ document.addEventListener("DOMContentLoaded", function() {
     function createPrefix(current, last, last_index, counter) {
         if (isScript("theorems-sec.js")) {
             let element = current
-            while (element !== null && element.className != `layout ${"Section"}`) {
+            while (element !== null && element != undefined && element.className != `layout ${"Section"}`) {
                     element = element.parentElement;
             }
-            if (element !== null && element !== last) {
+            if (element !== null && element != undefined && element !== last) {
                 last = element
-                if (last !== null && last.getAttribute("id") !== null) {
+                if (last !== null && last != undefined && last.getAttribute("id") !== null) {
                     last_index = parseInt(last.getAttribute("id").replace(/\D/g, ""))
                 }
                 counter = 0

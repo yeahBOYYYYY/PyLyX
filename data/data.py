@@ -2,20 +2,30 @@ from os.path import expanduser, exists, split, join, abspath
 from json import load
 
 
-def find_version():
+def find_settings():
     for i in range(9, -1, -1):
         path = f'{DRIVE}:\\Program Files\\LyX 2.{i}'
         if exists(path):
             version = 2 + 0.1 * i
             user_dir = f'{USER}\\AppData\\Roaming\\LyX{version}'
-            return version, path, user_dir
-    raise FileNotFoundError(f'Make sure LyX is installed on your computer,\nI can not found it in {DRIVE + ":\\Program Files\\LyX 2.x"}')
+            break
+    else:
+        raise FileNotFoundError(f'Make sure LyX is installed on your computer,\nI can not found it in {DRIVE + ":\\Program Files\\LyX 2.x"}')
+
+    with open(join(user_dir, 'preferences'), 'r') as file:
+        for line in file:
+            if line.startswith('\\backupdir_path'):
+                backup_dir = line.split()[1][1:-1]
+                break
+        else:
+            backup_dir = ''
+    return version, path, user_dir, backup_dir
 
 
 USER = expanduser('~')
 DOWNLOADS_DIR = f'{USER}\\Downloads'
 DRIVE = USER[0]
-VERSION, LYX_PATH, USER_DIR = find_version()
+VERSION, LYX_PATH, USER_DIR, BACKUP_DIR = find_settings()
 LYX_EXE, SYS_DIR = join(LYX_PATH, 'bin\\LyX.exe'), join(LYX_PATH, 'Resources')
 PACKAGE_PATH = '\\'.join((split(abspath(__file__))[0].split('\\'))[:-1])
 

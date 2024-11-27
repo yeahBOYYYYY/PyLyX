@@ -56,6 +56,18 @@ def perform_cell(old_attrib: dict, new_attrib: dict):
         new_attrib['style'] = style
 
 
+def perform_include(obj: LyXobj):
+    if 'data-filename' in obj.attrib:
+        path = obj.get('data-filename')
+        if path.endswith('.lyx'):
+            from PyLyX import LyX
+            root = LyX(path).load()
+            root = convert(root)
+            body = root[1]
+            for element in body:
+                obj.append(element)
+
+
 def create_attributes(obj, dictionary: dict):
     old_attrib = obj.attrib.copy()
     new_attrib = {}
@@ -63,7 +75,7 @@ def create_attributes(obj, dictionary: dict):
     if 'options' in dictionary:
         for key in dictionary['options']:
             if key in old_attrib:
-                new_key, value = dictionary['options'][key], old_attrib.pop(key).replace('"', '')  # todo: official func instead repkace
+                new_key, value = dictionary['options'][key], old_attrib.pop(key)
                 new_attrib[new_key] = value
     if 'class' in old_attrib:
         new_attrib['class'] = old_attrib.pop('class')
@@ -98,18 +110,6 @@ def create_text(obj, new_attrib: dict):
         return obj.text
 
 
-def perform_include(obj: LyXobj):
-    if 'data-filename' in obj.attrib:
-        path = obj.get('data-filename')
-        if path.endswith('.lyx'):
-            from PyLyX.__init__ import LyX
-            root = LyX(path).load()
-            root = convert(root)
-            body = root[1]
-            for element in body:
-                obj.append(element)
-
-
 def one_obj(obj):
     dictionary = create_dict(obj)
     attrib = create_attributes(obj, dictionary)
@@ -133,11 +133,14 @@ def recursive_convert(obj):
     return new_obj
 
 
-def convert(root, css_files=(), js_files=()):
+def convert(root, css_files=(), js_files=(), design=True, clean=True):
     root = recursive_convert(root)
-    root.set('xmlns', 'http://www.w3.org/1999/xhtml')
     if len(root) == 2:
-        order_document(*root, css_files, js_files)
+        pre_design(root)
+        if design:
+            designer(root, css_files, js_files)
+        if clean:
+            cleaner(root)
         return root
     else:
         raise Exception(f'root must contain 2 subelements exactly, not {len(root)}.')

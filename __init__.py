@@ -5,7 +5,7 @@ from xml.etree.ElementTree import indent, tostring
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
 from string import ascii_letters
-from PyLyX.data.data import LYX_EXE, VERSION, CUR_FORMAT
+from PyLyX.data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.objects.loader import load
@@ -14,8 +14,12 @@ from PyLyX.lyx2xhtml.helper import BASIC_LTR_CSS, CSS_FOLDER, NUM_TOC, JS_FOLDER
 
 
 class LyX:
-    def __init__(self, full_path: str, template=None, doc_obj=None):
+    def __init__(self, full_path: str, template=None, doc_obj=None, backup=True):
         self.__full_path = correct_name(full_path, '.lyx')
+
+        if backup:
+            name = split(self.__full_path)[1]
+            copy(self.__full_path, join(BACKUP_DIR, name))
 
         if exists(self.__full_path + '_'):
             remove(self.__full_path + '_')
@@ -46,6 +50,9 @@ class LyX:
                     doc.append(head)
                     doc.append(body)
                     file.write(doc.obj2lyx())
+
+    def get_path(self) -> str:
+        return self.__full_path
 
     def load(self) -> Environment:
         doc = load(self.__full_path)
@@ -99,27 +106,10 @@ class LyX:
             f.write(string)
         return True
 
-    def get_path(self) -> str:
-        return self.__full_path
-
     def write(self, obj):
         write_obj(self.__full_path, obj)
 
-    def find(self, query: str) -> bool:
-        with open(self.__full_path, 'r', encoding='utf8') as file:
-            for line in file:
-                if query in line:
-                    return True
-
-        return False
-
-    def find_and_replace(self, str1, str2) -> bool:
-        def func(line):
-            return line.replace(str1, str2)
-
-        return line_functions(self, func)
-
-    def reverse_hebrew_links(self) -> bool:
+    def reverse_rtl_links(self) -> bool:
         def one_link(line: str):
             start = 'name "'
             end = '"\n'
@@ -143,15 +133,13 @@ class LyX:
                 already_updated = False
 
         if VERSION == 2.4 and not already_updated:
-            self.reverse_hebrew_links()
+            self.reverse_rtl_links()
 
         return not already_updated
 
 
-def line_functions(lyxfile, func, args=()) -> bool:
-    path = lyxfile.get_path()
-    if exists(path + '_'):
-        remove(path + '_')
+def line_functions(lyx_file, func, args=()) -> bool:
+    path = lyx_file.get_path()
 
     is_changed = False
     with open(path, 'r', encoding='utf8') as old:
@@ -164,7 +152,7 @@ def line_functions(lyxfile, func, args=()) -> bool:
 
     if is_changed:
         remove(path)
-        rename(path + '_', lyxfile.__full_path)
+        rename(path + '_', lyx_file.__full_path)
     else:
         remove(path + '_')
     return is_changed
