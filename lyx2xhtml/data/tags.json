@@ -32,7 +32,7 @@
     "CommandInset": {
       "href": {"tag": "a", "options": {"name": "text", "target": "href"}},
       "ref": {"tag": "a", "options": {"reference": "href"}},
-      "label": {"options": {"name": "id"}},
+      "label": {"tag": "span", "options": {"name": "id"}},
       "toc": {"tag": "div"}
     },
     "Newline": {"newline": {"tag": "br"}},

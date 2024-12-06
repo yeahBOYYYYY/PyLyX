@@ -123,7 +123,6 @@ def write_all_files(full_path: str, final_path: str):
     files.append(join(PERSONAL_PATH, 'user.bind'))
     result = LyX(final_path, join(PACKAGE_PATH, 'data\\template.lyx'))
     result.write(obj)
-    result.find_and_replace('\\align default', '')
     recursive_write(split(full_path)[0], files, result)
 
 

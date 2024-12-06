@@ -1,6 +1,10 @@
-from PyLyX.data.data import PAR_SET
+from os.path import join
+from json import load
+from PyLyX.data.data import PAR_SET, PACKAGE_PATH
+from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
-from PyLyX.lyx2xhtml.helper import *
+from PyLyX.lyx2xhtml.general import design
+from PyLyX.lyx2xhtml.helper import correct_formula
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
     TAGS = load(f)
@@ -11,20 +15,14 @@ with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tables.json'), 'r', encoding='utf
 def create_dict(obj):
     if type(obj) is Environment and obj.is_in(TAGS):
         dictionary = TAGS[obj.command()][obj.category()][obj.details()]
+    elif type(obj) is Environment and obj.tag in TABLES:
+        dictionary = TABLES[obj.tag]
     elif type(obj) is Container:
         dictionary = {'tag': 'section'}
-    elif type(obj) is LyXobj and obj.tag in TABLES:
-        dictionary = TABLES[obj.tag]
+    elif (obj.is_command('layout') and not (obj.is_category('Plain') and obj.is_details('Layout'))) or obj.command() in PAR_SET:
+        dictionary = {'tag': 'div'}
     else:
-        dictionary = {}
-
-    if obj.is_command('layout') and not (obj.is_category('Plain') and obj.is_details('Layout')):
-        tag = 'div'
-    elif obj.command() in PAR_SET:
-        tag = 'div'
-    else:
-        tag = 'span'
-    dictionary.setdefault('tag', tag)
+        dictionary = {'tag': 'span'}
     return dictionary
 
 
@@ -64,11 +62,13 @@ def perform_include(obj: LyXobj):
             root = LyX(path).load()
             root = convert(root)
             body = root[1]
+            include_body = LyXobj('div', rank=-DEFAULT_RANK)
+            obj.append(include_body)
             for element in body:
-                obj.append(element)
+                include_body.append(element)
 
 
-def create_attributes(obj, dictionary: dict):
+def create_attributes(obj, dictionary: dict, keep_data=False):
     old_attrib = obj.attrib.copy()
     new_attrib = {}
 
@@ -92,9 +92,11 @@ def create_attributes(obj, dictionary: dict):
         lines = obj.text.splitlines()[1:]
         lines = '\n'.join(lines)
         old_attrib['lines'] = lines
-    for key in old_attrib:
-        new_attrib[f'data-{key}'] = old_attrib[key].replace('"', '')
-
+    if keep_data:
+        for key in old_attrib:
+            new_attrib[f'data-{key}'] = old_attrib[key].replace('"', '')
+    elif 'filename' in old_attrib:
+        new_attrib['data-filename'] = old_attrib['filename'].replace('"', '')
     return new_attrib
 
 
@@ -110,12 +112,13 @@ def create_text(obj, new_attrib: dict):
         return obj.text
 
 
-def one_obj(obj):
+def one_obj(obj, keep_data=False):
     dictionary = create_dict(obj)
-    attrib = create_attributes(obj, dictionary)
+    attrib = create_attributes(obj, dictionary, keep_data)
     text = create_text(obj, attrib)
-    properties = obj.command(), obj.category(), obj.details()
-    new_obj = LyXobj(dictionary['tag'], *properties, text, obj.tail, attrib)
+    new_obj = obj.copy()
+    new_obj.open()
+    new_obj.tag, new_obj.text, new_obj.attrib = dictionary['tag'], text, attrib
     if 'class' in new_obj.attrib and new_obj.attrib['class'].endswith('*'):
         new_obj.set('class', new_obj.get('class')[:-1] + '_')
     if new_obj.is_details('include'):
@@ -123,24 +126,30 @@ def one_obj(obj):
     return new_obj
 
 
-def recursive_convert(obj):
-    new_obj = one_obj(obj)
+def recursive_convert(obj, keep_data=False):
+    new_obj = one_obj(obj, keep_data)
+    is_first = True
     for child in obj:
         child = recursive_convert(child)
         if new_obj.tag in {'head', 'meta'}:
             child.tag = 'meta'
-        new_obj.append(child)
+            if 'class' in child.attrib:
+                lst = child.attrib['class'].split(maxsplit=1)
+                child.attrib['class'] = lst[0]
+                if len(lst) > 1:
+                    child.attrib['data-value'] = ' '.join(lst[1:])
+        if child.is_section_title() and is_first:
+            new_obj[0] = child
+        else:
+            new_obj.append(child)
+        is_first = False
     return new_obj
 
 
-def convert(root, css_files=(), js_files=(), design=True, clean=True):
-    root = recursive_convert(root)
+def convert(root, css_files=(), js_files=(), keep_data=False):
     if len(root) == 2:
-        pre_design(root)
-        if design:
-            designer(root, css_files, js_files)
-        if clean:
-            cleaner(root)
+        root = recursive_convert(root, keep_data)
+        design(root, css_files, js_files, keep_data)
         return root
     else:
         raise Exception(f'root must contain 2 subelements exactly, not {len(root)}.')

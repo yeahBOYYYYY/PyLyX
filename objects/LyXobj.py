@@ -24,23 +24,32 @@ class LyXobj(Element):
         if command + category + details:
             self.set('class', self.obj_props())
 
-    def can_be_nested_in(self, father) -> bool:
+    def can_be_nested_in(self, father, message=False) -> (bool, str):
         from PyLyX.objects.Environment import Environment, Container
-        if type(father) in (LyXobj, Environment, Container):
-            return father.is_open() and self.__rank >= father.__rank
+        if type(father) in {LyXobj, Environment, Container}:
+            if not father.is_open():
+                msg = f'{father} is closed.'
+                result = False
+            else:
+                msg = f'rank {self.__rank} vs rank {father.__rank}'
+                result = self.__rank >= father.__rank or self.__rank == -DEFAULT_RANK
         else:
-            return False
+            msg = f'invalid type: {type(father)}'
+            result = False
+
+        if message:
+            return result, msg
+        else:
+            return result
 
     def append(self, obj):
         from PyLyX.objects.Environment import Environment, Container
-        if type(obj) in (LyXobj, Environment, Container):
-            if self.__is_open:
-                if obj.can_be_nested_in(self):
-                    Element.append(self, obj)
-                else:
-                    raise Exception(f'{obj} can not be nested in {self}.')
+        if type(obj) in {LyXobj, Environment, Container}:
+            result, msg = obj.can_be_nested_in(self, True)
+            if result:
+                Element.append(self, obj)
             else:
-                raise Exception(f'{self} is closed.')
+                raise Exception(msg)
         else:
             raise TypeError(f'invalid {self.NAME}: {obj}.')
 
@@ -153,6 +162,15 @@ class LyXobj(Element):
                     return True
 
         return False
+
+    def copy(self):
+        from PyLyX.objects.Environment import Environment, Container
+        if type(self) is Environment:
+            return Environment(self.command(), self.category(), self.details(), self.text, self.tail, self.attrib, self.is_open())
+        elif type(self) is Container:
+            return Container(self[0], self.is_open())
+        else:
+            return LyXobj(self.tag, self.command(), self.category(), self.details(), self.text, self.tail, self.attrib, self.is_open(), self.rank())
 
 
 def xml2txt(text: str):

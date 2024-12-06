@@ -59,3 +59,5 @@ with open(join(PACKAGE_PATH, 'data\\xml_obj.json'), 'r', encoding='utf8') as f:
     OBJECTS.update(XML_OBJ)
 with open(join(PACKAGE_PATH, 'data\\ends.json'), 'r', encoding='utf8') as f:
     ENDS = load(f)
+with open(join(PACKAGE_PATH, 'data\\translate.json'), 'r', encoding='utf8') as f:
+    TRANSLATE = load(f)

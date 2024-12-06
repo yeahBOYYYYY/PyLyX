@@ -110,15 +110,15 @@ def extract_cmd(line: str):
 
 def order_object(branch: list, obj):
     copy_branch = branch.copy()
-    while True:
-        if branch:
-            if obj.can_be_nested_in(branch[-1]):
-                break
-            else:
-                branch[-1].close()
-                branch.pop()
+    copy_branch = [str(_) + f' is open: {_.is_open()}' for _ in copy_branch]
+    while branch:
+        if obj.can_be_nested_in(branch[-1]):
+            break
         else:
-            raise Exception(f'an error occurred when ordering object {obj} in branch: {[str(_) for _ in copy_branch]}')
+            branch[-1].close()
+            branch.pop()
+    if not branch:
+        raise Exception(f'an error occurred when ordering object {obj} in branch: {copy_branch}.')
 
     if len(branch) > 2 and branch[2].is_command('index'):
         branch[2].append(obj)
@@ -139,11 +139,13 @@ def is_known_object(command: str, category: str):
 
 def xml_command(line: str):
     if line.startswith('</'):
-        command = line.split('<')[0][2:-1]
+        command = line[2:-1].split('<')[0]
     elif line.startswith('<'):
-        command = line.split()[0][1:]
+        command = line.split()[0]
     else:
         return ''
+    for _ in {'<', '>', '</', '/>'}:
+        command = command.replace(_, '')
 
     if command in XML_OBJ:
         return command
@@ -155,7 +157,9 @@ def perform_new_obj(branch: list, unknowns: dict, command: str, category: str, d
     if is_known_object(command, category):
         if details in OBJECTS[command][category]:
             if line.startswith('<'):
-                element = fromstring(line.replace('">', '" />'))
+                line = line.replace('">', '" >')
+                line = line.replace('>', '/>')
+                element = fromstring(line)
                 obj = Environment(element.tag, 'xml', attrib=element.attrib)
             else:
                 obj = Environment(command, category, details, text)
@@ -220,7 +224,7 @@ def perform_deeper(file, last, unknowns: dict, path: str):
     last.close()
 
 
-def perform_options(obj: Environment, first: str, second: str, path=None):  # todo: sometimes the options are in one line only
+def perform_options(obj: Environment, first: str, second: str, path=None):
     lst = obj.get_dict().get('options', [])
     if first in lst:
         if path is not None and first == 'filename':
@@ -243,9 +247,14 @@ def perform_text(last, line: str, path: str):
         options = dictionary['options']
         if line.split() and line.split()[0] in options:
             lst = line.split('"')
-            for i in range(0, len(lst)//2):
-                first, second = lst[2*i][:-1], lst[2*i+1]
-                result = result or perform_options(last, first, second, path)
+            if len(lst) > 1:
+                for i in range(0, len(lst)//2):
+                    first, second = lst[2*i][:-1], lst[2*i+1]
+                    result = perform_options(last, first, second, path) or result
+            else:
+                lst = line.split()
+                if len(lst) == 2:
+                    result = perform_options(last, *lst, path)
     if not result:
         if last.is_command('modules') or last.is_command('local_layout'):
             last.text += line

@@ -1,39 +1,20 @@
 from json import load
-from os.path import join, exists
-from PyLyX.data.data import PACKAGE_PATH
-from PyLyX.objects.LyXobj import LyXobj
+from os.path import join
+from PyLyX.data.data import PACKAGE_PATH, TRANSLATE
+from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\texts.json'), 'r', encoding='utf8') as f:
     TEXTS = load(f)
 
-MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
-CSS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\css')
-BASIC_LTR_CSS = 'basic_ltr.css'
-BASIC_RTL_CSS = 'basic_rtl.css'
-JS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\js')
-NUM_TOC = 'numbering_and_toc.js'
 SECTIONS = ('Part', 'Chapter', 'Section', 'Subsection', 'Subsubsection', 'Paragraph', 'Subparagraph')
-RTL_LANGS = {'hebrew': 'He-IL'}
 
 
-def create_script(source: str, async_=''):
-    attrib = {'src': source}
-    if async_:
-        attrib['async'] = async_
-    return LyXobj('script', attrib=attrib)
-
-
-def create_css(path: str):
-    attrib = {'rel': 'stylesheet', 'type': 'text/css', 'href': path}
-    return LyXobj('link', attrib=attrib)
-
-
-def order_tables(root: LyXobj):
+def perform_tables(root: LyXobj):
     for table in root.iter('table'):
         table.attrib.update(table[0].attrib)  # tables[0] is <features tabularvalignment="middle">
         table.remove(table[0])
 
-        colgroup = LyXobj('colgroup')
+        colgroup = LyXobj('colgroup', 'xml', rank=-DEFAULT_RANK)
         table.insert(0, colgroup)
         lst = [obj for obj in table if obj.tag == 'col']
         for col in lst:
@@ -63,7 +44,7 @@ def extract_first_word(obj, edit=False):
 
 
 
-def order_lists(father):
+def perform_lists(father):
     last = father
     children = []
     for child in list(father):
@@ -76,7 +57,7 @@ def order_lists(father):
                 tag = 'dl'
 
             if last.tag != tag:
-                last = LyXobj(tag)
+                last = LyXobj(tag, rank=-DEFAULT_RANK)
                 children.append(last)
 
 
@@ -84,13 +65,13 @@ def order_lists(father):
                 last.append(child)
             else:
                 first = extract_first_word(child, edit=True)
-                prefix = LyXobj('dt', text=first, attrib={'class': child.get('class')})
-                item = LyXobj('div', attrib={'class': child.get('class') + ' item'})
+                prefix = LyXobj('dt', text=first, attrib={'class': child.get('class')}, rank=-DEFAULT_RANK)
+                item = LyXobj('div', attrib={'class': child.get('class') + ' item'}, rank=-DEFAULT_RANK)
                 item.extend((prefix, child))
                 last.append(item)
         else:
             children.append(child)
-        order_lists(child)
+        perform_lists(child)
         father.remove(child)
     father.extend(children)
 
@@ -142,104 +123,49 @@ def correct_formula(formula: str):
     return '\\(' + formula + '\\)'
 
 
-def viewport():
-    attrib = {'name': 'viewport', 'content': 'width=device-width'}
-    return LyXobj('meta', attrib=attrib)
+def numbering(obj: LyXobj, prefix):
+    pre_obj = LyXobj('span', text=prefix+' ')
+    pre_obj.attrib['class'] = 'label'
+    obj.text, pre_obj.tail = '', obj.text
+    obj.insert(0, pre_obj)
 
 
-def create_title(head: LyXobj, body: LyXobj):
-    title = body.find('h1')
-    if title is not None:
-        head_title = LyXobj('title', text=title.text)
-        head.append(head_title)
+def tocing(lst: LyXobj, obj: LyXobj, prefix):
+    item = LyXobj('li')
+    obj.set('id', obj.attrib['class'].split()[1] + '_' + prefix)
+    link = LyXobj('a', attrib={'href': '#' + obj.get('id', '')}, text=prefix+' '+obj.text)
+    item.append(link)
+    lst.append(item)
+    return item
 
 
-def perform_lang(root, head):
-    for lang in RTL_LANGS:
-        language = head.find(f'meta[@class="language {lang}"]').text.split()
-        if language is not None:
-            head.append(create_css(join(CSS_FOLDER, BASIC_RTL_CSS)))
-            root.set('lang', RTL_LANGS[lang])
-            break
-    else:
-        head.append(create_css(join(CSS_FOLDER, BASIC_LTR_CSS)))
-
-
-def pre_design(root):
-    root.set('xmlns', 'http://www.w3.org/1999/xhtml')
-    head, body = root[0], root[1]
-    head.extend((create_script(MATHJAX, 'async'), viewport()))
-    create_title(head, body)
-    order_tables(body)
-    order_lists(body)
-    obj2text(body)
-
-
-def num_and_toc(element, secnumdepth=-1, tocdepth=-1, prefix=''):
+def rec_num_and_toc(toc: LyXobj, element, secnumdepth=-1, tocdepth=-1, prefix='', lang='en'):
     i = 0
-    for sub in element:
-        if sub.tag == 'section' and sub.rank() <= max(secnumdepth, tocdepth):
-            if len(sub) and sub[0].attrib.get('class', '') in {f'layout {sec}' for sec in SECTIONS}:
+    for sec in element.findall('section'):
+        if sec.rank() <= max(secnumdepth, tocdepth) and sec is not element:
+            if len(sec) and sec.attrib.get('class') in {f'layout {s}' for s in SECTIONS}:
                 i += 1
-                sub.set('id', sub.attrib['class'].split()[1])
-                title = sub[0]
-                if sub.rank() <= secnumdepth:
-                    pre = LyXobj('span', text=f'{prefix}.{i} ')
-                    title.text, pre.tail = '', title.text
-                    title.insert(0, pre)
-                if sub.rank() <= tocdepth:
-                    pass  # todo:
-            num_and_toc(sub, secnumdepth, tocdepth, f'{prefix}.{i}')
+                if sec.rank() <= secnumdepth or sec.rank() <= tocdepth:
+                    new_prefix = f'{prefix}.{i}' if prefix else f'{i}'
+                    command, category, details = sec.command(), sec.category(), sec.details()
+                    if sec.rank() <= 1 and (command in TRANSLATE and category in TRANSLATE[command] and details in TRANSLATE[command][category]):
+                        new_prefix = TRANSLATE[command][category][details][lang] + ' ' + new_prefix
+
+                    if sec.rank() <= tocdepth:
+                        item = tocing(toc, sec[0], new_prefix)
+                        new_toc = LyXobj('ul')
+                        item.append(new_toc)
+                    else:
+                        new_toc = toc
+                    if sec.rank() <= secnumdepth:
+                        numbering(sec[0], new_prefix)
+                    rec_num_and_toc(new_toc, sec, secnumdepth, tocdepth, new_prefix, lang)
 
 
-def extract_depths(head):
-    secnumdepth = tocdepth = -1
-    for i in range(-1, 7):
-        if head.find(f'meta[@class="secnumdepth {i}"]'):
-            secnumdepth = i
-        if head.find(f'meta[@class="tocdepth {i}"]'):
-            tocdepth = i
-    return secnumdepth, tocdepth
-
-
-
-def css_and_js(head, body, css_files=(), js_files=()):
-    for file in css_files:
-        head.append(create_css(file))
-    for file in js_files:
-        body.append(create_script(file))
-
-
-def perform_modules(head, body):
-    modules = head.find('meta[@class="modules"]').text.split()
-    for m in modules:
-        path = join(PACKAGE_PATH, 'modules', f'{m}.py')
-        if exists(path):
-            pass  # todo: perform module
-        else:
-            print(f'unknown module: {m}.')
-
-
-def designer(root, css_files=(), js_files=()):
-    head, body = root[0], root[1]
-    perform_lang(root, head)
-    secnumdepth, tocdepth = extract_depths(head)
-    num_and_toc(body, secnumdepth, tocdepth)
-    css_and_js(head, body, css_files, js_files)
-    perform_modules(head, body)
-
-
-def recursive_clean(element):
-    for key in element.attrib:
-        if key.startswith('data-'):
-            element.attrib.pop(key)
+def perform_toc(element, toc, lang):
     for sub in element:
-        recursive_clean(sub)
-
-
-def cleaner(root: LyXobj):
-    head, body = root[0], root[1]
-    for sub in head.iter('meta'):
-        if sub.attrib.get('name') != 'viewport':
-            head.remove(sub)
-    recursive_clean(body)
+        if sub.get('class') == 'inset CommandInset toc':
+            title = LyXobj('h2', text=TRANSLATE['inset']['CommandInset']['toc'][lang])
+            sub.extend((title, toc))
+        else:
+            perform_toc(sub, toc, lang)

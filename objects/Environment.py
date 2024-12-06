@@ -23,52 +23,69 @@ class Environment(LyXobj):
         if self.is_command({'backslash', 'labelwidthstring', 'column', 'features'}) or self.is_category({'space'}):
             self.close()
 
-    def can_be_nested_in(self, father) -> bool:
-        if type(father) not in (LyXobj, Environment, Container):
-            return False
+    def can_be_nested_in(self, father, message=False) -> (bool, str):
+        msg = ''
+        if type(father) not in {LyXobj, Environment, Container}:
+            msg = f'invalid type: {type(father)}'
+            result = False
         elif not father.is_open():
-            return False
+            msg = f'{father} is closed.'
+            result = False
+        elif father.rank() == -DEFAULT_RANK:
+            result = True
         elif father.is_category({'Box', 'Note', 'Branch'}):
-            return True
+            result = True
         elif self.is_command('layout') or self.is_command('inset'):
             if self.is_section_title():
-                return type(father) is Container and not bool(father) and self.rank() == father.rank()
+                result = type(father) is Container and not len(father) and self.rank() == father.rank()
             elif type(father) is Container:
                 if len(father):
-                    return True
+                    result = True
                 else:
-                    return self.rank() == father.rank() and self.obj_props() == father.obj_props()
+                    msg = f'{father} is empty Container.'
+                    result = self.rank() == father.rank() and self.obj_props() == father.obj_props()
             elif father.is_category('Formula'):
-                return False
+                result = False
             elif father.is_command('layout'):
                 if father.is_category('Standard'):
-                    return self.is_command('inset')
+                    result = self.is_command('inset')
                 else:
-                    return self.rank() >= DEFAULT_RANK
+                    result = self.rank() >= DEFAULT_RANK
             elif father.is_command(DESIGNS) or father.command() in PAR_SET:
-                return self.is_command('inset')
-            elif father.is_command('inset'):
-                if self.obj_props() != father.obj_props():
-                    return father.is_category('Text') or self.is_command('inset') or (self.is_category('Plain') and self.details() == 'Layout')
+                result = self.is_command('inset')
+            elif father.is_command('inset') and self.obj_props() != father.obj_props():
+                result = father.is_category('Text') or self.is_command('inset') or (self.is_category('Plain') and self.details() == 'Layout')
             elif father.is_command('body'):
-                return self.is_command('layout')
+                result = self.is_command('layout')
             elif father.is_command('cell'):
-                return self.is_category('Text')
+                result = self.is_category('Text')
+            else:
+                result = False
         elif self.is_command('lang') and father.is_command('lang'):
-            return False
+            result = False
         elif self.is_command(DESIGNS):
-            return father.is_command('layout') or father.is_command('inset') or father.command() in DESIGNS or father.command() in PAR_SET
+            result = father.is_command('layout') or father.is_command('inset') or father.command() in DESIGNS or father.command() in PAR_SET
         elif self.is_command(PAR_SET):
-            return father.is_command('layout')
+            result = father.is_command('layout')
         elif self.is_command(XML_OBJ):
             if self.is_command('lyxtabular'):
-                return father.is_category('Tabular')
+                result = father.is_category('Tabular')
             else:
-                return self.rank() > father.rank()
+                result = self.rank() > father.rank()
         elif self.rank() < 0:
-            return self.rank() > father.rank()
+            result = self.rank() > father.rank()
         else:
-            return False
+            result = False
+
+        if not msg:
+            if not result:
+                msg = f'{self} can not be nested in {father}.'
+            else:
+                msg = 'ok'
+        if message:
+            return result, msg
+        else:
+            return result
 
     def obj2lyx(self):
         if self.is_command(XML_OBJ):
@@ -125,7 +142,7 @@ class Environment(LyXobj):
 
 class Container(LyXobj):
     NAME = 'Container'
-    def __init__(self, env: Environment, is_open=True):
+    def __init__(self, env, is_open=True):
         if type(env) is not Environment:
             raise TypeError(f'invalid {Environment.NAME} object: {env}.')
         elif not env.is_command('layout'):
@@ -137,17 +154,27 @@ class Container(LyXobj):
         if not is_open:
             self.close()
 
-    def can_be_nested_in(self, father):
-        if type(father) not in (LyXobj, Environment, Container):
-            return False
-        elif not father.is_open:
-            return False
+    def can_be_nested_in(self, father, message=False) -> (bool, str):
+        if type(father) not in {LyXobj, Environment, Container}:
+            msg = f'invalid type: {type(father)}'
+            result = False
+        elif not father.is_open():
+            msg = f'{father} is closed.'
+            result = False
         elif type(father) is Container or father.is_command('deeper'):
-            return self.rank() > father.rank() or self.rank() == DEFAULT_RANK
+            msg = f'rank {self.rank()} vs rank {father.rank()}'
+            result = self.rank() > father.rank() or self.rank() == DEFAULT_RANK
         elif father.is_command('body'):
-            return True
+            msg = 'ok'
+            result = True
+        else:
+            msg = f'{self} is Container.'
+            result = False
 
-        return False
+        if message:
+            return result, msg
+        else:
+            return result
 
     def obj2lyx(self, is_not_last=True):
         text = ''

@@ -1,0 +1,64 @@
+{
+  "layout": {
+    "Part": {"": {"hebrew": "חלק", "english": "Part"}},
+    "Chapter": {"": {"hebrew": "פרק", "english": "Chapter"}},
+    "Section": {"": {"hebrew": "סעיף", "english": "Section"}},
+    "Subsection": {"": {"hebrew": "תת-סעיף", "english": "Subsection"}},
+    "Subsubsection": {"": {"hebrew": "תת-תת-סעיף", "english": "Subsubsection"}},
+    "Paragraph": {"": {"hebrew": "פסקה", "english": "Paragraph"}},
+    "Subparagraph": {"": {"hebrew": "תת-פסקה", "english": "Subparagraph"}},
+
+    "Part*": {"": {"hebrew": "חלק", "english": "Part"}},
+    "Chapter*": {"": {"hebrew": "פרק", "english": "Chapter"}},
+    "Section*": {"": {"hebrew": "סעיף", "english": "Section"}},
+    "Subsection*": {"": {"hebrew": "תת-סעיף", "english": "Subsection"}},
+    "Subsubsection*": {"": {"hebrew": "תת-תת-סעיף", "english": "Subsubsection"}},
+    "Paragraph*": {"": {"hebrew": "פסקה", "english": "Paragraph"}},
+    "Subparagraph*": {"": {"hebrew": "תת-פסקה", "english": "Subparagraph"}},
+
+    "Title": {"": {"hebrew": "כותרת", "english": "Title"}},
+    "Author": {"": {"hebrew": "מחבר", "english": "Author"}},
+    "Date": {"": {"hebrew": "תאריך", "english": "Date"}},
+    "Address": {"": {"hebrew": "כתובת", "english": "Address"}},
+    "Abstract": {"": {"hebrew": "תקציר", "english": "Abstract"}},
+    "Right": {"Address": {"hebrew": "כתובת שמאלית", "english": "Right Address"}},
+
+    "Theorem": {"": {"hebrew": "משפט", "english": "Theorem"}},
+    "Corollary": {"": {"hebrew": "מסקנה", "english": "Corollary"}},
+    "Lemma": {"": {"hebrew": "למה", "english": "Lemma"}},
+    "Proposition": {"": {"hebrew": "משפטון", "english": "Proposition"}},
+    "Conjecture": {"": {"hebrew": "השערה", "english": "Conjecture"}},
+    "Definition": {"": {"hebrew": "הגדרה", "english": "Definition"}},
+    "Example": {"": {"hebrew": "דוגמה", "english": "Example"}},
+    "Problem": {"": {"hebrew": "בעיה", "english": "Problem"}},
+    "Exercise": {"": {"hebrew": "תרגיל", "english": "Exercise"}},
+    "Solution": {"": {"hebrew": "פתרון", "english":  "Solution"}},
+    "Remark": {"": {"hebrew": "הערה", "english": "Remark"}},
+    "Claim": {"": {"hebrew": "טענה", "english": "Claim"}},
+    "Case": {"": {"hebrew": "מקרה", "english": "Case"}},
+    "Fact": {"": {"hebrew": "עובדה", "english": "Fact"}},
+
+    "Theorem*": {"": {"hebrew": "משפט", "english": "Theorem"}},
+    "Corollary*": {"": {"hebrew": "מסקנה", "english": "Corollary"}},
+    "Lemma*": {"": {"hebrew": "למה", "english": "Lemma"}},
+    "Proposition*": {"": {"hebrew": "משפטון", "english": "Proposition"}},
+    "Conjecture*": {"": {"hebrew": "השערה", "english": "Conjecture"}},
+    "Definition*": {"": {"hebrew": "הגדרה", "english": "Definition"}},
+    "Example*": {"": {"hebrew": "דוגמה", "english": "Example"}},
+    "Problem*": {"": {"hebrew": "בעיה", "english": "Problem"}},
+    "Exercise*": {"": {"hebrew": "תרגיל", "english": "Exercise"}},
+    "Solution*": {"": {"hebrew": "פתרון", "english":  "Solution"}},
+    "Remark*": {"": {"hebrew": "הערה", "english": "Remark"}},
+    "Claim*": {"": {"hebrew": "טענה", "english": "Claim"}},
+    "Case*": {"": {"hebrew": "מקרה", "english": "Case"}},
+    "Fact*": {"": {"hebrew": "עובדה", "english": "Fact"}},
+
+    "Proof": {"": {"hebrew": "הוכחה"}}
+  },
+
+  "inset": {
+    "CommandInset": {
+      "toc": {"hebrew": "תוכן העניינים", "english": "Table of Contents"}
+    }
+  }
+}

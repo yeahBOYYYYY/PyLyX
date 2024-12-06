@@ -1,7 +1,7 @@
 from os import rename, remove
 from os.path import exists, split, splitext, join
 from re import sub
-from xml.etree.ElementTree import indent, tostring
+from xml.etree.ElementTree import indent, tostring, ElementTree
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
 from string import ascii_letters
@@ -10,14 +10,13 @@ from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.objects.loader import load
 from PyLyX.lyx2xhtml.converter import convert
-from PyLyX.lyx2xhtml.helper import BASIC_LTR_CSS, CSS_FOLDER, NUM_TOC, JS_FOLDER
 
 
 class LyX:
     def __init__(self, full_path: str, template=None, doc_obj=None, backup=True):
         self.__full_path = correct_name(full_path, '.lyx')
 
-        if backup:
+        if backup and exists(self.__full_path):
             name = split(self.__full_path)[1]
             copy(self.__full_path, join(BACKUP_DIR, name))
 
@@ -105,6 +104,14 @@ class LyX:
             string = string.encode('utf8')
             f.write(string)
         return True
+
+    def export2xml(self, output_path=''):
+        if not output_path:
+            output_path = self.__full_path.replace('.lyx', '.xml')
+        else:
+            output_path = correct_name(output_path, '.xml')
+        xml = ElementTree(self.load())
+        xml.write(output_path)
 
     def write(self, obj):
         write_obj(self.__full_path, obj)

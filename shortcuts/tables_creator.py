@@ -21,7 +21,7 @@ def create_cell(multicolumn='1', multirow='1', alignment='left', valignment='top
     attrib = {'multicolumn': multicolumn, 'multirow': multirow, 'alignment': alignment, 'valignment': valignment,
                 'topline': topline, 'bottomline': bottomline, 'leftline': leftline, 'rightline': rightline, 'usebox': usebox}
     attrib = {key: attrib[key] for key in attrib if attrib[key] not in ('false', '1')}
-    cell = LyXobj('cell', attrib=attrib)
+    cell = Environment('cell', 'xml', attrib=attrib)
     return cell
 
 
@@ -32,16 +32,16 @@ def create_table(table: list[list], tabularvalignment='middle', alignment='left'
     else:
         raise TypeError(f'invalid table: {table}')
 
-    root = LyXobj('lyxtabular', attrib={'version': str(version), 'rows': str(length), 'columns': str(width)})
-    features = LyXobj('features', attrib={'tabularvalignment': tabularvalignment})
+    root = Environment('lyxtabular', 'xml', attrib={'version': str(version), 'rows': str(length), 'columns': str(width)})
+    features = Environment('features', 'xml', attrib={'tabularvalignment': tabularvalignment})
     root.append(features)
 
     for _ in range(width):
-        column = LyXobj('column', attrib={'alignment': alignment, 'valignment': valignment})
+        column = Environment('column', 'xml', attrib={'alignment': alignment, 'valignment': valignment})
         root.append(column)
 
     for i in range(length):
-        row = LyXobj('row')
+        row = Environment('row', 'xml')
         root.append(row)
         for j in range(width):
             r = 'true' if j == width - 1 else 'false'
