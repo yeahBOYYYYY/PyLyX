@@ -8,16 +8,15 @@ with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\texts.json'), 'r', encoding='utf8
 
 
 def perform_table(table: LyXobj, lang='english'):
-    if table.tag == 'table':
-        table.attrib.update(table[0].attrib)  # tables[0] is <features tabularvalignment="middle">
-        table.remove(table[0])
+    table.attrib.update(table[0].attrib)  # tables[0] is <features tabularvalignment="middle">
+    table.remove(table[0])
 
-        colgroup = LyXobj('colgroup', 'xml', rank=-DEFAULT_RANK)
-        table.insert(0, colgroup)
-        lst = [obj for obj in table if obj.tag == 'col']
-        for col in lst:
-            table.remove(col)
-            colgroup.append(col)
+    colgroup = LyXobj('colgroup', 'xml', rank=-DEFAULT_RANK)
+    table.insert(0, colgroup)
+    lst = [obj for obj in table if obj.tag == 'col']
+    for col in lst:
+        table.remove(col)
+        colgroup.append(col)
     if lang in RTL_LANGS:
         for row in table.findall('tr'):
             for i in range(len(row)//2):
@@ -48,7 +47,7 @@ def extract_first_word(obj, edit=False):
 def perform_list(father):
     last = father
     children = []
-    for child in list(father):  # list for save the order
+    for child in list(father):  # list for save the order?
         if child.is_category({'Labeling', 'Itemize', 'Enumerate', 'Description'}):
             if child.is_category('Itemize'):
                 tag = 'ul'
@@ -120,3 +119,9 @@ def correct_formula(formula: str):
     if formula.endswith('\\)\n'):
         formula = formula[:-3]
     return '\\(' + formula + '\\)'
+
+
+def prefixing(obj: LyXobj, prefix, sep=' '):
+    pre_obj = LyXobj('span', text=prefix+sep, attrib={'class': 'label'})
+    obj.text, pre_obj.tail = '', obj.text
+    obj.insert(0, pre_obj)

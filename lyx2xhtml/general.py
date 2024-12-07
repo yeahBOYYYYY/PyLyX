@@ -2,6 +2,7 @@ from os.path import join
 from PyLyX.data.data import RTL_LANGS, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment
+from PyLyX.lyx2xhtml.helper import prefixing
 
 MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
 CSS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\css')
@@ -67,12 +68,6 @@ def css_and_js(head, body, css_files=(), js_files=()):
         body.append(create_script(file))
 
 
-def prefixing(obj: LyXobj, prefix, sep=' '):
-    pre_obj = LyXobj('span', text=prefix+sep, attrib={'class': 'label'})
-    obj.text, pre_obj.tail = '', obj.text
-    obj.insert(0, pre_obj)
-
-
 def tocing(lst: LyXobj, obj: LyXobj, prefix):
     item = LyXobj('li')
     obj.set('id', obj.attrib['class'].split()[1] + '_' + prefix)
@@ -82,7 +77,7 @@ def tocing(lst: LyXobj, obj: LyXobj, prefix):
     return item
 
 
-def num_and_toc(toc: LyXobj, element, secnumdepth=-1, tocdepth=-1, prefix='', lang='english'):
+def numbering_and_toc(toc: LyXobj, element, secnumdepth=-1, tocdepth=-1, prefix='', lang='english'):
     i = 0
     for sec in element.findall('section'):
         if sec.rank() <= max(secnumdepth, tocdepth) and sec is not element:
@@ -90,9 +85,8 @@ def num_and_toc(toc: LyXobj, element, secnumdepth=-1, tocdepth=-1, prefix='', la
                 i += 1
                 if sec.rank() <= secnumdepth or sec.rank() <= tocdepth:
                     new_prefix = f'{prefix}.{i}' if prefix else f'{i}'
-                    command, category, details = sec.command(), sec.category(), sec.details()
-                    if sec.rank() <= 1 and (command in TRANSLATE and category in TRANSLATE[command] and details in TRANSLATE[command][category]):
-                        new_prefix = TRANSLATE[command][category][details][lang] + ' ' + new_prefix
+                    if sec.rank() <= 1 and sec.is_in(TRANSLATE):
+                        new_prefix = TRANSLATE[sec.command()][sec.category()][sec.details()][lang] + ' ' + new_prefix
 
                     if sec.rank() <= tocdepth:
                         item = tocing(toc, sec[0], new_prefix)
@@ -102,9 +96,23 @@ def num_and_toc(toc: LyXobj, element, secnumdepth=-1, tocdepth=-1, prefix='', la
                         new_toc = toc
                     if sec.rank() <= secnumdepth:
                         prefixing(sec[0], new_prefix)
-                    num_and_toc(new_toc, sec, secnumdepth, tocdepth, new_prefix, lang)
+                    numbering_and_toc(new_toc, sec, secnumdepth, tocdepth, new_prefix, lang)
 
 
-def perform_toc(element, title, toc):
-    if element.get('class') == 'inset CommandInset toc':
-        element.extend((title, toc))
+def number_foots_and_captions(body: LyXobj, lang: str):
+    i = j = k = 0
+    for e in body.iter():
+        if e.is_category('Foot'):
+            i += 1
+            text = str(i)
+        elif e.is_details('table'):
+            j += 1
+            text = f'{TRANSLATE[e.command()][e.category()][e.details()][lang]} {j}: '
+            e = e.find(".//span/div[@class='inset Caption Standard']")
+        elif e.is_details('figure'):
+            k += 1
+            text = f'{TRANSLATE[e.command()][e.category()][e.details()][lang]} {k}: '
+            e = e.find(".//span/div[@class='inset Caption Standard']")
+        else:
+            continue
+        prefixing(e, text, '')

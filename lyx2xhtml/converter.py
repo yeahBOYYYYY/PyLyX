@@ -4,7 +4,7 @@ from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.lyx2xhtml.helper import perform_table, perform_list, obj2text, correct_formula
-from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, mathjax, viewport, css_and_js, num_and_toc, perform_toc
+from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, mathjax, viewport, css_and_js, numbering_and_toc, number_foots_and_captions
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
     TAGS = load(f)
@@ -140,10 +140,13 @@ def recursive_convert(obj, lang='english', toc=None, keep_data=False):
         else:
             new_obj.append(child)
         is_first = False
-    perform_table(new_obj, lang)
-    perform_list(new_obj)
-    perform_toc(new_obj, *toc)
+
     obj2text(new_obj)
+    perform_list(new_obj)
+    if new_obj.is_command('lyxtabular'):
+        perform_table(new_obj, lang)
+    if new_obj.is_details('toc'):
+        new_obj.extend(toc)
     return new_obj
 
 
@@ -165,7 +168,8 @@ def convert(root, css_files=(), js_files=(), keep_data=False):
         body = recursive_convert(root[1], lang, (title_toc, toc), keep_data)
         create_title(head, body)
         css_and_js(head, body, css_files, js_files)
-        num_and_toc(toc, body, info.get('secnumdepth', -1), info.get('tocdepth', -1), '', lang)
+        numbering_and_toc(toc, body, info.get('secnumdepth', -1), info.get('tocdepth', -1), '', lang)
+        number_foots_and_captions(body, lang)
 
         root = one_obj(root, keep_data)
         root.set('xmlns', 'http://www.w3.org/1999/xhtml')

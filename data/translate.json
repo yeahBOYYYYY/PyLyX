@@ -59,6 +59,10 @@
   "inset": {
     "CommandInset": {
       "toc": {"hebrew": "תוכן העניינים", "english": "Table of Contents"}
+    },
+    "Float": {
+        "table": {"hebrew": "טבלה", "english": "Table"},
+        "figure": {"hebrew": "איור", "english": "Figure"}
     }
   }
 }
