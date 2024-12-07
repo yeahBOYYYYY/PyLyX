@@ -56,16 +56,14 @@ class LyXobj(Element):
     def insert(self, index, obj):
         from PyLyX.objects.Environment import Environment, Container
         if type(obj) in (LyXobj, Environment, Container):
-            if self.__is_open:
-                if obj.can_be_nested_in(self):
-                    if index != 0 or not type(self) is Container:
-                        Element.insert(self, index, obj)
-                    else:
-                        raise Exception(f'can not change Container title.')
+            result, msg = obj.can_be_nested_in(self, True)
+            if result:
+                if index != 0 or not type(self) is Container:
+                    Element.insert(self, index, obj)
                 else:
-                    raise Exception(f'{obj} can not be nested in {self}.')
+                    raise Exception(f'can not change Container title.')
             else:
-                raise Exception(f'{self} is closed.')
+                raise Exception(msg)
         else:
             raise TypeError(f'invalid {self.NAME}: {obj}.')
 

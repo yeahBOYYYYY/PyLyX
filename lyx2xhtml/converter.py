@@ -1,10 +1,10 @@
 from os.path import join
 from json import load
-from PyLyX.data.data import PAR_SET, PACKAGE_PATH
+from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
-from PyLyX.lyx2xhtml.general import design
-from PyLyX.lyx2xhtml.helper import correct_formula
+from PyLyX.lyx2xhtml.helper import perform_table, perform_list, obj2text, correct_formula
+from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, mathjax, viewport, css_and_js, num_and_toc, perform_toc
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
     TAGS = load(f)
@@ -62,7 +62,7 @@ def perform_include(obj: LyXobj):
             root = LyX(path).load()
             root = convert(root)
             body = root[1]
-            include_body = LyXobj('div', rank=-DEFAULT_RANK)
+            include_body = LyXobj('div', attrib={'class': 'include body'}, rank=-DEFAULT_RANK)
             obj.append(include_body)
             for element in body:
                 include_body.append(element)
@@ -118,6 +118,8 @@ def one_obj(obj, keep_data=False):
     text = create_text(obj, attrib)
     new_obj = obj.copy()
     new_obj.open()
+    for e in new_obj:
+        e.open()
     new_obj.tag, new_obj.text, new_obj.attrib = dictionary['tag'], text, attrib
     if 'class' in new_obj.attrib and new_obj.attrib['class'].endswith('*'):
         new_obj.set('class', new_obj.get('class')[:-1] + '_')
@@ -126,30 +128,48 @@ def one_obj(obj, keep_data=False):
     return new_obj
 
 
-def recursive_convert(obj, keep_data=False):
+def recursive_convert(obj, lang='english', toc=None, keep_data=False):
+    if obj.is_command('lang'):
+        lang = obj.category()
     new_obj = one_obj(obj, keep_data)
     is_first = True
     for child in obj:
-        child = recursive_convert(child)
-        if new_obj.tag in {'head', 'meta'}:
-            child.tag = 'meta'
-            if 'class' in child.attrib:
-                lst = child.attrib['class'].split(maxsplit=1)
-                child.attrib['class'] = lst[0]
-                if len(lst) > 1:
-                    child.attrib['data-value'] = ' '.join(lst[1:])
+        child = recursive_convert(child, lang, toc, keep_data)
         if child.is_section_title() and is_first:
             new_obj[0] = child
         else:
             new_obj.append(child)
         is_first = False
+    perform_table(new_obj, lang)
+    perform_list(new_obj)
+    perform_toc(new_obj, *toc)
+    obj2text(new_obj)
     return new_obj
 
 
 def convert(root, css_files=(), js_files=(), keep_data=False):
     if len(root) == 2:
-        root = recursive_convert(root, keep_data)
-        design(root, css_files, js_files, keep_data)
+        info = scan_head(root[0])
+        lang = info.get('language', 'english')
+        if keep_data:
+            head = recursive_convert(root[0])
+            for e in head.iter():
+                e.tag = 'meta'
+        else:
+            head = one_obj(root[0])
+        head.extend((mathjax(), viewport()))
+        perform_lang(root, head, lang)
+
+        toc = LyXobj('ul')
+        title_toc = LyXobj('h2', text=TRANSLATE['inset']['CommandInset']['toc'][lang])
+        body = recursive_convert(root[1], lang, (title_toc, toc), keep_data)
+        create_title(head, body)
+        css_and_js(head, body, css_files, js_files)
+        num_and_toc(toc, body, info.get('secnumdepth', -1), info.get('tocdepth', -1), '', lang)
+
+        root = one_obj(root, keep_data)
+        root.set('xmlns', 'http://www.w3.org/1999/xhtml')
+        root.extend((head, body))
         return root
     else:
         raise Exception(f'root must contain 2 subelements exactly, not {len(root)}.')

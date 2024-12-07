@@ -1,16 +1,14 @@
 from json import load
 from os.path import join
-from PyLyX.data.data import PACKAGE_PATH, TRANSLATE
+from PyLyX.data.data import PACKAGE_PATH, RTL_LANGS
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\texts.json'), 'r', encoding='utf8') as f:
     TEXTS = load(f)
 
-SECTIONS = ('Part', 'Chapter', 'Section', 'Subsection', 'Subsubsection', 'Paragraph', 'Subparagraph')
 
-
-def perform_tables(root: LyXobj):
-    for table in root.iter('table'):
+def perform_table(table: LyXobj, lang='english'):
+    if table.tag == 'table':
         table.attrib.update(table[0].attrib)  # tables[0] is <features tabularvalignment="middle">
         table.remove(table[0])
 
@@ -20,6 +18,10 @@ def perform_tables(root: LyXobj):
         for col in lst:
             table.remove(col)
             colgroup.append(col)
+    if lang in RTL_LANGS:
+        for row in table.findall('tr'):
+            for i in range(len(row)//2):
+                row[-1-i][0], row[i][0] = row[i][0], row[-1-i][0]
 
 
 def extract_first_word(obj, edit=False):
@@ -43,12 +45,11 @@ def extract_first_word(obj, edit=False):
         return False
 
 
-
-def perform_lists(father):
+def perform_list(father):
     last = father
     children = []
-    for child in list(father):
-        if child.category() in ('Labeling', 'Itemize', 'Enumerate', 'Description'):
+    for child in list(father):  # list for save the order
+        if child.is_category({'Labeling', 'Itemize', 'Enumerate', 'Description'}):
             if child.is_category('Itemize'):
                 tag = 'ul'
             elif child.is_category('Enumerate'):
@@ -71,7 +72,6 @@ def perform_lists(father):
                 last.append(item)
         else:
             children.append(child)
-        perform_lists(child)
         father.remove(child)
     father.extend(children)
 
@@ -90,7 +90,6 @@ def obj2text(root):
                 last.tail += text
             root.remove(child)
         else:
-            obj2text(child)
             last = child
 
 
@@ -121,51 +120,3 @@ def correct_formula(formula: str):
     if formula.endswith('\\)\n'):
         formula = formula[:-3]
     return '\\(' + formula + '\\)'
-
-
-def numbering(obj: LyXobj, prefix):
-    pre_obj = LyXobj('span', text=prefix+' ')
-    pre_obj.attrib['class'] = 'label'
-    obj.text, pre_obj.tail = '', obj.text
-    obj.insert(0, pre_obj)
-
-
-def tocing(lst: LyXobj, obj: LyXobj, prefix):
-    item = LyXobj('li')
-    obj.set('id', obj.attrib['class'].split()[1] + '_' + prefix)
-    link = LyXobj('a', attrib={'href': '#' + obj.get('id', '')}, text=prefix+' '+obj.text)
-    item.append(link)
-    lst.append(item)
-    return item
-
-
-def rec_num_and_toc(toc: LyXobj, element, secnumdepth=-1, tocdepth=-1, prefix='', lang='en'):
-    i = 0
-    for sec in element.findall('section'):
-        if sec.rank() <= max(secnumdepth, tocdepth) and sec is not element:
-            if len(sec) and sec.attrib.get('class') in {f'layout {s}' for s in SECTIONS}:
-                i += 1
-                if sec.rank() <= secnumdepth or sec.rank() <= tocdepth:
-                    new_prefix = f'{prefix}.{i}' if prefix else f'{i}'
-                    command, category, details = sec.command(), sec.category(), sec.details()
-                    if sec.rank() <= 1 and (command in TRANSLATE and category in TRANSLATE[command] and details in TRANSLATE[command][category]):
-                        new_prefix = TRANSLATE[command][category][details][lang] + ' ' + new_prefix
-
-                    if sec.rank() <= tocdepth:
-                        item = tocing(toc, sec[0], new_prefix)
-                        new_toc = LyXobj('ul')
-                        item.append(new_toc)
-                    else:
-                        new_toc = toc
-                    if sec.rank() <= secnumdepth:
-                        numbering(sec[0], new_prefix)
-                    rec_num_and_toc(new_toc, sec, secnumdepth, tocdepth, new_prefix, lang)
-
-
-def perform_toc(element, toc, lang):
-    for sub in element:
-        if sub.get('class') == 'inset CommandInset toc':
-            title = LyXobj('h2', text=TRANSLATE['inset']['CommandInset']['toc'][lang])
-            sub.extend((title, toc))
-        else:
-            perform_toc(sub, toc, lang)

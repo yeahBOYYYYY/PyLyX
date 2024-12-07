@@ -28,6 +28,7 @@ DRIVE = USER[0]
 VERSION, LYX_PATH, USER_DIR, BACKUP_DIR = find_settings()
 LYX_EXE, SYS_DIR = join(LYX_PATH, 'bin\\LyX.exe'), join(LYX_PATH, 'Resources')
 PACKAGE_PATH = '\\'.join((split(abspath(__file__))[0].split('\\'))[:-1])
+RTL_LANGS = {'hebrew': 'He-IL'}
 
 CUR_FORMAT = 620
 

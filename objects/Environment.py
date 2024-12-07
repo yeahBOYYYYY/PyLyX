@@ -20,7 +20,7 @@ class Environment(LyXobj):
         rank = OBJECTS[command][category][details].get('rank', DEFAULT_RANK)
         super().__init__(command, command, category, details, text, tail, attrib, is_open, rank)
 
-        if self.is_command({'backslash', 'labelwidthstring', 'column', 'features'}) or self.is_category({'space'}):
+        if self.is_command({'backslash', 'labelwidthstring', 'column', 'features'}) or self.is_category('space'):
             self.close()
 
     def can_be_nested_in(self, father, message=False) -> (bool, str):
