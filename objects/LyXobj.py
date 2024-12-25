@@ -5,8 +5,26 @@ DEFAULT_RANK = 100
 
 
 class LyXobj(Element):
+    """
+    Represents a LyX object with additional attributes and behaviors for
+    managing hierarchical document structures.
+    """
+
     NAME = 'LyxObj'
     def __init__(self, tag, command='', category='', details='', text='', tail='', attrib=None, is_open=True, rank=DEFAULT_RANK):
+        """
+        Initializes a LyX object with specified properties.
+
+            :param tag (str): XML tag name for the element.
+            :param command (str, optional): The first word of the element in the LyX code.
+            :param category (str, optional): The second word of the element in the LyX code.
+            :param details (str, optional): The third word of the element in the LyX code..
+            :param text (str, optional): Text content of the element.
+            :param tail (str, optional): Tail content of the element.
+            :param attrib (dict, optional): Attributes for the XML element.
+            :param is_open (bool, optional): Whether the element is open for appending subelements.
+            :param rank (int, optional): Rank of the element, element with low rank can not be subelement of higher one.
+        """
         super().__init__(tag)
         self.text = str(text)
         self.tail = str(tail)

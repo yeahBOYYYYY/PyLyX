@@ -5,6 +5,7 @@ from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.lyx2xhtml.helper import perform_table, perform_list, obj2text, correct_formula
 from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, mathjax, viewport, css_and_js, numbering_and_toc, number_foots_and_captions
+from PyLyX.lyx2xhtml.modules import MODULES
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
     TAGS = load(f)
@@ -108,6 +109,13 @@ def create_text(obj, new_attrib: dict):
         return correct_formula(macro)
     elif 'text' in new_attrib:
         return new_attrib.pop('text')
+    elif obj.is_details('ref'):
+        text = new_attrib.get('href', '')
+        new_txt = ''
+        for c in text:
+            if c in '1234567890.':
+                new_txt += c
+        return new_txt
     else:
         return obj.text
 
@@ -170,6 +178,12 @@ def convert(root, css_files=(), js_files=(), keep_data=False):
         css_and_js(head, body, css_files, js_files)
         numbering_and_toc(toc, body, info.get('secnumdepth', -1), info.get('tocdepth', -1), '', lang)
         number_foots_and_captions(body, lang)
+        if 'modules' in info:
+            for module in info['modules']:
+                if module in MODULES:
+                    MODULES[module](head, body, info)
+                else:
+                    print(f'unknown module: {module}.')
 
         root = one_obj(root, keep_data)
         root.set('xmlns', 'http://www.w3.org/1999/xhtml')

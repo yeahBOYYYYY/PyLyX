@@ -16,10 +16,12 @@ def scan_head(head: Environment):
         lst = e.get('class').split(maxsplit=1)
         if len(lst) == 2:
             class_, value = lst
-            if e.tag in {'language', 'secnumdepth', 'tocdepth', 'modules'}:
+            if e.tag in {'language', 'secnumdepth', 'tocdepth', 'textclass'}:
                 if class_ in {'secnumdepth', 'tocdepth'}:
                     value = int(value)
                 dictionary[class_] = value
+        elif e.tag == 'modules':
+            dictionary['modules'] = e.text.split()
     return dictionary
 
 
@@ -115,4 +117,5 @@ def number_foots_and_captions(body: LyXobj, lang: str):
             e = e.find(".//span/div[@class='inset Caption Standard']")
         else:
             continue
-        prefixing(e, text, '')
+        if e is not None:
+            prefixing(e, text, '')

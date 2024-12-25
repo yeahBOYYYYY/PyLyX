@@ -53,7 +53,7 @@
     "Case*": {"": {"hebrew": "מקרה", "english": "Case"}},
     "Fact*": {"": {"hebrew": "עובדה", "english": "Fact"}},
 
-    "Proof": {"": {"hebrew": "הוכחה"}}
+    "Proof": {"": {"hebrew": "הוכחה", "english": "Proof"}}
   },
 
   "inset": {
