@@ -1,15 +1,15 @@
 from os import rename, remove
-from os.path import exists, split, splitext, join
+from os.path import exists, split, join
 from re import sub
 from xml.etree.ElementTree import indent, tostring, ElementTree
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
-from string import ascii_letters
 from PyLyX.data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.objects.loader import load
 from PyLyX.lyx2xhtml.converter import convert
+from PyLyX.helper import correct_name, detect_lang
 
 
 class LyX:
@@ -196,20 +196,3 @@ def write_obj(full_path: str, obj):
 
     remove(full_path)
     rename(full_path + '_', full_path)
-
-
-def correct_name(full_path: str, extension: str):
-    extension = extension if extension.startswith('.') else '.' + extension
-    path, name = split(full_path)
-    name = splitext(name)[0]
-    path = join(path, name + extension)
-    return path
-
-
-def detect_lang(text: str):
-    for char in text:
-        if char in 'אבגדהוזחטיכלמנסעפצקרשת':
-            return 'he'
-        elif char in ascii_letters:
-            return 'en'
-    return ''

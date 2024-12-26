@@ -1,4 +1,5 @@
 from os.path import join
+from PyLyX.helper import correct_name
 from PyLyX.data.data import RTL_LANGS, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment
@@ -43,6 +44,7 @@ def create_title(head: LyXobj, body: LyXobj):
 
 
 def create_css(path: str):
+    path = correct_name(path, '.css')
     attrib = {'rel': 'stylesheet', 'type': 'text/css', 'href': path}
     return LyXobj('link', attrib=attrib)
 

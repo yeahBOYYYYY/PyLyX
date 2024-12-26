@@ -1,9 +1,12 @@
+from os.path import join
 from PyLyX.data.data import THEOREMS, TRANSLATE
+from PyLyX.lyx2xhtml.general import create_css, CSS_FOLDER
 from PyLyX.objects.Environment import Environment
 from PyLyX.lyx2xhtml.helper import prefixing
 
 
 def theorems_ams(head: Environment, body: Environment, info: dict):
+    head.append(create_css(join(CSS_FOLDER, 'modules', 'theorems-ams.css')))
     lang = info['language']
     i = 0
     for e in body.iter('div'):
