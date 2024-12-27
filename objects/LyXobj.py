@@ -15,15 +15,15 @@ class LyXobj(Element):
         """
         Initializes a LyX object with specified properties.
 
-            :param tag (str): XML tag name for the element.
-            :param command (str, optional): The first word of the element in the LyX code.
-            :param category (str, optional): The second word of the element in the LyX code.
-            :param details (str, optional): The third word of the element in the LyX code..
-            :param text (str, optional): Text content of the element.
-            :param tail (str, optional): Tail content of the element.
-            :param attrib (dict, optional): Attributes for the XML element.
-            :param is_open (bool, optional): Whether the element is open for appending subelements.
-            :param rank (int, optional): Rank of the element, element with low rank can not be subelement of higher one.
+        :param tag: XML tag name for the element.
+        :param command: The first word of the element in the LyX code.
+        :param category: The second word of the element in the LyX code.
+        :param details: The third word of the element in the LyX code.
+        :param text: Text content of the element.
+        :param tail: Tail content of the element.
+        :param attrib: Attributes for the XML element.
+        :param is_open: Whether the element is open for appending subelements.
+        :param rank: Rank of the element, element with low rank can not be subelement of higher one.
         """
         super().__init__(tag)
         self.text = str(text)
@@ -42,28 +42,33 @@ class LyXobj(Element):
         if command + category + details:
             self.set('class', self.obj_props())
 
-    def can_be_nested_in(self, father, message=False) -> (bool, str):
+    def can_be_nested_in(self, father) -> (bool, str):
+        """
+        Check if <self> can be subelement of <father>.
+
+        :param father: an element for be nested in.
+        :return: boolean value and message for explaining.
+        """
         from PyLyX.objects.Environment import Environment, Container
         if type(father) in {LyXobj, Environment, Container}:
             if not father.is_open():
                 msg = f'{father} is closed.'
                 result = False
+            elif self.__rank >= father.__rank or self.__rank == -DEFAULT_RANK:
+                msg = ''
+                result = True
             else:
                 msg = f'rank {self.__rank} vs rank {father.__rank}'
-                result = self.__rank >= father.__rank or self.__rank == -DEFAULT_RANK
+                result = False
         else:
             msg = f'invalid type: {type(father)}'
             result = False
-
-        if message:
-            return result, msg
-        else:
-            return result
+        return result, msg
 
     def append(self, obj):
         from PyLyX.objects.Environment import Environment, Container
         if type(obj) in {LyXobj, Environment, Container}:
-            result, msg = obj.can_be_nested_in(self, True)
+            result, msg = obj.can_be_nested_in(self)
             if result:
                 Element.append(self, obj)
             else:
@@ -74,7 +79,7 @@ class LyXobj(Element):
     def insert(self, index, obj):
         from PyLyX.objects.Environment import Environment, Container
         if type(obj) in (LyXobj, Environment, Container):
-            result, msg = obj.can_be_nested_in(self, True)
+            result, msg = obj.can_be_nested_in(self)
             if result:
                 if index != 0 or not type(self) is Container:
                     Element.insert(self, index, obj)

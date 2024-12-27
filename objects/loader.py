@@ -112,7 +112,7 @@ def order_object(branch: list, obj):
     copy_branch = branch.copy()
     copy_branch = [str(_) + f' is open: {_.is_open()}' for _ in copy_branch]
     while branch:
-        if obj.can_be_nested_in(branch[-1]):
+        if obj.can_be_nested_in(branch[-1])[0]:
             break
         else:
             branch[-1].close()
