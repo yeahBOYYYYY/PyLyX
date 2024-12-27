@@ -1,7 +1,7 @@
 from os import scandir
 from string import ascii_letters
 from os.path import split, join, isfile
-from PyLyX.data.data import USER_DIR, DOWNLOADS_DIR
+from data.data import USER_DIR, DOWNLOADS_DIR
 from bind2lyx import SHIFTED_DICT, KEYS_DICT
 
 

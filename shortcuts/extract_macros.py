@@ -1,8 +1,8 @@
 from sys import argv
 from os.path import join
 from json import dumps, load
-from PyLyX.helper import correct_name
-from PyLyX.data.data import DOWNLOADS_DIR
+from helper import correct_name
+from data.data import DOWNLOADS_DIR
 
 
 def translate_dicts(primary: dict, secondary: dict):

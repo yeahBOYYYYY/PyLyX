@@ -1,11 +1,11 @@
 from os.path import join
 from json import load
-from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
-from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
-from PyLyX.objects.Environment import Environment, Container
-from PyLyX.lyx2xhtml.helper import perform_table, perform_list, obj2text, correct_formula
-from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, mathjax, viewport, css_and_js, numbering_and_toc, number_foots_and_captions
-from PyLyX.lyx2xhtml.modules import MODULES
+from data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
+from objects.LyXobj import LyXobj, DEFAULT_RANK
+from objects.Environment import Environment, Container
+from lyx2xhtml.special_objects import perform_table, perform_list, obj2text, correct_formula
+from lyx2xhtml.general import scan_head, perform_lang, create_title, mathjax, viewport, css_and_js, numbering_and_toc, number_foots_and_captions
+from lyx2xhtml.modules import MODULES
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
     TAGS = load(f)
@@ -59,7 +59,7 @@ def perform_include(obj: LyXobj):
     if 'data-filename' in obj.attrib:
         path = obj.get('data-filename')
         if path.endswith('.lyx'):
-            from PyLyX import LyX
+            from __init__ import LyX
             root = LyX(path).load()
             root = convert(root)
             body = root[1]

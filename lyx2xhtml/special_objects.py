@@ -1,7 +1,7 @@
 from json import load
 from os.path import join
-from PyLyX.data.data import PACKAGE_PATH, RTL_LANGS
-from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
+from data.data import PACKAGE_PATH, RTL_LANGS
+from objects.LyXobj import LyXobj, DEFAULT_RANK
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\texts.json'), 'r', encoding='utf8') as f:
     TEXTS = load(f)

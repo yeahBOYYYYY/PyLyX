@@ -1,6 +1,6 @@
 from os.path import expanduser, splitext, split, join
 from sys import argv
-from PyLyX.helper import correct_name
+from helper import correct_name
 
 BIND, UNBIND, BIND_FILE, SELF = '\\bind ', '\\unbind ', '\\bind_file', 'self-insert'
 EXTENSION = '.bind'

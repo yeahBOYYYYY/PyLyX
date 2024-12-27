@@ -1,8 +1,8 @@
 from os.path import join
-from PyLyX.data.data import THEOREMS, TRANSLATE
-from PyLyX.lyx2xhtml.general import create_css, CSS_FOLDER
-from PyLyX.objects.Environment import Environment
-from PyLyX.lyx2xhtml.helper import prefixing
+from data.data import THEOREMS, TRANSLATE
+from lyx2xhtml.general import create_css, CSS_FOLDER
+from objects.Environment import Environment
+from lyx2xhtml.special_objects import prefixing
 
 
 def theorems_ams(head: Environment, body: Environment, info: dict):

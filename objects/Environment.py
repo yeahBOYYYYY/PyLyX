@@ -1,6 +1,6 @@
 from xml.etree.ElementTree import Element, tostring
-from PyLyX.data.data import OBJECTS, DESIGNS, PAR_SET, ENDS, DOC_SET, XML_OBJ
-from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK, xml2txt
+from data.data import OBJECTS, DESIGNS, PAR_SET, ENDS, DOC_SET, XML_OBJ
+from objects.LyXobj import LyXobj, DEFAULT_RANK, xml2txt
 
 
 class Environment(LyXobj):
@@ -82,10 +82,8 @@ class Environment(LyXobj):
                 msg = f'{self} can not be nested in {father}.'
             else:
                 msg = 'ok'
-        if message:
-            return result, msg
-        else:
-            return result
+
+        return result, msg
 
     def obj2lyx(self):
         if self.is_command(XML_OBJ):
@@ -171,10 +169,7 @@ class Container(LyXobj):
             msg = f'{self} is Container.'
             result = False
 
-        if message:
-            return result, msg
-        else:
-            return result
+        return result, msg
 
     def obj2lyx(self, is_not_last=True):
         text = ''

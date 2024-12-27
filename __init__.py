@@ -4,12 +4,12 @@ from re import sub
 from xml.etree.ElementTree import indent, tostring, ElementTree
 from shutil import copy
 from subprocess import run, CalledProcessError, TimeoutExpired
-from PyLyX.data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
-from PyLyX.objects.LyXobj import LyXobj
-from PyLyX.objects.Environment import Environment, Container
-from PyLyX.objects.loader import load
-from PyLyX.lyx2xhtml.converter import convert
-from PyLyX.helper import correct_name, detect_lang
+from data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
+from objects.LyXobj import LyXobj
+from objects.Environment import Environment, Container
+from objects.loader import load
+from lyx2xhtml.converter import convert
+from helper import correct_name, detect_lang
 
 
 class LyX:

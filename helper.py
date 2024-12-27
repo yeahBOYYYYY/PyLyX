@@ -2,7 +2,7 @@ from os.path import split, splitext, join
 from string import ascii_letters
 
 
-def correct_name(full_path: str, extension: str):
+def correct_name(full_path: str, extension: str) -> str:
     extension = extension if extension.startswith('.') else '.' + extension
     path, name = split(full_path)
     name = splitext(name)[0]
