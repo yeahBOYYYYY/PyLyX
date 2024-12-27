@@ -1,7 +1,7 @@
 from sys import argv
 from os.path import join
 from json import dumps, load
-from helper import correct_name
+from package_helper import correct_name
 from data.data import DOWNLOADS_DIR
 
 

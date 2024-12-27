@@ -61,7 +61,7 @@ def perform_include(obj: LyXobj):
         if path.endswith('.lyx'):
             from __init__ import LyX
             root = LyX(path).load()
-            root = convert(root)
+            root, info = convert(root)
             body = root[1]
             include_body = LyXobj('div', attrib={'class': 'include body'}, rank=-DEFAULT_RANK)
             obj.append(include_body)
@@ -188,6 +188,6 @@ def convert(root, css_files=(), js_files=(), keep_data=False):
         root = one_obj(root, keep_data)
         root.set('xmlns', 'http://www.w3.org/1999/xhtml')
         root.extend((head, body))
-        return root
+        return root, info
     else:
         raise Exception(f'root must contain 2 subelements exactly, not {len(root)}.')

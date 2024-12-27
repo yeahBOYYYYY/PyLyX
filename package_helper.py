@@ -17,3 +17,10 @@ def detect_lang(text: str):
         elif char in ascii_letters:
             return 'en'
     return ''
+
+
+def default_path(old_path, old_extension, new_extension, new_path=None):
+    if new_path is not None:
+        return old_path.replace(old_extension, new_extension)
+    else:
+        return correct_name(old_path, new_extension)

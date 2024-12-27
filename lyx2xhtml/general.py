@@ -1,5 +1,5 @@
 from os.path import join
-from helper import correct_name
+from package_helper import correct_name
 from data.data import RTL_LANGS, PACKAGE_PATH, TRANSLATE
 from objects.LyXobj import LyXobj
 from objects.Environment import Environment
@@ -17,8 +17,8 @@ def scan_head(head: Environment):
         lst = e.get('class').split(maxsplit=1)
         if len(lst) == 2:
             class_, value = lst
-            if e.tag in {'language', 'secnumdepth', 'tocdepth', 'textclass'}:
-                if class_ in {'secnumdepth', 'tocdepth'}:
+            if class_ in {'language', 'secnumdepth', 'tocdepth', 'textclass', 'html_math_output', 'html_css_as_file'}:
+                if class_ in {'secnumdepth', 'tocdepth', 'html_math_output', 'html_css_as_file'}:
                     value = int(value)
                 dictionary[class_] = value
         elif e.tag == 'modules':

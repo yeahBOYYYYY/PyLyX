@@ -1,15 +1,10 @@
-from os import rename, remove
-from os.path import exists, split, join
-from re import sub
-from xml.etree.ElementTree import indent, tostring, ElementTree
-from shutil import copy
+from xml.etree.ElementTree import ElementTree
 from subprocess import run, CalledProcessError, TimeoutExpired
 from data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
-from objects.LyXobj import LyXobj
-from objects.Environment import Environment, Container
 from objects.loader import load
 from lyx2xhtml.converter import convert
-from helper import correct_name, detect_lang
+from package_helper import correct_name, default_path
+from init_helper import *
 
 
 class LyX:
@@ -58,7 +53,7 @@ class LyX:
         doc.set('original_file', self.__full_path)
         return doc
 
-    def export(self, fmt: str, output_path='', timeout=30) -> bool:
+    def export(self, fmt: str, output_path='', timeout=60) -> bool:
         if output_path:
             cmd = [LYX_EXE, '--export-to', fmt, output_path, self.__full_path]
         else:
@@ -76,33 +71,13 @@ class LyX:
             raise FileNotFoundError(f'Make sure the path "{LYX_EXE}" is correct.')
         return False
 
-    def export2xhtml(self, output_path='', keep=None, css_files=(), js_files=()):
-        if not output_path:
-            output_path = self.__full_path.replace('.lyx', '.xhtml')
-        else:
-            output_path = correct_name(output_path, '.xhtml')
-
+    def export2xhtml(self, output_path=None, css_files=(), js_files=(), keep=None, style=None):
+        default_path(self.__full_path, '.lyx', '.xhtml', output_path)
         root = self.load()
-        root = convert(root, css_files, js_files)
-        if exists(output_path):
-            if keep is None:
-                answer = ''
-                while answer not in {'Y', 'N'}:
-                    answer = input(f'File {output_path} is exist.\nDo you want delete it? (Y/N) ')
-                keep = True if answer == 'N' else False
-            if not keep:
-                remove(output_path)
-            else:
-                return False
-        with open(output_path, 'wb') as f:
-            indent(root)
-            string = tostring(root, encoding='utf8').decode('utf8')
-            for tag in {'span', 'b'}:
-                string = sub(f'</{tag}>\\s\\s+', f'</{tag}>', string)
-                string = sub(f'\\s\\s+<{tag} ', f'<{tag} ', string)
-                string = sub(f'\\s\\s+<{tag}>', f'<{tag}>', string)
-            string = string.encode('utf8')
-            f.write(string)
+        root, info = convert(root, css_files, js_files)
+        xhtml_keep(output_path, keep)
+        xhtml_style(root, output_path, style, info)
+        xhtml_write(root, output_path)
         return True
 
     def export2xml(self, output_path=''):
@@ -117,18 +92,6 @@ class LyX:
         write_obj(self.__full_path, obj)
 
     def reverse_rtl_links(self) -> bool:
-        def one_link(line: str):
-            start = 'name "'
-            end = '"\n'
-            if line.startswith(start) and line.endswith(end):
-                text = line[len(start):-len(end)]
-                if detect_lang(text) == 'he':
-                    lst = text.split()
-                    lst.reverse()
-                    text = ' '.join(lst)
-                    line = start + text + end
-            return line
-
         return line_functions(self, one_link)
 
     def update_version(self) -> bool:
@@ -144,55 +107,12 @@ class LyX:
 
         return not already_updated
 
+    def find(self, query, command=None, category=None, details=None):
+        return rec_find(self.load()[1], query, command, category, details)
 
-def line_functions(lyx_file, func, args=()) -> bool:
-    path = lyx_file.get_path()
-
-    is_changed = False
-    with open(path, 'r', encoding='utf8') as old:
-        with open(path + '_', 'x', encoding='utf8') as new:
-            for line in old:
-                new_line = func(line, *args)
-                if new_line != line:
-                    is_changed = True
-                new.write(new_line)
-
-    if is_changed:
-        remove(path)
-        rename(path + '_', lyx_file.__full_path)
-    else:
-        remove(path + '_')
-    return is_changed
-
-
-def write_obj(full_path: str, obj):
-    if type(obj) not in (Environment, Container):
-        raise TypeError(f'obj must be {LyXobj.NAME}, not {type(obj)}.')
-    if exists(full_path + '_'):
-        remove(full_path)
-
-    if type(obj) is Container or obj.is_command('layout'):
-        start = ('\\end_body\n',)
-        end = ('\\end_body\n', '\\end_document\n')
-    elif obj.is_command('body'):
-        start = ('\\begin_body\n',)
-        end = ('\\end_document\n',)
-    elif obj.is_command('document'):
-        start = ('\\begin_document\n',)
-        end = ()
-    else:
-        raise TypeError(f'invalid command of {Environment.NAME} object: {obj.command()}.')
-
-    with open(full_path, 'r', encoding='utf8') as old:
-        with open(full_path + '_', 'x', encoding='utf8') as new:
-            for line in old:
-                if line not in start:
-                    new.write(line)
-                else:
-                    break
-            new.write(obj.obj2lyx())
-            for s in end:
-                new.write(s)
-
-    remove(full_path)
-    rename(full_path + '_', full_path)
+    def find_and_replace(self, old_str, new_str, command=None, category=None, details=None):
+        doc = self.load()
+        rec_find_and_replace(doc, old_str, new_str, command, category, details)
+        LyX(self.__full_path + '~', doc_obj=doc)
+        remove(self.__full_path)
+        rename(self.__full_path + '~', self.__full_path)

@@ -1,6 +1,6 @@
 from os.path import expanduser, splitext, split, join
 from sys import argv
-from helper import correct_name
+from package_helper import correct_name
 
 BIND, UNBIND, BIND_FILE, SELF = '\\bind ', '\\unbind ', '\\bind_file', 'self-insert'
 EXTENSION = '.bind'
@@ -85,7 +85,7 @@ def compare_files(old_path, new_path, final_path):
                 value, old_shortcut, new_shortcut = search_shortcut(shortcut, latex, new_path)
                 if shortcut.startswith('M-o') or shortcut.startswith('M-d o'):  # this will change!
                     pass
-                elif old_shortcut and old_shortcut[1].find('\\\\kali') != -1:  # this will change!
+                elif old_shortcut and old_shortcut[1].find_and_replace('\\\\kali') != -1:  # this will change!
                     macros.append(old_shortcut)
                 elif not value and new_shortcut:
                     diff.append((old_shortcut, new_shortcut))
