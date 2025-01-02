@@ -109,7 +109,7 @@ def recursive_write(path: str, files: list, result: LyX, depth=2):
             obj, files0 = one_file(name, depth)
         else:
             obj, files0 = one_file(join(path, name), depth)
-        result.write(obj)
+        result.append(obj)
         recursive_write(path, files0, result, depth + 1)
 
 
@@ -121,9 +121,10 @@ def write_all_files(full_path: str, final_path: str):
 
     obj, files = one_file(full_path)
     files.append(join(PERSONAL_PATH, 'user.bind'))
-    result = LyX(final_path, join(PACKAGE_PATH, r'shortcuts\data\template.lyx'))
-    result.write(obj)
+    result = LyX(join(PACKAGE_PATH, r'shortcuts\data\template.lyx'), writeable=False)
+    result.append(obj)
     recursive_write(split(full_path)[0], files, result)
+    result.save_as(final_path)
 
 
 DEFAULT_PATH = join(SYS_DIR, 'bind')

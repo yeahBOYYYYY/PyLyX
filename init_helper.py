@@ -8,6 +8,31 @@ from PyLyX.objects.Environment import Environment, Container
 from PyLyX.package_helper import detect_lang
 
 
+def merge_docs(doc1: Environment, doc2: Environment):
+    doc = Environment('document')
+    doc.append(doc2[0])
+    doc.append(doc1[1])
+    for e in doc2[1]:
+        doc[1].append(e)
+    return doc
+
+
+def rec_append(obj1: LyXobj | Environment | Container, obj2: LyXobj | Environment | Container):
+    obj1.open()
+    if len(obj1) == 0:
+        if obj2.can_be_nested_in(obj1)[0]:
+            obj1.append(obj2)
+            return True
+    else:
+        for i in range(len(obj1)-1, -1, -1):
+            if rec_append(obj1[i], obj2):
+                return True
+        if obj2.can_be_nested_in(obj1)[0]:
+            obj1.append(obj2)
+            return True
+    return False
+
+
 def line_functions(lyx_file, func, args=()) -> bool:
     path = lyx_file.get_path()
 
@@ -75,14 +100,14 @@ def write_obj(full_path: str, obj):
 
 
 def xhtml_style(root, output_path: str, style: bool, info: dict):
-    if (style is None and info['html_css_as_file'] == 1) or style is True:
+    if (style is None and info.get('html_css_as_file') == 1) or style is True:
         for e in root[0].iterfind("link[@type='text/css']"):
             full_path = e.get('href')
             path = split(output_path)[0]
             name = split(full_path)[1]
             copy(full_path, join(path, name))
             e.set('href', name)
-    elif style is None and info['html_css_as_file'] == 0:
+    elif style is None and info.get('html_css_as_file') == 0:
         style = LyXobj('style')
         for e in root[0].iterfind("link[@type='text/css']"):
             with open(e.get('href'), 'r') as f:

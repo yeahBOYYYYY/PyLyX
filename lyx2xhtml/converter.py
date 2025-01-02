@@ -60,7 +60,7 @@ def perform_include(obj: LyXobj):
         path = obj.get('data-filename')
         if path.endswith('.lyx'):
             from PyLyX import LyX
-            root = LyX(path).load()
+            root = LyX(path).get_doc()
             root, info = convert(root)
             body = root[1]
             include_body = LyXobj('div', attrib={'class': 'include body'}, rank=-DEFAULT_RANK)
