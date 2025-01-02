@@ -1,4 +1,4 @@
-from objects.Environment import Environment
+from PyLyX.objects.Environment import Environment
 
 
 def is_table(table):

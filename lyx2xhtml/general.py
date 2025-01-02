@@ -1,9 +1,9 @@
 from os.path import join
-from package_helper import correct_name
-from data.data import RTL_LANGS, PACKAGE_PATH, TRANSLATE
-from objects.LyXobj import LyXobj
-from objects.Environment import Environment
-from lyx2xhtml.special_objects import prefixing
+from PyLyX.package_helper import correct_name
+from PyLyX.data.data import RTL_LANGS, PACKAGE_PATH, TRANSLATE
+from PyLyX.objects.LyXobj import LyXobj
+from PyLyX.objects.Environment import Environment
+from PyLyX.lyx2xhtml.special_objects import prefixing
 
 MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
 CSS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\css')

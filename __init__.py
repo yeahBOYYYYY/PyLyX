@@ -1,19 +1,15 @@
 from xml.etree.ElementTree import ElementTree
 from subprocess import run, CalledProcessError, TimeoutExpired
-from data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
-from objects.loader import load
-from lyx2xhtml.converter import convert
-from package_helper import correct_name, default_path
-from init_helper import *
+from PyLyX.data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
+from PyLyX.objects.loader import load
+from PyLyX.lyx2xhtml.converter import convert
+from PyLyX.package_helper import correct_name, default_path
+from PyLyX.init_helper import *
 
 
 class LyX:
-    def __init__(self, full_path: str, template=None, doc_obj=None, backup=True):
+    def __init__(self, full_path: str, template=None, doc_obj=None):
         self.__full_path = correct_name(full_path, '.lyx')
-
-        if backup and exists(self.__full_path):
-            name = split(self.__full_path)[1]
-            copy(self.__full_path, join(BACKUP_DIR, name))
 
         if exists(self.__full_path + '_'):
             remove(self.__full_path + '_')
@@ -72,7 +68,7 @@ class LyX:
         return False
 
     def export2xhtml(self, output_path=None, css_files=(), js_files=(), keep=None, style=None):
-        default_path(self.__full_path, '.lyx', '.xhtml', output_path)
+        output_path = default_path(self.__full_path, '.xhtml', output_path)
         root = self.load()
         root, info = convert(root, css_files, js_files)
         xhtml_keep(output_path, keep)
@@ -88,17 +84,25 @@ class LyX:
         xml = ElementTree(self.load())
         xml.write(output_path)
 
-    def write(self, obj):
+    def backup(self, active=True):
+        if active:
+            name = split(self.__full_path)[1]
+            copy(self.__full_path, join(BACKUP_DIR, name))
+
+    def write(self, obj, backup=True):
+        self.backup(backup)
         write_obj(self.__full_path, obj)
 
-    def reverse_rtl_links(self) -> bool:
+    def reverse_rtl_links(self, backup=True) -> bool:
+        self.backup(backup)
         return line_functions(self, one_link)
 
     def update_version(self) -> bool:
-        already_updated = True
         with open(self.__full_path, 'r', encoding='utf8') as file:
             first_line = file.readline()
-            if not first_line.startswith(f'#LyX {VERSION}'):
+            if first_line.startswith(f'#LyX {VERSION}'):
+                already_updated = True
+            else:
                 self.export('lyx')
                 already_updated = False
 
@@ -110,7 +114,8 @@ class LyX:
     def find(self, query, command=None, category=None, details=None):
         return rec_find(self.load()[1], query, command, category, details)
 
-    def find_and_replace(self, old_str, new_str, command=None, category=None, details=None):
+    def find_and_replace(self, old_str, new_str, command=None, category=None, details=None, backup=True):
+        self.backup(backup)
         doc = self.load()
         rec_find_and_replace(doc, old_str, new_str, command, category, details)
         LyX(self.__full_path + '~', doc_obj=doc)

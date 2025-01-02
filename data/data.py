@@ -13,12 +13,11 @@ def find_settings():
         raise FileNotFoundError(f'Make sure LyX is installed on your computer,\nI can not found it in {DRIVE + ":\\Program Files\\LyX 2.x"}')
 
     with open(join(user_dir, 'preferences'), 'r') as file:
+        backup_dir = DOWNLOADS_DIR
         for line in file:
             if line.startswith('\\backupdir_path'):
                 backup_dir = line.split()[1][1:-1]
                 break
-        else:
-            backup_dir = ''
     return version, path, user_dir, backup_dir
 
 
@@ -33,32 +32,32 @@ RTL_LANGS = {'hebrew': 'He-IL'}
 CUR_FORMAT = 620
 
 OBJECTS = {}
-with open(join(PACKAGE_PATH, 'data\\designs.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\designs.json'), 'r', encoding='utf8') as f:
     DESIGNS = load(f)
     OBJECTS.update(DESIGNS)
-with open(join(PACKAGE_PATH, 'data\\par_set.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\par_set.json'), 'r', encoding='utf8') as f:
     PAR_SET = load(f)
     OBJECTS.update(PAR_SET)
-with open(join(PACKAGE_PATH, 'data\\layouts.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\layouts.json'), 'r', encoding='utf8') as f:
     LAYOUTS = load(f)
     OBJECTS.update(LAYOUTS)
-with open(join(PACKAGE_PATH, 'data\\theorems-ams.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\theorems-ams.json'), 'r', encoding='utf8') as f:
     THEOREMS = load(f)['layout']
     LAYOUTS['layout'].update(THEOREMS)
     OBJECTS.update(THEOREMS)
-with open(join(PACKAGE_PATH, 'data\\insets.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\insets.json'), 'r', encoding='utf8') as f:
     INSETS = load(f)
     OBJECTS.update(INSETS)
-with open(join(PACKAGE_PATH, 'data\\primaries.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\primaries.json'), 'r', encoding='utf8') as f:
     PRIMARIES = load(f)
     OBJECTS.update(PRIMARIES)
-with open(join(PACKAGE_PATH, 'data\\doc_set.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\doc_set.json'), 'r', encoding='utf8') as f:
     DOC_SET = load(f)
     OBJECTS.update(DOC_SET)
-with open(join(PACKAGE_PATH, 'data\\xml_obj.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\xml_obj.json'), 'r', encoding='utf8') as f:
     XML_OBJ = load(f)
     OBJECTS.update(XML_OBJ)
-with open(join(PACKAGE_PATH, 'data\\ends.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\ends.json'), 'r', encoding='utf8') as f:
     ENDS = load(f)
-with open(join(PACKAGE_PATH, 'data\\translate.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, r'data\objects\translate.json'), 'r', encoding='utf8') as f:
     TRANSLATE = load(f)

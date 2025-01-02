@@ -3,7 +3,7 @@
 \begin_document
 \begin_header
 \save_transient_properties true
-\origin "C:/Users/sraya/PycharmProjects/main/LyX with Python - draft/"
+\origin unavailable
 \textclass article
 \begin_preamble
 % Necessary Commands:
@@ -98,12 +98,12 @@ End
 \language_package default
 \inputencoding auto-legacy
 \fontencoding auto
-\font_roman "default" "David"
-\font_sans "default" "David"
-\font_typewriter "default" "David"
+\font_roman "times" "Times New Roman"
+\font_sans "default" "Arial"
+\font_typewriter "default" "Courier New"
 \font_math "auto" "auto"
 \font_default_family default
-\use_non_tex_fonts false
+\use_non_tex_fonts true
 \font_sc false
 \font_roman_osf false
 \font_sans_osf false
@@ -166,7 +166,7 @@ End
 \headheight 0cm
 \headsep 0cm
 \footskip 2cm
-\secnumdepth 3
+\secnumdepth -2
 \tocdepth 3
 \paragraph_separation indent
 \paragraph_indentation 0bp

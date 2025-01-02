@@ -2,9 +2,9 @@ from os import remove
 from os.path import split, splitext, exists, join
 from sys import argv
 from json import load
-from __init__ import LyX
-from data.data import USER, USER_DIR, SYS_DIR, PACKAGE_PATH
-from objects.Environment import Environment, Container
+from PyLyX import LyX
+from PyLyX.data.data import USER, USER_DIR, SYS_DIR, PACKAGE_PATH
+from PyLyX.objects.Environment import Environment, Container
 from tables_creator import create_table
 from compare_bind import scan_file
 
@@ -38,11 +38,11 @@ def translate_shortcut(code):
 
 def command2lyx(code: str):
     if code.startswith('command-sequence'):
-        code = 'command-sequence...'
+        code = 'command-sequencePyLyX..'
     elif code.startswith('command-alternatives'):
-        code = 'command-alternative...'
+        code = 'command-alternativePyLyX..'
     elif code.startswith('paragraph-params'):
-        code = 'paragraph-params...'
+        code = 'paragraph-paramsPyLyX..'
     elif code.startswith('math-insert '):
         code = code[len('math-insert '):]
         code = code.replace('\\\\', '\\')
@@ -121,7 +121,7 @@ def write_all_files(full_path: str, final_path: str):
 
     obj, files = one_file(full_path)
     files.append(join(PERSONAL_PATH, 'user.bind'))
-    result = LyX(final_path, join(PACKAGE_PATH, 'data\\template.lyx'))
+    result = LyX(final_path, join(PACKAGE_PATH, r'shortcuts\data\template.lyx'))
     result.write(obj)
     recursive_write(split(full_path)[0], files, result)
 

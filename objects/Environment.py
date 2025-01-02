@@ -1,6 +1,6 @@
 from xml.etree.ElementTree import Element, tostring
-from data.data import OBJECTS, DESIGNS, PAR_SET, ENDS, DOC_SET, XML_OBJ
-from objects.LyXobj import LyXobj, DEFAULT_RANK, xml2txt
+from PyLyX.data.data import OBJECTS, DESIGNS, PAR_SET, ENDS, DOC_SET, XML_OBJ
+from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK, xml2txt
 
 
 class Environment(LyXobj):
@@ -121,7 +121,7 @@ class Environment(LyXobj):
             text += deeper
 
             if self.command() in DESIGNS:
-                magic_word = ENDS['usually'].get(self.command(), 'default')
+                magic_word = ENDS.get(self.command(), 'default')
                 if magic_word:
                     text += f'\\{self.command()} {magic_word}\n'
             elif not (self.command() in PAR_SET or self.command() in DOC_SET or deeper) or self.is_command('index'):
@@ -140,7 +140,7 @@ class Environment(LyXobj):
 
 class Container(LyXobj):
     NAME = 'Container'
-    def __init__(self, env, is_open=True):
+    def __init__(self, env: Environment, is_open=True):
         if type(env) is not Environment:
             raise TypeError(f'invalid {Environment.NAME} object: {env}.')
         elif not env.is_command('layout'):
@@ -184,7 +184,7 @@ def perform_options(obj: Environment):
     text = ''
     for command in lst:
         if command in obj.attrib:
-            text += f'{command} {obj.get(command)}\n'
+            text += f'{command} "{obj.get(command)}"\n'
         else:
             for key in obj.attrib:
                 new_commands = obj.attrib[key].split(command, maxsplit=1)

@@ -19,8 +19,8 @@ def detect_lang(text: str):
     return ''
 
 
-def default_path(old_path, old_extension, new_extension, new_path=None):
+def default_path(old_path, new_extension, new_path=None):
     if new_path is not None:
-        return old_path.replace(old_extension, new_extension)
+        return correct_name(new_path, new_extension)
     else:
         return correct_name(old_path, new_extension)

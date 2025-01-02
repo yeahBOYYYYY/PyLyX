@@ -3,9 +3,9 @@ from os.path import exists, join, split
 from re import sub
 from xml.etree.ElementTree import indent, tostring
 from shutil import copy
-from objects.LyXobj import LyXobj
-from objects.Environment import Environment, Container
-from package_helper import detect_lang
+from PyLyX.objects.LyXobj import LyXobj
+from PyLyX.objects.Environment import Environment, Container
+from PyLyX.package_helper import detect_lang
 
 
 def line_functions(lyx_file, func, args=()) -> bool:
