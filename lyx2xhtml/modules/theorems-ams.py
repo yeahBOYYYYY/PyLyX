@@ -1,0 +1,22 @@
+from os.path import join
+from PyLyX.package_helper import create_css
+from PyLyX.data.data import THEOREMS, TRANSLATE
+from PyLyX.objects.Environment import Environment
+from PyLyX.lyx2xhtml.special_objects import prefixing
+from PyLyX.lyx2xhtml.general import CSS_FOLDER
+
+
+def main(head: Environment, body: Environment, info: dict):
+    head.append(create_css(join(CSS_FOLDER, 'modules', 'theorems-ams.css')))
+    lang = info['language']
+    i = 0
+    for e in body.iter('div'):
+        if e.category() in THEOREMS:
+            name = e.category()
+            i += 1
+            prefix = TRANSLATE['layout'][name][''][lang]
+            if not name.endswith('*') and name != 'Proof':
+                prefix += f' {i}.'
+            else:
+                prefix += '.'
+            prefixing(e, prefix)

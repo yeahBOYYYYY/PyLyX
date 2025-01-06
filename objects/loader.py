@@ -250,7 +250,7 @@ def perform_text(last, line: str, path: str):
             if len(lst) > 1:
                 for i in range(0, len(lst)//2):
                     first, second = lst[2*i][:-1], lst[2*i+1]
-                    result = perform_options(last, first, second, path) or result
+                    result = perform_options(last, first, second, path)
             else:
                 lst = line.split()
                 if len(lst) == 2:

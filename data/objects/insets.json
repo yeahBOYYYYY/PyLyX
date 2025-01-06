@@ -40,7 +40,8 @@
   "Graphics": {"": {"options": ["filename", "scale"]}},
   "Float": {
     "table": {"options": ["placement", "alignment", "wide", "sideways", "status"], "rank": 7},
-    "figure": {"options": ["placement", "alignment", "wide", "sideways", "status"]}
+    "figure": {"options": ["placement", "alignment", "wide", "sideways", "status"]},
+    "algorithm": {"options": ["placement", "alignment", "wide", "sideways", "status"]}
   },
   "ERT": {"": {"options": ["status"]}},
   "Argument": {"1": {"options": ["status"]}},

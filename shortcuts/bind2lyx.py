@@ -38,11 +38,11 @@ def translate_shortcut(code):
 
 def command2lyx(code: str):
     if code.startswith('command-sequence'):
-        code = 'command-sequencePyLyX..'
+        code = 'command-sequence...'
     elif code.startswith('command-alternatives'):
-        code = 'command-alternativePyLyX..'
+        code = 'command-alternative...'
     elif code.startswith('paragraph-params'):
-        code = 'paragraph-paramsPyLyX..'
+        code = 'paragraph-params...'
     elif code.startswith('math-insert '):
         code = code[len('math-insert '):]
         code = code.replace('\\\\', '\\')

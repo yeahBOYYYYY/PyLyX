@@ -51,10 +51,10 @@ class Environment(LyXobj):
                     result = self.is_command('inset')
                 else:
                     result = self.rank() >= DEFAULT_RANK
-            elif father.is_command(DESIGNS) or father.command() in PAR_SET:
+            elif father.is_command(DESIGNS) or father.is_command(PAR_SET):
                 result = self.is_command('inset')
             elif father.is_command('inset') and self.obj_props() != father.obj_props():
-                result = father.is_category('Text') or self.is_command('inset') or (self.is_category('Plain') and self.details() == 'Layout')
+                result = father.is_category('Text') or father.is_category('Float') or self.is_command('inset') or (self.is_category('Plain') and self.details() == 'Layout')
             elif father.is_command('body'):
                 result = self.is_command('layout')
             elif father.is_command('cell'):
@@ -184,7 +184,10 @@ def perform_options(obj: Environment):
     text = ''
     for command in lst:
         if command in obj.attrib:
-            text += f'{command} "{obj.get(command)}"\n'
+            if command in {'filename', 'name', 'reference'}:
+                text += f'{command} "{obj.get(command)}"\n'
+            else:
+                text += f'{command} {obj.get(command)}\n'
         else:
             for key in obj.attrib:
                 new_commands = obj.attrib[key].split(command, maxsplit=1)

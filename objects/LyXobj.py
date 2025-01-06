@@ -129,29 +129,17 @@ class LyXobj(Element):
     def is_command(self, commands):
         if type(commands) is str:
             commands = commands.split()
-        for command in commands:
-            if self.__command == command:
-                return True
-        else:
-            return False
+        return self.__command in commands
     
     def is_category(self, categories):
         if type(categories) is str:
             categories = categories.split()
-        for category in categories:
-            if self.__category == category:
-                return True
-        else:
-            return False
+        return self.__category in categories
 
     def is_details(self, details):
         if type(details) is str:
             details = details.split()
-        for det in details:
-            if self.__details == det:
-                return True
-        else:
-            return False
+        return self.__details in details
 
     def obj_props(self, sep=' '):
         lst = []

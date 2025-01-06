@@ -1,11 +1,12 @@
 from os.path import join
 from json import load
+from PyLyX.package_helper import mathjax, viewport
 from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.lyx2xhtml.special_objects import perform_table, perform_list, obj2text, correct_formula
-from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, mathjax, viewport, css_and_js, numbering_and_toc, number_foots_and_captions
-from PyLyX.lyx2xhtml.modules import MODULES
+from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, number_foots_and_captions
+from PyLyX.lyx2xhtml.modules import perform_module
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
     TAGS = load(f)
@@ -180,10 +181,7 @@ def convert(root, css_files=(), js_files=(), keep_data=False):
         number_foots_and_captions(body, lang)
         if 'modules' in info:
             for module in info['modules']:
-                if module in MODULES:
-                    MODULES[module](head, body, info)
-                else:
-                    print(f'unknown module: {module}.')
+                perform_module(module, head, body, info)
 
         root = one_obj(root, keep_data)
         root.set('xmlns', 'http://www.w3.org/1999/xhtml')
