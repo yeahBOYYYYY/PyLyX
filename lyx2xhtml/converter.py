@@ -4,7 +4,7 @@ from PyLyX.package_helper import mathjax, viewport
 from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
-from PyLyX.lyx2xhtml.special_objects import perform_table, perform_list, obj2text, correct_formula
+from PyLyX.lyx2xhtml.special_objects import perform_table, perform_lists, obj2text, correct_formula
 from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, number_foots_and_captions
 from PyLyX.lyx2xhtml.modules import perform_module
 
@@ -14,18 +14,18 @@ with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tables.json'), 'r', encoding='utf
     TABLES = load(f)
 
 
-def create_dict(obj):
+def create_info(obj):
     if type(obj) is Environment and obj.is_in(TAGS):
-        dictionary = TAGS[obj.command()][obj.category()][obj.details()]
+        info = TAGS[obj.command()][obj.category()][obj.details()]
     elif type(obj) is Environment and obj.tag in TABLES:
-        dictionary = TABLES[obj.tag]
+        info = TABLES[obj.tag]
     elif type(obj) is Container:
-        dictionary = {'tag': 'section'}
+        info = {'tag': 'section'}
     elif (obj.is_command('layout') and not (obj.is_category('Plain') and obj.is_details('Layout'))) or obj.command() in PAR_SET:
-        dictionary = {'tag': 'div'}
+        info = {'tag': 'div'}
     else:
-        dictionary = {'tag': 'span'}
-    return dictionary
+        info = {'tag': 'span'}
+    return info
 
 
 def perform_box(obj, old_attrib: dict, new_attrib: dict):
@@ -122,14 +122,14 @@ def create_text(obj, new_attrib: dict):
 
 
 def one_obj(obj, keep_data=False):
-    dictionary = create_dict(obj)
-    attrib = create_attributes(obj, dictionary, keep_data)
+    info = create_info(obj)
+    attrib = create_attributes(obj, info, keep_data)
     text = create_text(obj, attrib)
     new_obj = obj.copy()
     new_obj.open()
     for e in new_obj:
         e.open()
-    new_obj.tag, new_obj.text, new_obj.attrib = dictionary['tag'], text, attrib
+    new_obj.tag, new_obj.text, new_obj.attrib = info['tag'], text, attrib
     if 'class' in new_obj.attrib and new_obj.attrib['class'].endswith('*'):
         new_obj.set('class', new_obj.get('class')[:-1] + '_')
     if new_obj.is_details('include'):
@@ -151,10 +151,10 @@ def recursive_convert(obj, lang='english', toc=None, keep_data=False):
         is_first = False
 
     obj2text(new_obj)
-    perform_list(new_obj)
+    perform_lists(new_obj)
     if new_obj.is_command('lyxtabular'):
         perform_table(new_obj, lang)
-    if new_obj.is_details('toc'):
+    if new_obj.is_details('toc') and toc is not None:
         new_obj.extend(toc)
     return new_obj
 

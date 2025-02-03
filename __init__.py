@@ -3,33 +3,34 @@ from subprocess import run, CalledProcessError, TimeoutExpired
 from PyLyX.data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
 from PyLyX.objects.loader import load
 from PyLyX.lyx2xhtml.converter import convert
-from PyLyX.package_helper import correct_name, default_path
+from PyLyX.package_helper import correct_name, default_path, run_correct_brackets
 from PyLyX.init_helper import *
+
+# the first and the second lines in any LyX document.
+PREFIX = f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {CUR_FORMAT}\n'
 
 
 class LyX:
+    """a LyX document."""
     def __init__(self, full_path: str, writeable=True, doc_obj: Environment | None = None):
         if type(full_path) is not str:
-            raise TypeError(f'full_path must be string, not {type(full_path)}.')
+            raise TypeError(f'full_path must be a string, not {type(full_path)}.')
         self.__full_path = correct_name(full_path, '.lyx')
         self.__writeable = bool(writeable)
 
-        if doc_obj is not None:
-            if type(doc_obj) is not Environment:
-                raise TypeError(f'invalid document object: type of {doc_obj} is not {Environment.NAME}.')
-            elif not doc_obj.is_command('document'):
-                raise TypeError(f'invalid document object: command of {doc_obj} is not "document", but {doc_obj.command()}.')
-            elif exists(self.__full_path):
-                self.__doc = merge_docs(load(self.__full_path), doc_obj)
-            else:
-                self.__doc = doc_obj
-        elif exists(self.__full_path):
+        if exists(self.__full_path):
+            if doc_obj is not None:
+                raise FileExistsError(f'file {self.__full_path} is exists.')
             self.__doc = load(self.__full_path)
             if not self.__writeable:
                 self.__doc.set('original_file', self.__full_path)
+        elif type(doc_obj) is Environment:
+            if not doc_obj.is_command('document'):
+                raise TypeError(f'invalid document object: command of {doc_obj} is not "document", but {doc_obj.command()}.')
+            else:
+                self.__doc = doc_obj
         else:
-            self.__doc = Environment('document')
-            self.__doc.extend((Environment('header'), Environment('body')))
+            raise TypeError(f'invalid document object: type of {doc_obj} is not {Environment.NAME}.')
 
     def save_as(self, path: str):
         if type(path) is not str:
@@ -39,7 +40,7 @@ class LyX:
         else:
             path = correct_name(path, '.lyx')
             with open(path, 'x', encoding='utf8') as file:
-                file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {CUR_FORMAT}\n')
+                file.write(PREFIX)
                 file.write(self.__doc.obj2lyx())
 
     def save(self, backup=True):
@@ -51,7 +52,9 @@ class LyX:
             if exists(path):
                 remove(path)
             with open(path, 'x', encoding='utf8') as file:
-                file.write(f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {CUR_FORMAT}\n')
+                file.write(PREFIX)
+                if self.__doc.get('lyxformat', CUR_FORMAT) != CUR_FORMAT:
+                    run_correct_brackets(self.__doc)
                 file.write(self.__doc.obj2lyx())
             if exists(self.__full_path):
                 remove(self.__full_path)
@@ -68,7 +71,7 @@ class LyX:
     def get_doc(self) -> Environment:
         return self.__doc
 
-    def is_writeable(self):
+    def is_writeable(self) -> bool:
         return self.__writeable
 
     def append(self, obj: LyXobj | Environment | Container):
@@ -78,28 +81,35 @@ class LyX:
 
     def export(self, fmt: str, output_path='', timeout=60) -> bool:
         if output_path:
+            output_path = correct_name(output_path, fmt)
+            while output_path and output_path[-1] in '1234567890':
+                output_path = output_path[:-1]
             cmd = [LYX_EXE, '--export-to', fmt, output_path, self.__full_path]
         else:
             cmd = [LYX_EXE, '--export', fmt, self.__full_path]
 
+        export_bug_fix()
         try:
-            run(cmd, timeout=timeout)
+            run(cmd, timeout=timeout, shell=True)
+            export_bug_fix()
             return True
         except TimeoutExpired:
-            print(f'Attempting to export file "{split(self.__full_path)[1]}" took too long.')
+            print(f'Attempting to export file "{split(self.__full_path)[1]}" took too long time.')
         except CalledProcessError as e:
-            print(f'An error occurred while converting the file {self.__full_path}, error massage: "{e}"')
+            print(f'An error occurred while converting the file {self.__full_path}.\nError massage is: "{e}"')
             return False
         except FileNotFoundError:
-            raise FileNotFoundError(f'Make sure the path "{LYX_EXE}" is lyx.exe path.')
+            print(f'Make sure the path "{LYX_EXE}" is the correct lyx.exe path.')
+        export_bug_fix()
         return False
 
-    def export2xhtml(self, output_path=None, css_files=(), js_files=(), keep=None, style=None):
+    def export2xhtml(self, output_path: str | None = None, css_files=(), js_files=(), remove_old: bool | None = None, css_copy: bool | None = None):
         output_path = default_path(self.__full_path, '.xhtml', output_path)
+        xhtml_remove(output_path, remove_old)
         root, info = convert(self.__doc, css_files, js_files)
-        xhtml_keep(output_path, keep)
-        xhtml_style(root, output_path, style, info)
-        xhtml_write(root, output_path)
+        xhtml_bytes = xhtml_style(root, output_path, css_copy, info).encode('utf8')
+        with open(output_path, 'wb') as f:
+            f.write(xhtml_bytes)
         return True
 
     def export2xml(self, output_path=''):

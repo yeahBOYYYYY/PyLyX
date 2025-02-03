@@ -12,12 +12,14 @@ def find_settings():
     else:
         raise FileNotFoundError(f'Make sure LyX is installed on your computer,\nI can not found it in {DRIVE + ":\\Program Files\\LyX 2.x"}')
 
-    with open(join(user_dir, 'preferences'), 'r') as file:
-        backup_dir = DOWNLOADS_DIR
-        for line in file:
-            if line.startswith('\\backupdir_path'):
-                backup_dir = line.split()[1][1:-1]
-                break
+    backup_dir = DOWNLOADS_DIR
+    preferences = join(user_dir, 'preferences')
+    if exists(preferences):
+        with open(join(user_dir, 'preferences'), 'r') as file:
+            for line in file:
+                if line.startswith('\\backupdir_path'):
+                    backup_dir = line.split()[1][1:-1]
+                    break
     return version, path, user_dir, backup_dir
 
 

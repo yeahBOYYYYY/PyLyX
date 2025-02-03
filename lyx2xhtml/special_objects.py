@@ -44,7 +44,7 @@ def extract_first_word(obj, edit=False):
         return False
 
 
-def perform_list(father):
+def perform_lists(father):
     last = father
     children = []
     for child in list(father):  # list for save the order?
@@ -93,16 +93,12 @@ def obj2text(root):
 
 
 def correct_formula(formula: str):
+    while formula.endswith('\n'):
+        formula = formula[:-1]
     if formula.startswith('\\[') and formula.endswith('\\]'):
         return formula
-    elif formula.startswith('\\[') and formula.endswith('\\]\n'):
-        return formula
-    elif formula.startswith('\\[') and formula.endswith('\\]\n\n'):
-        return formula[:-1]
     elif formula.startswith('\\['):
         return formula +'\\]'
-    elif formula.endswith('\\]\n'):
-        return '\\[' + formula
     elif formula.startswith('\\begin{'):
         return '\\[' + formula + '\\]'
 
@@ -110,14 +106,10 @@ def correct_formula(formula: str):
         formula = formula[1:]
     if formula.endswith('$'):
         formula = formula[:-1]
-    if formula.endswith('$\n'):
-        formula = formula[:-2]
     if formula.startswith('\\('):
         formula = formula[2:]
     if formula.endswith('\\)'):
         formula = formula[:-2]
-    if formula.endswith('\\)\n'):
-        formula = formula[:-3]
     return '\\(' + formula + '\\)'
 
 

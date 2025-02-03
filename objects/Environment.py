@@ -179,12 +179,16 @@ class Container(LyXobj):
         return text
 
 
+QUOTED = {'name', 'reference', 'position', 'hor_pos', 'has_inner_box', 'inner_pos', 'use_parbox', 'use_makebox', 'width', 'special', 'height',
+          'height_special', 'thickness', 'separation', 'shadowsize', 'framecolor', 'backgroundcolor'}
+
+
 def perform_options(obj: Environment):
     lst = obj.get_dict().get('options', [])
     text = ''
     for command in lst:
         if command in obj.attrib:
-            if command in {'filename', 'name', 'reference'}:
+            if command in QUOTED:
                 text += f'{command} "{obj.get(command)}"\n'
             else:
                 text += f'{command} {obj.get(command)}\n'

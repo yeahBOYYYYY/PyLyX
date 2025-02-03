@@ -1,23 +1,12 @@
 from os import rename, remove
 from os.path import exists, join, split
 from re import sub
-from xml.etree.ElementTree import indent, tostring
+from xml.etree.ElementTree import indent, tostring, Element
 from shutil import copy
-from PyLyX.data.data import CUR_FORMAT
+from PyLyX.data.data import USER_DIR
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.package_helper import detect_lang
-
-
-def merge_docs(doc1: Environment, doc2: Environment):
-    doc = Environment('document')
-    doc.set('lyxformat', doc2.get('lyxformat', CUR_FORMAT))
-    doc.append(doc2[0])
-    doc.append(doc1[1])
-    doc[1].open()
-    for e in doc2[1]:
-        doc[1].append(e)
-    return doc
 
 
 def rec_append(obj1: LyXobj | Environment | Container, obj2: LyXobj | Environment | Container):
@@ -69,34 +58,32 @@ def one_link(line: str):
     return line
 
 
-def xhtml_keep(output_path, keep):
+def xhtml_remove(output_path: str, remove_old: bool | None = None):
     if exists(output_path):
-        if keep is None:
+        if remove_old is None:
             answer = ''
             while answer not in {'Y', 'N'}:
                 answer = input(f'File {output_path} is exist.\nDo you want delete it? (Y/N) ')
-            keep = True if answer == 'N' else False
-        if not keep:
+            remove_old = True if answer == 'Y' else False
+        if remove_old:
             remove(output_path)
-        else:
-            return False
 
 
-def xhtml_style(root, output_path: str, style: bool, info: dict):
-    if (style is None and info.get('html_css_as_file') == 1) or style is True:
+def xhtml_style(root: Environment | Element, output_path: str, css_copy: bool | None = None, info: dict | None = None):
+    if (css_copy is None and info.get('html_css_as_file') == 1) or css_copy is True:
         for e in root[0].iterfind("link[@type='text/css']"):
             full_path = e.get('href')
             path = split(output_path)[0]
             name = split(full_path)[1]
             copy(full_path, join(path, name))
             e.set('href', name)
-    elif style is None and info.get('html_css_as_file') == 0:
-        style = LyXobj('style')
+    elif css_copy is None and info is not None and info.get('html_css_as_file') == 0:
+        css_copy = LyXobj('style')
         for e in root[0].iterfind("link[@type='text/css']"):
             with open(e.get('href'), 'r') as f:
-                style.text = style.text + f.read()
+                css_copy.text = css_copy.text + f.read()
             root[0].remove(e)
-        root[0].append(style)
+        root[0].append(css_copy)
 
     for e in root[0].iterfind("img"):
         img_path = e.get('src', '')
@@ -108,20 +95,16 @@ def xhtml_style(root, output_path: str, style: bool, info: dict):
         else:
             print(f'image path is not found: {img_path}')
 
-
-def xhtml_write(root, output_path):
-    with open(output_path, 'wb') as f:
-        indent(root)
-        string = tostring(root, encoding='utf8').decode('utf8')
-        for tag in {'span', 'b'}:
-            string = sub(f'</{tag}>\\s\\s+', f'</{tag}>', string)
-            string = sub(f'\\s\\s+<{tag} ', f'<{tag} ', string)
-            string = sub(f'\\s\\s+<{tag}>', f'<{tag}>', string)
-        string = string.encode('utf8')
-        f.write(string)
+    indent(root)
+    xhtml_string = tostring(root, encoding='utf8').decode('utf8')
+    for tag in {'span', 'b', 'u', 'i'}:
+        xhtml_string = sub(f'</{tag}>\\s\\s+', f'</{tag}>', xhtml_string)
+        xhtml_string = sub(f'\\s\\s+<{tag} ', f'<{tag} ', xhtml_string)
+        xhtml_string = sub(f'\\s\\s+<{tag}>', f'<{tag}>', xhtml_string)
+    return xhtml_string
 
 
-def rec_find(obj, query, command=None, category=None, details=None):
+def rec_find(obj, query, command=None, category=None, details=None) -> bool:
     if command is not None and obj.obj_props() != f'{command} {category} {details}':
         return False
     elif query in obj.text or query in obj.tail:
@@ -136,5 +119,21 @@ def rec_find_and_replace(obj, old_str, new_str, command=None, category=None, det
     if command is None or obj.obj_props() == f'{command} {category} {details}':
         obj.text = obj.text.replace(old_str, new_str)
         obj.tail = obj.tail.replace(old_str, new_str)
+        for key in obj.attrib:
+            obj.attrib[key] = obj.attrib[key].replace(old_str, new_str)
     for e in obj:
         rec_find_and_replace(e, old_str, new_str, command, category, details)
+
+
+def export_bug_fix():
+    preferences = join(USER_DIR, 'preferences')
+    with open(preferences, 'r', encoding='utf8') as old:
+        with open(preferences + '_n', 'w', encoding='utf8') as new:
+            for line in old:
+                if line.startswith(r'\ui_style'):
+                    line = '#' + line
+                elif line.startswith(r'#\ui_style'):
+                    line = line[1:]
+                new.write(line)
+    remove(preferences)
+    rename(preferences + '_n', preferences)
