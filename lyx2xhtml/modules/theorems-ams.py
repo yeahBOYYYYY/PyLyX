@@ -6,8 +6,8 @@ from PyLyX.lyx2xhtml.special_objects import prefixing
 from PyLyX.lyx2xhtml.general import CSS_FOLDER
 
 
-def main(head: Environment, body: Environment, info: dict):
-    head.append(create_css(join(CSS_FOLDER, 'modules', 'theorems-ams.css')))
+def main(head: Environment, body: Environment, info: dict, css_folder=CSS_FOLDER):
+    head.append(create_css(join(css_folder, 'modules', 'theorems-ams.css')))
     lang = info['language']
     i = 0
     for e in body.iter('div'):

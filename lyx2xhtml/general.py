@@ -25,12 +25,12 @@ def scan_head(head: Environment):
     return dictionary
 
 
-def perform_lang(root: Environment, head: Environment, lang: str):
+def perform_lang(root: Environment, head: Environment, lang: str, css_folder=CSS_FOLDER):
     if lang in RTL_LANGS:
         root.set('lang', RTL_LANGS[lang])
-        head.append(create_css(join(CSS_FOLDER, BASIC_RTL_CSS)))
+        head.append(create_css(join(css_folder, BASIC_RTL_CSS)))
     else:
-        head.append(create_css(join(CSS_FOLDER, BASIC_LTR_CSS)))
+        head.append(create_css(join(css_folder, BASIC_LTR_CSS)))
 
 
 def create_title(head: LyXobj, body: LyXobj):
@@ -42,11 +42,12 @@ def create_title(head: LyXobj, body: LyXobj):
         head.append(head_title)
 
 
-def css_and_js(head, body, css_files=(), js_files=()):
+def css_and_js(head, body, css_files=(), js_files=(), js_in_head=False):
     for file in css_files:
         head.append(create_css(file))
+    js_parent = head if js_in_head else body
     for file in js_files:
-        body.append(create_script(file))
+        js_parent.append(create_script(file))
 
 
 def tocing(lst: LyXobj, obj: LyXobj, prefix):

@@ -5,7 +5,7 @@ from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.lyx2xhtml.special_objects import perform_table, perform_lists, obj2text, correct_formula
-from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, number_foots_and_captions
+from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, number_foots_and_captions, CSS_FOLDER
 from PyLyX.lyx2xhtml.modules import perform_module
 
 with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
@@ -159,7 +159,7 @@ def recursive_convert(obj, lang='english', toc=None, keep_data=False):
     return new_obj
 
 
-def convert(root, css_files=(), js_files=(), keep_data=False):
+def convert(root, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=False, keep_data=False):
     if len(root) == 2:
         info = scan_head(root[0])
         lang = info.get('language', 'english')
@@ -170,18 +170,18 @@ def convert(root, css_files=(), js_files=(), keep_data=False):
         else:
             head = one_obj(root[0])
         head.extend((mathjax(), viewport()))
-        perform_lang(root, head, lang)
+        perform_lang(root, head, lang, css_folder)
 
         toc = LyXobj('ul')
         title_toc = LyXobj('h2', text=TRANSLATE['inset']['CommandInset']['toc'][lang])
         body = recursive_convert(root[1], lang, (title_toc, toc), keep_data)
         create_title(head, body)
-        css_and_js(head, body, css_files, js_files)
+        css_and_js(head, body, css_files, js_files, js_in_head)
         numbering_and_toc(toc, body, info.get('secnumdepth', -1), info.get('tocdepth', -1), '', lang)
         number_foots_and_captions(body, lang)
         if 'modules' in info:
             for module in info['modules']:
-                perform_module(module, head, body, info)
+                perform_module(module, head, body, info, css_folder)
 
         root = one_obj(root, keep_data)
         root.set('xmlns', 'http://www.w3.org/1999/xhtml')

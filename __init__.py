@@ -1,4 +1,4 @@
-from xml.etree.ElementTree import ElementTree
+from xml.etree.ElementTree import ElementTree, tostring, indent
 from subprocess import run, CalledProcessError, TimeoutExpired
 from PyLyX.data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
 from PyLyX.objects.loader import load
@@ -88,10 +88,10 @@ class LyX:
         else:
             cmd = [LYX_EXE, '--export', fmt, self.__full_path]
 
-        export_bug_fix()
+        export_bug_fix(True)
         try:
             run(cmd, timeout=timeout, shell=True)
-            export_bug_fix()
+            export_bug_fix(False)
             return True
         except TimeoutExpired:
             print(f'Attempting to export file "{split(self.__full_path)[1]}" took too long time.')
@@ -100,16 +100,17 @@ class LyX:
             return False
         except FileNotFoundError:
             print(f'Make sure the path "{LYX_EXE}" is the correct lyx.exe path.')
-        export_bug_fix()
+        export_bug_fix(False)
         return False
 
     def export2xhtml(self, output_path: str | None = None, css_files=(), js_files=(), remove_old: bool | None = None, css_copy: bool | None = None):
         output_path = default_path(self.__full_path, '.xhtml', output_path)
-        xhtml_remove(output_path, remove_old)
+        old_file_remove(output_path, remove_old)
         root, info = convert(self.__doc, css_files, js_files)
-        xhtml_bytes = xhtml_style(root, output_path, css_copy, info).encode('utf8')
+        xhtml_style(root, output_path, css_copy, info)
+        indent(root)
         with open(output_path, 'wb') as f:
-            f.write(xhtml_bytes)
+            f.write(tostring(root, encoding='utf8'))
         return True
 
     def export2xml(self, output_path=''):

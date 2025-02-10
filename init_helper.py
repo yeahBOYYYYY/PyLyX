@@ -1,7 +1,6 @@
 from os import rename, remove
 from os.path import exists, join, split
-from re import sub
-from xml.etree.ElementTree import indent, tostring, Element
+from xml.etree.ElementTree import Element
 from shutil import copy
 from PyLyX.data.data import USER_DIR
 from PyLyX.objects.LyXobj import LyXobj
@@ -58,7 +57,7 @@ def one_link(line: str):
     return line
 
 
-def xhtml_remove(output_path: str, remove_old: bool | None = None):
+def old_file_remove(output_path: str, remove_old: bool | None = None):
     if exists(output_path):
         if remove_old is None:
             answer = ''
@@ -95,13 +94,15 @@ def xhtml_style(root: Environment | Element, output_path: str, css_copy: bool | 
         else:
             print(f'image path is not found: {img_path}')
 
-    indent(root)
-    xhtml_string = tostring(root, encoding='utf8').decode('utf8')
-    for tag in {'span', 'b', 'u', 'i'}:
-        xhtml_string = sub(f'</{tag}>\\s\\s+', f'</{tag}>', xhtml_string)
-        xhtml_string = sub(f'\\s\\s+<{tag} ', f'<{tag} ', xhtml_string)
-        xhtml_string = sub(f'\\s\\s+<{tag}>', f'<{tag}>', xhtml_string)
-    return xhtml_string
+    last = root
+    whitespaces = {' ', '\t', '\n'}
+    for cur in root.iter():
+        if cur.tag in {'span', 'b', 'u', 'i'}:
+            if len(cur.tail) > 1 and cur.tail[0] in whitespaces and cur.tail[1] in whitespaces:
+                cur.text = cur.text.lstrip()
+            if len(last.tail) > 1 and last.tail[-1] in whitespaces and last.tail[-2] in whitespaces:
+                last.text = last.text.rstrip()
+        last = cur
 
 
 def rec_find(obj, query, command=None, category=None, details=None) -> bool:
@@ -125,15 +126,19 @@ def rec_find_and_replace(obj, old_str, new_str, command=None, category=None, det
         rec_find_and_replace(e, old_str, new_str, command, category, details)
 
 
-def export_bug_fix():
+def export_bug_fix(before: bool):
     preferences = join(USER_DIR, 'preferences')
     with open(preferences, 'r', encoding='utf8') as old:
         with open(preferences + '_n', 'w', encoding='utf8') as new:
-            for line in old:
-                if line.startswith(r'\ui_style'):
-                    line = '#' + line
-                elif line.startswith(r'#\ui_style'):
-                    line = line[1:]
-                new.write(line)
+            if before:
+                for line in old:
+                    if line.startswith(r'\ui_style'):
+                        line = '#' + line
+                    new.write(line)
+            else:
+                for line in old:
+                    if line.startswith(r'#\ui_style'):
+                        line = line[1:]
+                    new.write(line)
     remove(preferences)
     rename(preferences + '_n', preferences)
