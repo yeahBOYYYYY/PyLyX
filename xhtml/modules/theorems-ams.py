@@ -2,8 +2,8 @@ from os.path import join
 from PyLyX.package_helper import create_css
 from PyLyX.data.data import THEOREMS, TRANSLATE
 from PyLyX.objects.Environment import Environment
-from PyLyX.lyx2xhtml.special_objects import prefixing
-from PyLyX.lyx2xhtml.general import CSS_FOLDER
+from PyLyX.xhtml.special_objects import prefixing
+from PyLyX.xhtml.helper import CSS_FOLDER
 
 
 def main(head: Environment, body: Environment, info: dict, css_folder=CSS_FOLDER):

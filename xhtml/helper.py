@@ -3,9 +3,9 @@ from PyLyX.package_helper import create_script, create_css
 from PyLyX.data.data import RTL_LANGS, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment
-from PyLyX.lyx2xhtml.special_objects import prefixing
+from PyLyX.xhtml.special_objects import prefixing
 
-CSS_FOLDER = join(PACKAGE_PATH, 'lyx2xhtml\\css')
+CSS_FOLDER = join(PACKAGE_PATH, 'xhtml\\css')
 BASIC_RTL_CSS, BASIC_LTR_CSS = 'basic_rtl.css', 'basic_ltr.css'
 SECTIONS = ('Part', 'Chapter', 'Section', 'Subsection', 'Subsubsection', 'Paragraph', 'Subparagraph')
 
@@ -50,12 +50,12 @@ def css_and_js(head, body, css_files=(), js_files=(), js_in_head=False):
         js_parent.append(create_script(file))
 
 
-def tocing(lst: LyXobj, obj: LyXobj, prefix):
+def tocing(toc: LyXobj, obj: LyXobj, prefix):
     item = LyXobj('li')
     obj.set('id', obj.attrib['class'].split()[1] + '_' + prefix)
     link = LyXobj('a', attrib={'href': '#' + obj.get('id', '')}, text=prefix+' '+obj.text)
     item.append(link)
-    lst.append(item)
+    toc.append(item)
     return item
 
 

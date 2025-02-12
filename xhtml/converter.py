@@ -4,13 +4,13 @@ from PyLyX.package_helper import mathjax, viewport
 from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
-from PyLyX.lyx2xhtml.special_objects import perform_table, perform_lists, obj2text, correct_formula
-from PyLyX.lyx2xhtml.general import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, number_foots_and_captions, CSS_FOLDER
-from PyLyX.lyx2xhtml.modules import perform_module
+from PyLyX.xhtml.special_objects import perform_table, perform_lists, obj2text, correct_formula
+from PyLyX.xhtml.helper import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, number_foots_and_captions, CSS_FOLDER
+from PyLyX.xhtml.modules import perform_module
 
-with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, 'xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
     TAGS = load(f)
-with open(join(PACKAGE_PATH, 'lyx2xhtml\\data\\tables.json'), 'r', encoding='utf8') as f:
+with open(join(PACKAGE_PATH, 'xhtml\\data\\tables.json'), 'r', encoding='utf8') as f:
     TABLES = load(f)
 
 
@@ -137,7 +137,7 @@ def one_obj(obj, keep_data=False):
     return new_obj
 
 
-def recursive_convert(obj, lang='english', toc=None, keep_data=False):
+def recursive_convert(obj: LyXobj, lang='english', toc: tuple[LyXobj, LyXobj] | None = None, keep_data=False):
     if obj.is_command('lang'):
         lang = obj.category()
     new_obj = one_obj(obj, keep_data)
@@ -155,8 +155,13 @@ def recursive_convert(obj, lang='english', toc=None, keep_data=False):
     if new_obj.is_command('lyxtabular'):
         perform_table(new_obj, lang)
     if new_obj.is_details('toc') and toc is not None:
-        new_obj.extend(toc)
+        add_toc(new_obj, toc[0], toc[1])
     return new_obj
+
+
+def add_toc(toc_obj: LyXobj, toc_title: LyXobj, toc: LyXobj):
+    toc_obj.append(toc_title)
+    toc_obj.append(toc)
 
 
 def convert(root, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=False, keep_data=False):
@@ -173,11 +178,14 @@ def convert(root, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=F
         perform_lang(root, head, lang, css_folder)
 
         toc = LyXobj('ul')
-        title_toc = LyXobj('h2', text=TRANSLATE['inset']['CommandInset']['toc'][lang])
-        body = recursive_convert(root[1], lang, (title_toc, toc), keep_data)
+        toc_title = TRANSLATE['inset']['CommandInset']['toc'].get(lang, 'Table of Contents')
+        toc_title = LyXobj('h2', text=toc_title)
+        body = recursive_convert(root[1], lang, (toc_title, toc), keep_data)
         create_title(head, body)
         css_and_js(head, body, css_files, js_files, js_in_head)
         numbering_and_toc(toc, body, info.get('secnumdepth', -1), info.get('tocdepth', -1), '', lang)
+        info['toc'] = LyXobj('inset', 'CommandInset', 'toc')
+        add_toc(info['toc'], toc_title, toc)
         number_foots_and_captions(body, lang)
         if 'modules' in info:
             for module in info['modules']:

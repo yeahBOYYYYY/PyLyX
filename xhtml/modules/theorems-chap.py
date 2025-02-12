@@ -1,12 +1,12 @@
 from PyLyX.objects.Environment import Environment
 from PyLyX.data.data import THEOREMS
-from PyLyX.lyx2xhtml.general import CSS_FOLDER
+from PyLyX.xhtml.helper import CSS_FOLDER
 
 
-def main(head: Environment, body, info: dict, css_folder=CSS_FOLDER):
+def theorems_chap(head: Environment, body, info: dict, css_folder=CSS_FOLDER):
     for sec in body.findall('section'):
-        if sec.is_category('Section'):
-            n, i = sec[0][0].text[:-1], 0
+        n, i = sec[0][0].text[:-1], 0
+        if sec.is_category('Chapter'):
             for e in sec.iter('div'):
                 name = e.category()
                 if e.category() in THEOREMS and not name.endswith('*') and name != 'Proof':

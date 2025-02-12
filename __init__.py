@@ -2,7 +2,7 @@ from xml.etree.ElementTree import ElementTree, tostring, indent
 from subprocess import run, CalledProcessError, TimeoutExpired
 from PyLyX.data.data import LYX_EXE, VERSION, CUR_FORMAT, BACKUP_DIR
 from PyLyX.objects.loader import load
-from PyLyX.lyx2xhtml.converter import convert
+from PyLyX.xhtml.converter import convert
 from PyLyX.package_helper import correct_name, default_path, run_correct_brackets
 from PyLyX.init_helper import *
 
