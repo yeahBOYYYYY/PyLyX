@@ -83,11 +83,7 @@ def compare_files(old_path, new_path, final_path):
             sign, shortcut, latex = check_line(line)
             if sign == 1:
                 value, old_shortcut, new_shortcut = search_shortcut(shortcut, latex, new_path)
-                if shortcut.startswith('M-o') or shortcut.startswith('M-d o'):  # this will change!
-                    pass
-                elif old_shortcut and old_shortcut[1].find_and_replace('\\\\kali') != -1:  # this will change!
-                    macros.append(old_shortcut)
-                elif not value and new_shortcut:
+                if not value and new_shortcut:
                     diff.append((old_shortcut, new_shortcut))
                 elif not (value or new_shortcut):
                     miss.append(old_shortcut)

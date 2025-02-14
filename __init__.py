@@ -121,10 +121,10 @@ class LyX:
         xml = ElementTree(self.__doc)
         xml.write(output_path)
 
-    def find(self, query, command=None, category=None, details=None):
+    def find(self, query: str | None, command='', category='', details=''):
         return rec_find(self.__doc[1], query, command, category, details)
 
-    def find_and_replace(self, old_str, new_str, command=None, category=None, details=None, backup=True):
+    def find_and_replace(self, old_str, new_str, command: str | None = None, category: str | None = None, details: str | None = None, backup=True):
         self.backup(backup)
         rec_find_and_replace(self.__doc, old_str, new_str, command, category, details)
         self.save()

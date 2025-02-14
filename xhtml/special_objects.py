@@ -13,7 +13,7 @@ def perform_table(table: LyXobj, lang='english'):
 
     colgroup = LyXobj('colgroup', 'xml', rank=-DEFAULT_RANK)
     table.insert(0, colgroup)
-    lst = [obj for obj in table if obj.tag == 'col']
+    lst = [obj for obj in table if obj.tag == 'column']
     for col in lst:
         table.remove(col)
         colgroup.append(col)

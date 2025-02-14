@@ -29,7 +29,7 @@ def detect_lang(text: str):
     return ''
 
 
-def correct_brackets(text: str, is_open: bool):
+def correct_brackets(text: str, is_open=False):
     new_text = ''
     for char in text:
         if char in {'(', ')'}:

@@ -102,9 +102,9 @@ class Environment(LyXobj):
         else:
             text = ''
             if self.is_command(DESIGNS) or self.is_command(PAR_SET) or self.is_command(DOC_SET):
-                text += f'\\{self.obj_props()}\n'
+                text += f'\\{self.obj_props_str()}\n'
             else:
-                text += f'\\begin_{self.obj_props()}\n'
+                text += f'\\begin_{self.obj_props_str()}\n'
 
             if 'options' in self.get_dict():
                 text += perform_options(self)
@@ -140,15 +140,15 @@ class Environment(LyXobj):
 
 class Container(LyXobj):
     NAME = 'Container'
-    def __init__(self, env: Environment, is_open=True):
-        if type(env) is not Environment:
-            raise TypeError(f'invalid {Environment.NAME} object: {env}.')
-        elif not env.is_command('layout'):
-            raise TypeError(f'{Environment.NAME} object {env} is not layout obj.')
+    def __init__(self, obj: Environment | LyXobj, is_open=True):
+        if type(obj) not in {Environment, LyXobj}:
+            raise TypeError(f'invalid {Environment.NAME} object: {obj}.')
+        elif not obj.is_command('layout'):
+            raise TypeError(f'{Environment.NAME} object {obj} is not layout obj.')
 
-        super().__init__('container', env.command(), env.category(), env.details(), rank=env.rank())
+        super().__init__('container', obj.command(), obj.category(), obj.details(), rank=obj.rank())
 
-        self.append(env)
+        self.append(obj)
         if not is_open:
             self.close()
 

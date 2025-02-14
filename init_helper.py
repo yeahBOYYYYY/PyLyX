@@ -8,7 +8,7 @@ from PyLyX.objects.Environment import Environment, Container
 from PyLyX.package_helper import detect_lang
 
 
-def rec_append(obj1: LyXobj | Environment | Container, obj2: LyXobj | Environment | Container):
+def rec_append(obj1: LyXobj | Environment | Container | Element, obj2: LyXobj | Environment | Container):
     obj1.open()
     if len(obj1) == 0:
         if obj2.can_be_nested_in(obj1)[0]:
@@ -105,19 +105,30 @@ def xhtml_style(root: Environment | Element, output_path: str, css_copy: bool | 
         last = cur
 
 
-def rec_find(obj, query, command=None, category=None, details=None) -> bool:
-    if command is not None and obj.obj_props() != f'{command} {category} {details}':
-        return False
-    elif query in obj.text or query in obj.tail:
-        return True
-    for e in obj:
-        if rec_find(e, query, command, category, details):
-            return True
-    return False
+def rec_find(obj: LyXobj | Environment | Container | Element, query: str | None, command='', category='', details='')\
+        -> LyXobj | Environment | Container | Element | None:
+    if command:
+        if obj.obj_props() == (command, category, details):
+            if query is None or query in obj.text or query in obj.tail:
+                return obj
+            else:
+                for e in obj:
+                    result = rec_find(e, query, command, category, details)
+                    if result is not None:
+                        return obj
+    elif query is None:
+        raise TypeError('please give query or object properties.')
+    else:
+        if query in obj.text or query in obj.tail:
+            return obj
+        for e in obj:
+            result = rec_find(e, query, command, category, details)
+            if result is not None:
+                return result
 
 
-def rec_find_and_replace(obj, old_str, new_str, command=None, category=None, details=None):
-    if command is None or obj.obj_props() == f'{command} {category} {details}':
+def rec_find_and_replace(obj, old_str, new_str, command='', category='', details=''):
+    if command and obj.obj_props() != (command, category, details):
         obj.text = obj.text.replace(old_str, new_str)
         obj.tail = obj.tail.replace(old_str, new_str)
         for key in obj.attrib:

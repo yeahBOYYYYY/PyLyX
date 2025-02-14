@@ -1,5 +1,7 @@
 from os.path import join
 from json import load
+from xml.etree.ElementTree import Element
+
 from PyLyX.package_helper import mathjax, viewport
 from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
@@ -42,7 +44,7 @@ def perform_box(obj, old_attrib: dict, new_attrib: dict):
         new_attrib['style'] = style
 
     if 'width' in new_attrib:
-        new_attrib['width'] = new_attrib['width'].replace('col%', '%')
+        new_attrib['width'] = new_attrib['width'].replace('column%', '%')
 
 
 def perform_cell(old_attrib: dict, new_attrib: dict):
@@ -137,7 +139,7 @@ def one_obj(obj, keep_data=False):
     return new_obj
 
 
-def recursive_convert(obj: LyXobj, lang='english', toc: tuple[LyXobj, LyXobj] | None = None, keep_data=False):
+def recursive_convert(obj: LyXobj | Element, lang='english', toc: tuple[LyXobj, LyXobj] | None = None, keep_data=False):
     if obj.is_command('lang'):
         lang = obj.category()
     new_obj = one_obj(obj, keep_data)

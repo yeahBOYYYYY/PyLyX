@@ -40,7 +40,7 @@ class LyXobj(Element):
         self.__is_open = bool(is_open)
 
         if command + category + details:
-            self.set('class', self.obj_props())
+            self.set('class', self.obj_props_str())
 
     def can_be_nested_in(self, father) -> (bool, str):
         """
@@ -76,6 +76,10 @@ class LyXobj(Element):
         else:
             raise TypeError(f'invalid {self.NAME}: {obj}.')
 
+    def extend(self, objs):
+        for obj in objs:
+            self.append(obj)
+
     def insert(self, index, obj):
         from PyLyX.objects.Environment import Environment, Container
         if type(obj) in (LyXobj, Environment, Container):
@@ -90,8 +94,18 @@ class LyXobj(Element):
         else:
             raise TypeError(f'invalid {self.NAME}: {obj}.')
 
+    def __str__(self):
+        string = self.obj_props_str('-')
+        if not string:
+            string = self.tag
+        return f'<{self.NAME} {string} at {id(self)}>'
+
+    def clear(self):
+        Element.clear(self)
+        self.text, self.tail = '', ''
+
     def obj2lyx(self):
-        code = f'\\{self.obj_props()}\n'
+        code = f'\\{self.obj_props_str()}\n'
         if self.text:
             code += self.text + '\n'
         for e in self:
@@ -117,6 +131,9 @@ class LyXobj(Element):
     def details(self):
         return self.__details
 
+    def obj_props(self):
+        return self.__command, self.__category, self.__details
+
     def rank(self):
         return self.__rank
 
@@ -141,21 +158,11 @@ class LyXobj(Element):
             details = details.split()
         return self.__details in details
 
-    def obj_props(self, sep=' '):
-        lst = []
-        if self.__command:
-            lst.append(self.__command)
-        if self.__category:
-            lst.append(self.__category)
-        if self.__details:
-            lst.append(self.__details)
-        return sep.join(lst)
-
-    def __str__(self):
-        string = self.obj_props('-')
-        if not string:
-            string = self.tag
-        return f'<{self.NAME} {string} at {id(self)}>'
+    def obj_props_str(self, sep=' '):
+        props = list(self.obj_props())
+        while props and not props[-1]:
+            props.pop()
+        return sep.join(props)
 
     def get_dict(self):
         if self.is_in():
