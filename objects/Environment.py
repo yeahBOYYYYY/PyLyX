@@ -1,3 +1,4 @@
+from copy import deepcopy
 from xml.etree.ElementTree import Element, tostring
 from PyLyX.data.data import OBJECTS, DESIGNS, PAR_SET, ENDS, DOC_SET, XML_OBJ
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK, xml2txt
@@ -177,6 +178,15 @@ class Container(LyXobj):
             text += e.obj2lyx()
         text = xml2txt(text)
         return text
+
+    def clear(self, save_attrib=False, save_text=False, save_tail=False):
+        title = self[0]
+        attrib = deepcopy(self.attrib) if save_attrib else {}
+        text = self.text if save_text else ''
+        tail = self.tail if save_tail else ''
+        Element.clear(self)
+        self.text, self.tail, self.attrib = text, tail, attrib
+        self.append(title)
 
 
 QUOTED = {'name', 'reference', 'position', 'hor_pos', 'has_inner_box', 'inner_pos', 'use_parbox', 'use_makebox', 'width', 'special', 'height',

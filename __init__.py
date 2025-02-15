@@ -103,10 +103,11 @@ class LyX:
         export_bug_fix(False)
         return False
 
-    def export2xhtml(self, output_path: str | None = None, css_files=(), js_files=(), remove_old: bool | None = None, css_copy: bool | None = None):
+    def export2xhtml(self, output_path: str | None = None, css_files=(), css_folder='', js_files=(), js_in_head=False, remove_old: bool | None = None, css_copy: bool | None = None,
+                     keep_data=False, replaces: dict | None = None):
         output_path = default_path(self.__full_path, '.xhtml', output_path)
         old_file_remove(output_path, remove_old)
-        root, info = convert(self.__doc, css_files, js_files)
+        root, info = convert(self.__doc, css_files, css_folder, js_files, js_in_head, keep_data, replaces)
         xhtml_style(root, output_path, css_copy, info)
         indent(root)
         with open(output_path, 'wb') as f:

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from xml.etree.ElementTree import Element
 from PyLyX.data.data import OBJECTS
 
@@ -11,7 +12,7 @@ class LyXobj(Element):
     """
 
     NAME = 'LyxObj'
-    def __init__(self, tag, command='', category='', details='', text='', tail='', attrib=None, is_open=True, rank=DEFAULT_RANK):
+    def __init__(self, tag, command='', category='', details='', text='', tail='', attrib: dict | None = None, is_open=True, rank=DEFAULT_RANK):
         """
         Initializes a LyX object with specified properties.
 
@@ -100,9 +101,13 @@ class LyXobj(Element):
             string = self.tag
         return f'<{self.NAME} {string} at {id(self)}>'
 
-    def clear(self):
+    def clear(self, save_attrib=False, save_text=False, save_tail=False):
+        attrib = deepcopy(self.attrib) if save_attrib else {}
+        text = self.text if save_text else ''
+        tail = self.tail if save_tail else ''
         Element.clear(self)
-        self.text, self.tail = '', ''
+        self.text, self.tail, self.attrib = text, tail, attrib
+
 
     def obj2lyx(self):
         code = f'\\{self.obj_props_str()}\n'

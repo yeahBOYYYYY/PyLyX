@@ -1,7 +1,6 @@
 from os.path import join
 from json import load
 from xml.etree.ElementTree import Element
-
 from PyLyX.package_helper import mathjax, viewport
 from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
@@ -123,7 +122,7 @@ def create_text(obj, new_attrib: dict):
         return obj.text
 
 
-def one_obj(obj, keep_data=False):
+def one_obj(obj, keep_data=False, replaces: dict | None = None):
     info = create_info(obj)
     attrib = create_attributes(obj, info, keep_data)
     text = create_text(obj, attrib)
@@ -131,6 +130,10 @@ def one_obj(obj, keep_data=False):
     new_obj.open()
     for e in new_obj:
         e.open()
+    if replaces is not None:
+        for old in replaces:
+            for key in attrib:
+                attrib[key] = attrib[key].replace(old, replaces[old])
     new_obj.tag, new_obj.text, new_obj.attrib = info['tag'], text, attrib
     if 'class' in new_obj.attrib and new_obj.attrib['class'].endswith('*'):
         new_obj.set('class', new_obj.get('class')[:-1] + '_')
@@ -139,13 +142,13 @@ def one_obj(obj, keep_data=False):
     return new_obj
 
 
-def recursive_convert(obj: LyXobj | Element, lang='english', toc: tuple[LyXobj, LyXobj] | None = None, keep_data=False):
+def recursive_convert(obj: LyXobj | Element, lang='english', toc: tuple[LyXobj, LyXobj] | None = None, keep_data=False, replaces: dict | None = None):
     if obj.is_command('lang'):
         lang = obj.category()
-    new_obj = one_obj(obj, keep_data)
+    new_obj = one_obj(obj, keep_data, replaces)
     is_first = True
     for child in obj:
-        child = recursive_convert(child, lang, toc, keep_data)
+        child = recursive_convert(child, lang, toc, keep_data, replaces)
         if child.is_section_title() and is_first:
             new_obj[0] = child
         else:
@@ -166,7 +169,7 @@ def add_toc(toc_obj: LyXobj, toc_title: LyXobj, toc: LyXobj):
     toc_obj.append(toc)
 
 
-def convert(root, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=False, keep_data=False):
+def convert(root, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=False, keep_data=False, replaces: dict | None = None):
     if len(root) == 2:
         info = scan_head(root[0])
         lang = info.get('language', 'english')
@@ -182,7 +185,7 @@ def convert(root, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=F
         toc = LyXobj('ul')
         toc_title = TRANSLATE['inset']['CommandInset']['toc'].get(lang, 'Table of Contents')
         toc_title = LyXobj('h2', text=toc_title)
-        body = recursive_convert(root[1], lang, (toc_title, toc), keep_data)
+        body = recursive_convert(root[1], lang, (toc_title, toc), keep_data, replaces)
         create_title(head, body)
         css_and_js(head, body, css_files, js_files, js_in_head)
         numbering_and_toc(toc, body, info.get('secnumdepth', -1), info.get('tocdepth', -1), '', lang)
@@ -193,7 +196,7 @@ def convert(root, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=F
             for module in info['modules']:
                 perform_module(module, head, body, info, css_folder)
 
-        root = one_obj(root, keep_data)
+        root = one_obj(root, keep_data, replaces)
         root.set('xmlns', 'http://www.w3.org/1999/xhtml')
         root.extend((head, body))
         return root, info
