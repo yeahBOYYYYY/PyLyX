@@ -7,7 +7,7 @@ body {
       margin: 0 auto;
       color: light-dark(black, white);
       background-color: light-dark(white, black);
-      position: relative;
+      position: relative
 }
 
 

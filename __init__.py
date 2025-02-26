@@ -5,6 +5,7 @@ from PyLyX.objects.loader import load
 from PyLyX.xhtml.converter import convert
 from PyLyX.package_helper import correct_name, default_path, run_correct_brackets
 from PyLyX.init_helper import *
+from PyLyX.xhtml.helper import CSS_FOLDER
 
 # the first and the second lines in any LyX document.
 PREFIX = f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {CUR_FORMAT}\n'
@@ -30,7 +31,7 @@ class LyX:
             else:
                 self.__doc = doc_obj
         else:
-            raise TypeError(f'invalid document object: type of {doc_obj} is not {Environment.NAME}.')
+            raise TypeError(f'type of {doc_obj} is not {Environment.NAME}, and {full_path} is not valid path.')
 
     def save_as(self, path: str):
         if type(path) is not str:
@@ -103,7 +104,7 @@ class LyX:
         export_bug_fix(False)
         return False
 
-    def export2xhtml(self, output_path: str | None = None, css_files=(), css_folder='', js_files=(), js_in_head=False, remove_old: bool | None = None, css_copy: bool | None = None,
+    def export2xhtml(self, output_path: str | None = None, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=False, remove_old: bool | None = None, css_copy: bool | None = None,
                      keep_data=False, replaces: dict | None = None):
         output_path = default_path(self.__full_path, '.xhtml', output_path)
         old_file_remove(output_path, remove_old)

@@ -74,14 +74,21 @@ def xhtml_style(root: Environment | Element, output_path: str, css_copy: bool | 
             full_path = e.get('href')
             path = split(output_path)[0]
             name = split(full_path)[1]
-            copy(full_path, join(path, name))
+            if exists(full_path):
+                copy(full_path, join(path, name))
+            else:
+                print(f'invalid path: {full_path}')
             e.set('href', name)
     elif css_copy is None and info is not None and info.get('html_css_as_file') == 0:
         css_copy = LyXobj('style')
         for e in root[0].iterfind("link[@type='text/css']"):
-            with open(e.get('href'), 'r') as f:
-                css_copy.text = css_copy.text + f.read()
-            root[0].remove(e)
+            full_path = e.get('href', '')
+            if exists(full_path):
+                with open(full_path, 'r') as f:
+                    css_copy.text = css_copy.text + f.read()
+                root[0].remove(e)
+            else:
+                print(f'invalid path: {full_path}')
         root[0].append(css_copy)
 
     for e in root[0].iterfind("img"):
