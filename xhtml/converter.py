@@ -5,7 +5,7 @@ from PyLyX.package_helper import mathjax, viewport
 from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
-from PyLyX.xhtml.special_objects import perform_table, perform_lists, obj2text, correct_formula
+from PyLyX.xhtml.special_objects import perform_table, perform_lists, correct_formula
 from PyLyX.xhtml.helper import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, number_foots_and_captions, CSS_FOLDER
 from PyLyX.xhtml.modules import perform_module
 
@@ -13,6 +13,8 @@ with open(join(PACKAGE_PATH, 'xhtml\\data\\tags.json'), 'r', encoding='utf8') as
     TAGS = load(f)
 with open(join(PACKAGE_PATH, 'xhtml\\data\\tables.json'), 'r', encoding='utf8') as f:
     TABLES = load(f)
+with open(join(PACKAGE_PATH, 'xhtml\\data\\texts.json'), 'r', encoding='utf8') as f:
+    TEXTS = load(f)
 
 
 def create_info(obj):
@@ -71,7 +73,14 @@ def perform_include(obj: LyXobj):
                 include_body.append(element)
 
 
-def create_attributes(obj, dictionary: dict, keep_data=False):
+def perform_text(obj: LyXobj):
+    text = TEXTS[obj.command()][obj.category()][obj.details()]
+    if obj.is_category('space'):
+        text = '\\(' + text + '\\)'
+    return text
+
+
+def create_attributes(obj: LyXobj, dictionary: dict, keep_data=False):
     old_attrib = obj.attrib.copy()
     new_attrib = {}
 
@@ -109,8 +118,8 @@ def create_text(obj, new_attrib: dict):
     elif obj.is_category('FormulaMacro'):
         macro = obj.text.splitlines()[0]
         return correct_formula(macro)
-    elif 'text' in new_attrib:
-        return new_attrib.pop('text')
+    elif obj.is_in(TEXTS):
+        return perform_text(obj)
     elif obj.is_details('ref'):
         text = new_attrib.get('href', '')
         new_txt = ''
@@ -155,7 +164,6 @@ def recursive_convert(obj: LyXobj | Element, lang='english', toc: tuple[LyXobj, 
             new_obj.append(child)
         is_first = False
 
-    obj2text(new_obj)
     perform_lists(new_obj)
     if new_obj.is_command('lyxtabular'):
         perform_table(new_obj, lang)

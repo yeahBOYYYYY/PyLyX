@@ -3,9 +3,6 @@ from os.path import join
 from PyLyX.data.data import PACKAGE_PATH, RTL_LANGS
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 
-with open(join(PACKAGE_PATH, 'xhtml\\data\\texts.json'), 'r', encoding='utf8') as f:
-    TEXTS = load(f)
-
 
 def perform_table(table: LyXobj, lang='english'):
     table.attrib.update(table[0].attrib)  # tables[0] is <features tabularvalignment="middle">
@@ -73,23 +70,6 @@ def perform_lists(father):
             children.append(child)
         father.remove(child)
     father.extend(children)
-
-
-def obj2text(root):
-    last = root
-    for child in root:
-        if child.is_in(TEXTS):
-            text = TEXTS[child.command()][child.category()][child.details()]
-            if child.is_category('space'):
-                text = '\\(' + text + '\\)'
-            text += child.tail
-            if last is root:
-                last.text += text
-            else:
-                last.tail += text
-            root.remove(child)
-        else:
-            last = child
 
 
 def correct_formula(formula: str):
