@@ -8,9 +8,9 @@
 
   "noun": {"on": {"": {}}, "off": {"": {}}},
   "family": {
-  "roman": {"": {}},
-  "sans": {"": {}},
-  "typewriter": {"": {}}
+    "roman": {"": {}},
+    "sans": {"": {}},
+    "typewriter": {"": {}}
   },
   "SpecialChar": {"LyX": {"": {}}},
 
@@ -56,16 +56,16 @@
   "Caption": {"Standard": {"": {}}},
 
   "size": {
-  "tiny": {"": {}},
-  "scriptsize": {"": {}},
-  "footnotesize": {"": {}},
-  "small": {"": {}},
-  "normal": {"": {}},
-  "large": {"": {}},
-  "larger": {"": {}},
-  "largest": {"": {}},
-  "huge": {"": {}},
-  "giant": {"": {}}
+    "tiny": {"": {}},
+    "scriptsize": {"": {}},
+    "footnotesize": {"": {}},
+    "small": {"": {}},
+    "normal": {"": {}},
+    "large": {"": {}},
+    "larger": {"": {}},
+    "largest": {"": {}},
+    "huge": {"": {}},
+    "giant": {"": {}}
   },
 
   "backslash": {"": {"": {}}},

@@ -19,7 +19,8 @@ with open(join(PACKAGE_PATH, 'xhtml\\data\\texts.json'), 'r', encoding='utf8') a
 
 def create_info(obj):
     if type(obj) is Environment and obj.is_in(TAGS):
-        info = TAGS[obj.command()][obj.category()][obj.details()]
+        details = '*****' if obj.details() not in TAGS[obj.command()][obj.category()] else obj.details()
+        info = TAGS[obj.command()][obj.category()][details]
     elif type(obj) is Environment and obj.tag in TABLES:
         info = TABLES[obj.tag]
     elif type(obj) is Container:

@@ -171,7 +171,8 @@ class LyXobj(Element):
 
     def get_dict(self):
         if self.is_in():
-            return OBJECTS[self.__command][self.__category][self.__details]
+            details = '*****' if self.__details not in OBJECTS[self.__command][self.__category] else self.__details
+            return OBJECTS[self.__command][self.__category][details]
         else:
             return {}
 
@@ -180,6 +181,8 @@ class LyXobj(Element):
         if self.__command in dictionary:
             if self.__category in dictionary[self.__command]:
                 if self.__details in dictionary[self.__command][self.__category]:
+                    return True
+                elif '*****' in dictionary[self.__command][self.__category]:
                     return True
 
         return False

@@ -9,7 +9,7 @@
     "single": {"": {}},
     "onehalf": {"": {}},
     "double": {"": {}},
-    "other": {"some_number!!!": {}}
+    "other": {"*****": {}}
   },
   "noindent": {"": {"": {}}}
 }
