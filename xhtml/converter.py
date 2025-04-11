@@ -128,6 +128,8 @@ def create_text(obj, new_attrib: dict):
             if c in '1234567890.':
                 new_txt += c
         return new_txt
+    elif 'text' in new_attrib:
+        return new_attrib.pop('text')
     else:
         return obj.text
 
