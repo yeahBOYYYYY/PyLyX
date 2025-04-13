@@ -3,11 +3,10 @@
 
 body {
       font-family: sans-serif;
-      direction: rtl;
       margin: 0 auto;
       color: light-dark(black, white);
       background-color: light-dark(white, black);
-      position: relative
+      position: relative;
 }
 
 
@@ -48,7 +47,6 @@ div.layout.Abstract {
       margin-top: 0.7ex;
       margin-bottom: 0.7ex;
       margin-left: 3ex;
-      margin-right: 3ex;
 }
 
 div.layout.Address {
@@ -57,7 +55,6 @@ div.layout.Address {
 
 div.layout.Right.Address {
       margin-bottom: 1.5ex;
-      text-align: left;
 }
 
 div.layout.Part {
@@ -102,12 +99,8 @@ ul li ul li ul li ul {list-style-type: "- ";}
 
 div.layout.Labeling.item, div.layout.Description.item {display: flex;}
 dt.layout.Labeling, dt.layout.Description {min-width: 1.7cm;}
-dd.layout.Labeling, dd.layout.Description {flex: 1; margin-right: 1em;}
+dd.layout.Labeling, dd.layout.Description {flex: 1;}
 dt.layout.Description {font-weight: bold;}
-
-div.layout.LyX-Code, div.layout.Quote, div.layout.Verse {margin-right: 1cm;}
-
-div.layout.Quotation {margin-right: 1.5cm;}
 
 div.layout.LyX-Code, div.layout.Verbatim, div.layout.Verbatim_ {font-family: monospace;}
 
@@ -142,21 +135,23 @@ span.size.large {font-size: large;}
 span.size.larger {font-size: x-large;}
 span.size.largest {font-size: xx-large;}
 
-span.color.blue {color: blue}
-span.color.brown {color: brown}
+span.color.black {color: light-dark(black, white)}
+span.color.white {color: light-dark(white, black)}
+span.color.blue {color: light-dark(blue, rgb(64, 64, 255))}
+span.color.brown {color: light-dark(brown, rgb(227, 63, 63))}
 span.color.cyan {color: cyan}
-span.color.darkgray {color: darkgray}
+span.color.darkgray {color: light-dark(dimgray, lightgray)}
 span.color.gray {color: gray}
-span.color.green {color: green}
-span.color.lightgray {color: lightgrey}
+span.color.green {color: light-dark(green, rgb(0, 192, 0))}
+span.color.lightgray {color: light-dark(lightgrey, dimgray)}
 span.color.lime.green {color: limegreen}
 span.color.magenta {color: magenta}
-span.color.olive.green {color: olive}
+span.color.olive.green {color: light-dark(olive, rgb(192, 192, 0))}
 span.color.orange {color: orange}
 span.color.pink {color: pink}
-span.color.purple {color: purple}
-span.color.red {color: red}
-span.color.teal {color: teal}
+span.color.purple {color: light-dark(purple, rgb(192, 0, 192))}
+span.color.red {color: light-dark(red, rgb(255, 64, 64))}
+span.color.teal {color: light-dark(teal, rgb(0, 192, 192))}
 span.color.violet {color: violet}
 span.color.yellow {color: yellow}
 
@@ -195,7 +190,6 @@ span.inset.Foot:hover span.layout.Plain.Layout  {
 
 span.inset.Marginal {
       position: absolute;
-      right: -150px;
       width: fit-content;
       max-width: 120px;
       font-size: 0.85em;

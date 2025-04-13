@@ -6,7 +6,7 @@ from PyLyX.objects.Environment import Environment
 from PyLyX.xhtml.special_objects import prefixing
 
 CSS_FOLDER = join(PACKAGE_PATH, 'xhtml\\css')
-BASIC_RTL_CSS, BASIC_LTR_CSS = 'basic_rtl.css', 'basic_ltr.css'
+BASIC_CSS, RTL_CSS, LTR_CSS = 'basic.css', 'rtl.css', 'ltr.css'
 SECTIONS = ('Part', 'Chapter', 'Section', 'Subsection', 'Subsubsection', 'Paragraph', 'Subparagraph')
 
 
@@ -26,11 +26,12 @@ def scan_head(head: Environment):
 
 
 def perform_lang(root: Environment, head: Environment, lang: str, css_folder=CSS_FOLDER):
+    head.append(create_css(join(css_folder, BASIC_CSS)))
     if lang in RTL_LANGS:
         root.set('lang', RTL_LANGS[lang])
-        head.append(create_css(join(css_folder, BASIC_RTL_CSS)))
+        head.append(create_css(join(css_folder, RTL_CSS)))
     else:
-        head.append(create_css(join(css_folder, BASIC_LTR_CSS)))
+        head.append(create_css(join(css_folder, LTR_CSS)))
 
 
 def create_title(head: LyXobj, body: LyXobj):

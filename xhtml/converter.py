@@ -15,6 +15,8 @@ with open(join(PACKAGE_PATH, 'xhtml\\data\\tables.json'), 'r', encoding='utf8') 
     TABLES = load(f)
 with open(join(PACKAGE_PATH, 'xhtml\\data\\texts.json'), 'r', encoding='utf8') as f:
     TEXTS = load(f)
+with open(join(PACKAGE_PATH, 'xhtml\\data\\light_dark.json'), 'r', encoding='utf8') as f:
+    LIGHT_DARK = load(f)
 
 
 def create_info(obj):
@@ -105,6 +107,12 @@ def create_attributes(obj: LyXobj, dictionary: dict, keep_data=False):
         lines = obj.text.splitlines()[1:]
         lines = '\n'.join(lines)
         old_attrib['lines'] = lines
+
+    if 'style' in new_attrib:
+        for color in LIGHT_DARK:
+            light_dark_color = f'light-dark({LIGHT_DARK[color][0]}, {LIGHT_DARK[color][1]})'
+            new_attrib['style'] = new_attrib['style'].replace(color, light_dark_color)
+
     if keep_data:
         for key in old_attrib:
             new_attrib[f'data-{key}'] = old_attrib[key].replace('"', '')

@@ -1,0 +1,11 @@
+body {direction: ltr;}
+
+div.layout.Right.Address {text-align: right;}
+
+dd.layout.Labeling, dd.layout.Description {margin-left: 1em;}
+
+div.layout.LyX-Code, div.layout.Quote, div.layout.Verse {margin-left: 1cm;}
+
+div.layout.Quotation {margin-left: 1.5cm;}
+
+span.inset.Marginal {left: -150px;}

@@ -1,0 +1,13 @@
+{
+  "black": ["black", "white"],
+  "white": ["white", "black"],
+  "blue": ["blue", "rgb(64, 64, 255)"],
+  "brown": ["brown", "rgb(227, 63, 63)"],
+  "darkgray": ["dimgray", "lightgray"],
+  "green": ["green", "rgb(0, 192, 0)"],
+  "lightgray": ["lightgrey", "dimgray"],
+  "olive": ["olive", "rgb(192, 192, 0)"],
+  "purple": ["purple", "rgb(192, 0, 192)"],
+  "red": ["red", "rgb(255, 64, 64)"],
+  "teal": ["teal", "rgb(0, 192, 192)"]
+}

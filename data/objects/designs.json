@@ -50,7 +50,8 @@
     "red": {"": {}},
     "teal": {"": {}},
     "violet": {"": {}},
-    "yellow": {"": {}}
+    "yellow": {"": {}},
+    "white": {"": {}}
   },
 
   "Caption": {"Standard": {"": {}}},
