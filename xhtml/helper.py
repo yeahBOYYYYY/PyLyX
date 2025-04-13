@@ -1,10 +1,11 @@
 from os.path import join
-from PyLyX.package_helper import create_script, create_css
+from PyLyX.package_helper import correct_name
 from PyLyX.data.data import RTL_LANGS, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment
 from PyLyX.xhtml.special_objects import prefixing
 
+MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
 CSS_FOLDER = join(PACKAGE_PATH, 'xhtml\\css')
 BASIC_CSS, RTL_CSS, LTR_CSS = 'basic.css', 'rtl.css', 'ltr.css'
 SECTIONS = ('Part', 'Chapter', 'Section', 'Subsection', 'Subsubsection', 'Paragraph', 'Subparagraph')
@@ -35,12 +36,35 @@ def perform_lang(root: Environment, head: Environment, lang: str, css_folder=CSS
 
 
 def create_title(head: LyXobj, body: LyXobj):
-    title = body.find('h1')
-    if title is not None:
+    titles = body.findall(".//*[@class='layout Title']")
+    if titles:
+        title = titles[0]
         while not title.text and len(title):
-                title = title[0]
+            title = title[0]
         head_title = LyXobj('title', text=title.text)
         head.append(head_title)
+
+
+def create_css(path: str):
+    path = correct_name(path, '.css')
+    attrib = {'rel': 'stylesheet', 'type': 'text/css', 'href': path}
+    return LyXobj('link', attrib=attrib)
+
+
+def create_script(source: str, async_=''):
+    attrib = {'src': source}
+    if async_:
+        attrib['async'] = async_
+    return LyXobj('script', attrib=attrib)
+
+
+def mathjax():
+    return create_script(MATHJAX, 'async')
+
+
+def viewport():
+    attrib = {'name': 'viewport', 'content': 'width=device-width'}
+    return LyXobj('meta', attrib=attrib)
 
 
 def css_and_js(head, body, css_files=(), js_files=(), js_in_head=False):

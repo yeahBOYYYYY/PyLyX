@@ -2,7 +2,7 @@ from os import rename, remove
 from os.path import exists, join, split
 from xml.etree.ElementTree import Element
 from shutil import copy
-from PyLyX.data.data import USER_DIR
+from PyLyX.data.data import USER_DIR, RTL_LANGS
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.package_helper import detect_lang
@@ -49,7 +49,7 @@ def one_link(line: str):
     end = '"\n'
     if line.startswith(start) and line.endswith(end):
         text = line[len(start):-len(end)]
-        if detect_lang(text) == 'he':
+        if detect_lang(text) in RTL_LANGS:
             lst = text.split()
             lst.reverse()
             text = ' '.join(lst)

@@ -2,6 +2,16 @@ from json import load
 from os.path import join
 from PyLyX.data.data import PACKAGE_PATH, RTL_LANGS
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
+from PyLyX.package_helper import detect_lang
+
+with open(join(PACKAGE_PATH, 'xhtml\\data\\texts.json'), 'r', encoding='utf8') as f:
+    TEXTS = load(f)
+
+
+def perform_style(style: list, new_attrib: dict):
+    if style:
+        style = '; '.join(style)
+        new_attrib['style'] = style
 
 
 def perform_table(table: LyXobj, lang='english'):
@@ -18,6 +28,15 @@ def perform_table(table: LyXobj, lang='english'):
         for row in table.findall('tr'):
             for i in range(len(row)//2):
                 row[-1-i][0], row[i][0] = row[i][0], row[-1-i][0]
+
+
+def perform_cell(old_attrib: dict, new_attrib: dict):
+    style = []
+    for side in ('top', 'bottom', 'right', 'left'):
+        value = old_attrib.pop(f'{side}line', None)
+        if value == 'true':
+            style.append(f'border-{side}: solid 1px')
+    perform_style(style, new_attrib)
 
 
 def extract_first_word(obj, edit=False):
@@ -72,6 +91,36 @@ def perform_lists(father):
     father.extend(children)
 
 
+def perform_box(obj, old_attrib: dict, new_attrib: dict):
+    style = []
+    if 'framecolor' in old_attrib:
+        if not obj.is_command('Frameless'):
+            if old_attrib['framecolor'] != '"default"':
+                style.append(f'border-color: {old_attrib.pop('framecolor')}')
+    if 'backgroundcolor' in old_attrib:
+        if old_attrib['backgroundcolor'] != '"none"':
+            style.append(f'background-color: {old_attrib.pop('backgroundcolor')}')
+    perform_style(style, new_attrib)
+
+    if 'width' in new_attrib:
+        new_attrib['width'] = new_attrib['width'].replace('column%', '%')
+
+
+def perform_image(old_attrib: dict, new_attrib: dict):
+    style = []
+    if 'scale' in old_attrib:
+        scale = min(int(1.5*int(old_attrib.pop('scale'))), 100)
+        style.append(f'max-width: {scale}%')
+    perform_style(style, new_attrib)
+
+
+def perform_text(obj: LyXobj):
+    text = TEXTS[obj.command()][obj.category()][obj.details()]
+    if obj.is_category('space'):
+        text = '\\(' + text + '\\)'
+    return text
+
+
 def correct_formula(formula: str):
     while formula.endswith('\n'):
         formula = formula[:-1]
@@ -90,7 +139,19 @@ def correct_formula(formula: str):
         formula = formula[2:]
     if formula.endswith('\\)'):
         formula = formula[:-2]
-    return '\\(' + formula + '\\)'
+    formula = '\\(' + formula + '\\)'
+
+    i = formula.find(r'\text{')
+    while i != -1:
+        j = i + len(r'\text{')
+        start = formula[:j]
+        k = formula.find('}', i)
+        text, end = formula[j:k], formula[k:]
+        if detect_lang(text) in RTL_LANGS:
+            text = text[::-1]
+        formula = start + text + end
+        i = formula.find(r'\text{', k+1)
+    return formula
 
 
 def prefixing(obj: LyXobj, prefix, sep=' '):

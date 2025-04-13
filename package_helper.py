@@ -2,8 +2,6 @@ from os.path import split, splitext, join
 from string import ascii_letters
 from PyLyX.objects.LyXobj import LyXobj
 
-MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
-
 
 def correct_name(full_path: str, extension: str) -> str:
     extension = extension if extension.startswith('.') else '.' + extension
@@ -23,9 +21,9 @@ def default_path(old_path, new_extension, new_path=None):
 def detect_lang(text: str):
     for char in text:
         if char in 'אבגדהוזחטיכלמנסעפצקרשת':
-            return 'he'
+            return 'hebrew'
         elif char in ascii_letters:
-            return 'en'
+            return 'english'
     return ''
 
 
@@ -49,25 +47,3 @@ def run_correct_brackets(obj: LyXobj):
         if not e.is_category({'Formula', 'FormulaMacro'}):
             e.text , is_open = correct_brackets(e.text, is_open)
         e.tail, is_open = correct_brackets(e.tail, is_open)
-
-
-def create_css(path: str):
-    path = correct_name(path, '.css')
-    attrib = {'rel': 'stylesheet', 'type': 'text/css', 'href': path}
-    return LyXobj('link', attrib=attrib)
-
-
-def create_script(source: str, async_=''):
-    attrib = {'src': source}
-    if async_:
-        attrib['async'] = async_
-    return LyXobj('script', attrib=attrib)
-
-
-def mathjax():
-    return create_script(MATHJAX, 'async')
-
-
-def viewport():
-    attrib = {'name': 'viewport', 'content': 'width=device-width'}
-    return LyXobj('meta', attrib=attrib)

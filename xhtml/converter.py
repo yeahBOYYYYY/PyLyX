@@ -1,20 +1,19 @@
 from os.path import join
 from json import load
 from xml.etree.ElementTree import Element
-from PyLyX.package_helper import mathjax, viewport
 from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
-from PyLyX.xhtml.special_objects import perform_table, perform_lists, correct_formula
-from PyLyX.xhtml.helper import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, number_foots_and_captions, CSS_FOLDER
+from PyLyX.xhtml.special_objects import perform_table, perform_cell, perform_lists, perform_box, perform_text, \
+    correct_formula, TEXTS, perform_image
+from PyLyX.xhtml.helper import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, \
+    number_foots_and_captions, mathjax, viewport, CSS_FOLDER
 from PyLyX.xhtml.modules import perform_module
 
 with open(join(PACKAGE_PATH, 'xhtml\\data\\tags.json'), 'r', encoding='utf8') as f:
     TAGS = load(f)
 with open(join(PACKAGE_PATH, 'xhtml\\data\\tables.json'), 'r', encoding='utf8') as f:
     TABLES = load(f)
-with open(join(PACKAGE_PATH, 'xhtml\\data\\texts.json'), 'r', encoding='utf8') as f:
-    TEXTS = load(f)
 with open(join(PACKAGE_PATH, 'xhtml\\data\\light_dark.json'), 'r', encoding='utf8') as f:
     LIGHT_DARK = load(f)
 
@@ -34,69 +33,22 @@ def create_info(obj):
     return info
 
 
-def perform_box(obj, old_attrib: dict, new_attrib: dict):
-    style = []
-    if 'framecolor' in old_attrib:
-        if not obj.is_command('Frameless'):
-            if old_attrib['framecolor'] != '"default"':
-                style.append(f'border-color: {old_attrib.pop('framecolor')}')
-    if 'backgroundcolor' in old_attrib:
-        if old_attrib['backgroundcolor'] != '"none"':
-            style.append(f'background-color: {old_attrib.pop('backgroundcolor')}')
-    if style:
-        style = '; '.join(style)
-        new_attrib['style'] = style
-
-    if 'width' in new_attrib:
-        new_attrib['width'] = new_attrib['width'].replace('column%', '%')
-
-
-def perform_cell(old_attrib: dict, new_attrib: dict):
-    style = []
-    for side in ('top', 'bottom', 'right', 'left'):
-        value = old_attrib.pop(f'{side}line', None)
-        if value == 'true':
-            style.append(f'border-{side}: solid 1px')
-    if style:
-        style = '; '.join(style)
-        new_attrib['style'] = style
-
-
-def perform_include(obj: LyXobj):
-    if 'data-filename' in obj.attrib:
-        path = obj.get('data-filename')
-        if path.endswith('.lyx'):
-            from PyLyX import LyX
-            root = LyX(path).get_doc()
-            root, info = convert(root)
-            body = root[1]
-            include_body = LyXobj('div', attrib={'class': 'include body'}, rank=-DEFAULT_RANK)
-            obj.append(include_body)
-            for element in body:
-                include_body.append(element)
-
-
-def perform_text(obj: LyXobj):
-    text = TEXTS[obj.command()][obj.category()][obj.details()]
-    if obj.is_category('space'):
-        text = '\\(' + text + '\\)'
-    return text
-
-
-def create_attributes(obj: LyXobj, dictionary: dict, keep_data=False):
+def create_attributes(obj: LyXobj, info: dict, keep_data=False):
     old_attrib = obj.attrib.copy()
     new_attrib = {}
 
-    if 'options' in dictionary:
-        for key in dictionary['options']:
+    if 'options' in info:
+        for key in info['options']:
             if key in old_attrib:
-                new_key, value = dictionary['options'][key], old_attrib.pop(key)
+                new_key, value = info['options'][key], old_attrib.pop(key)
                 new_attrib[new_key] = value
     if 'class' in old_attrib:
         new_attrib['class'] = old_attrib.pop('class')
 
     if obj.is_category('Box'):
         perform_box(obj, old_attrib, new_attrib)
+    elif obj.is_category('Graphics'):
+        perform_image(old_attrib, new_attrib)
     elif obj.tag == 'cell':
         perform_cell(old_attrib, new_attrib)
     elif obj.is_details('ref'):
@@ -221,3 +173,17 @@ def convert(root, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=F
         return root, info
     else:
         raise Exception(f'root must contain 2 subelements exactly, not {len(root)}.')
+
+
+def perform_include(obj: LyXobj):
+    if 'data-filename' in obj.attrib:
+        path = obj.get('data-filename')
+        if path.endswith('.lyx'):
+            from PyLyX import LyX
+            root = LyX(path).get_doc()
+            root, info = convert(root)
+            body = root[1]
+            include_body = LyXobj('div', attrib={'class': 'include body'}, rank=-DEFAULT_RANK)
+            obj.append(include_body)
+            for element in body:
+                include_body.append(element)
