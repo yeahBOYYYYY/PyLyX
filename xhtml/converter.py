@@ -5,7 +5,7 @@ from PyLyX.data.data import PAR_SET, PACKAGE_PATH, TRANSLATE
 from PyLyX.objects.LyXobj import LyXobj, DEFAULT_RANK
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.xhtml.special_objects import perform_table, perform_cell, perform_lists, perform_box, perform_text, \
-    correct_formula, TEXTS, perform_image
+    perform_image, correct_formula, TEXTS
 from PyLyX.xhtml.helper import scan_head, perform_lang, create_title, css_and_js, numbering_and_toc, \
     number_foots_and_captions, mathjax, viewport, CSS_FOLDER
 from PyLyX.xhtml.modules import perform_module
@@ -82,12 +82,18 @@ def create_text(obj, new_attrib: dict):
     elif obj.is_in(TEXTS):
         return perform_text(obj)
     elif obj.is_details('ref'):
-        text = new_attrib.get('href', '')
+        text = new_attrib.get('href', '#')[1:]
         new_txt = ''
-        for c in text:
-            if c in '1234567890.':
-                new_txt += c
-        return new_txt
+        if obj.new_attrib.get('data-LatexCommand') == 'ref':
+            for c in text:
+                if c in '1234567890.':
+                    new_txt += c
+        elif obj.new_attrib.get('data-LatexCommand') == 'nameref':
+            pass
+        if new_txt:
+            return new_txt
+        else:
+            return text
     elif 'text' in new_attrib:
         return new_attrib.pop('text')
     else:

@@ -214,3 +214,4 @@ div.inset.Caption.Standard {text-align: center; margin: 1em;}
 span.inset.Note.Note {display: none;}
 span.inset.Note.Note div {display: none;}
 span.inset.FormulaMacro {display: none;}
+span.inset.ERT {display: none;}
