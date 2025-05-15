@@ -84,11 +84,11 @@ def create_text(obj, new_attrib: dict):
     elif obj.is_details('ref'):
         text = new_attrib.get('href', '#')[1:]
         new_txt = ''
-        if obj.new_attrib.get('data-LatexCommand') == 'ref':
+        if new_attrib.get('data-LatexCommand') == 'ref':
             for c in text:
                 if c in '1234567890.':
                     new_txt += c
-        elif obj.new_attrib.get('data-LatexCommand') == 'nameref':
+        elif new_attrib.get('data-LatexCommand') == 'nameref':
             pass
         if new_txt:
             return new_txt
