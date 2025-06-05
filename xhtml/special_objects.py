@@ -60,35 +60,29 @@ def extract_first_word(obj, edit=False):
         return False
 
 
-def perform_lists(father):
-    last = father
-    children = []
-    for child in list(father):  # list for save the order?
-        if child.is_category({'Labeling', 'Itemize', 'Enumerate', 'Description'}):
-            if child.is_category('Itemize'):
-                tag = 'ul'
-            elif child.is_category('Enumerate'):
-                tag = 'ol'
-            else:
-                tag = 'dl'
+def perform_lists(father, child, last=None):
+    if child.is_category('Itemize'):
+        tag = 'ul'
+    elif child.is_category('Enumerate'):
+        tag = 'ol'
+    else:
+        tag = 'dl'
 
-            if last.tag != tag:
-                last = LyXobj(tag, rank=-DEFAULT_RANK)
-                children.append(last)
+    if last is None or last.tag != tag:
+        last = LyXobj(tag, rank=-DEFAULT_RANK)
+        father.append(last)
 
 
-            if child.is_category('Itemize') or child.is_category('Enumerate'):
-                last.append(child)
-            else:
-                first = extract_first_word(child, edit=True)
-                prefix = LyXobj('dt', text=first, attrib={'class': child.get('class')}, rank=-DEFAULT_RANK)
-                item = LyXobj('div', attrib={'class': child.get('class') + ' item'}, rank=-DEFAULT_RANK)
-                item.extend((prefix, child))
-                last.append(item)
-        else:
-            children.append(child)
-        father.remove(child)
-    father.extend(children)
+    if child.is_category('Itemize') or child.is_category('Enumerate'):
+        last.append(child)
+    else:
+        first = extract_first_word(child, edit=True)
+        prefix = LyXobj('dt', text=first, attrib={'class': child.get('class')}, rank=-DEFAULT_RANK)
+        item = LyXobj('div', attrib={'class': child.get('class') + ' item'}, rank=-DEFAULT_RANK)
+        item.extend((prefix, child))
+        last.append(item)
+
+    return last
 
 
 def perform_box(obj, old_attrib: dict, new_attrib: dict):

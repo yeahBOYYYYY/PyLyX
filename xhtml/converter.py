@@ -125,15 +125,19 @@ def recursive_convert(obj: LyXobj | Element, lang='english', toc: tuple[LyXobj, 
         lang = obj.category()
     new_obj = one_obj(obj, keep_data, replaces)
     is_first = True
+    last = None
     for child in obj:
         child = recursive_convert(child, lang, toc, keep_data, replaces)
         if child.is_section_title() and is_first:
             new_obj[0] = child
+            last = None
+        elif child.is_category({'Labeling', 'Itemize', 'Enumerate', 'Description'}):
+            last = perform_lists(new_obj, child, last)
         else:
             new_obj.append(child)
+            last = None
         is_first = False
 
-    perform_lists(new_obj)
     if new_obj.is_command('lyxtabular'):
         perform_table(new_obj, lang)
     if new_obj.is_details('toc') and toc is not None:
