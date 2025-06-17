@@ -6,7 +6,7 @@ def find_settings():
     for i in range(9, -1, -1):
         path = f'{DRIVE}:\\Program Files\\LyX 2.{i}'
         if exists(path):
-            version = 2 + 0.1 * i
+            version = 2 + 0.1*i
             user_dir = f'{USER}\\AppData\\Roaming\\LyX{version}'
             break
     else:

@@ -1,7 +1,6 @@
 from os.path import splitext
 from PyLyX import LyX, correct_name
 
-
 def main(input_path: str, output_path: str):
     output_path = correct_name(output_path, '.xhtml')
     file = LyX(input_path)

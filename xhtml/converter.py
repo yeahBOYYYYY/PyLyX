@@ -18,7 +18,7 @@ with open(join(PACKAGE_PATH, 'xhtml\\data\\light_dark.json'), 'r', encoding='utf
     LIGHT_DARK = load(f)
 
 
-def create_info(obj):
+def create_info(obj: LyXobj):
     if type(obj) is Environment and obj.is_in(TAGS):
         details = '*****' if obj.details() not in TAGS[obj.command()][obj.category()] else obj.details()
         info = TAGS[obj.command()][obj.category()][details]
