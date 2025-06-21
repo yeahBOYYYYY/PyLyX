@@ -11,8 +11,8 @@ def correct_name(full_path: str, extension: str) -> str:
     return path
 
 
-def default_path(old_path, new_extension, new_path=None):
-    if new_path is not None:
+def default_path(old_path, new_extension, new_path=''):
+    if new_path:
         return correct_name(new_path, new_extension)
     else:
         return correct_name(old_path, new_extension)
@@ -29,15 +29,16 @@ def detect_lang(text: str):
 
 def correct_brackets(text: str, is_open=False):
     new_text = ''
-    for char in text:
-        if char in {'(', ')'}:
-            if is_open:
-                new_text += ')'
+    for brackets in {{'(', ')'}, {'[', ']'}, {'{', '}'}}:
+        for char in text:
+            if char in brackets:
+                if is_open:
+                    new_text += ')'
+                else:
+                    new_text += '('
+                is_open = not is_open
             else:
-                new_text += '('
-            is_open = not is_open
-        else:
-            new_text += char
+                new_text += char
     return new_text, is_open
 
 

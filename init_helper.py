@@ -2,10 +2,13 @@ from os import rename, remove
 from os.path import exists, join, split
 from xml.etree.ElementTree import Element
 from shutil import copy
-from PyLyX.data.data import USER_DIR, RTL_LANGS
+from PyLyX.data.data import VERSION, CUR_FORMAT, USER_DIR, RTL_LANGS
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment, Container
 from PyLyX.package_helper import detect_lang
+
+# the first and the second lines in any LyX document.
+PREFIX = f'#LyX {VERSION} created this file. For more info see https://www.lyx.org/\n\\lyxformat {CUR_FORMAT}\n'
 
 
 def rec_append(obj1: LyXobj | Environment | Container | Element, obj2: LyXobj | Environment | Container):
