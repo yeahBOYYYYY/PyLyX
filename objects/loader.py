@@ -1,5 +1,5 @@
 from os.path import split, join
-from xml.etree.ElementTree import fromstring
+from xml.etree.ElementTree import fromstring, ParseError
 from PyLyX.data.data import ENDS, OBJECTS, DESIGNS, XML_OBJ
 from PyLyX.objects.LyXobj import LyXobj
 from PyLyX.objects.Environment import Environment, Container
@@ -157,9 +157,14 @@ def perform_new_obj(branch: list, unknowns: dict, command: str, category: str, d
     if is_known_object(command, category):
         if details in OBJECTS[command][category]:
             if line.startswith('<'):
-                line = line.replace('">', '" >')
-                line = line.replace('>', '/>')
-                element = fromstring(line)
+                if line.endswith('">\n'):
+                    line = line[:-3] + '" />\n'
+                elif line.endswith('>\n'):
+                    line = line[:-2] + '/>\n'
+                try:
+                    element = fromstring(line)
+                except ParseError as e:
+                    raise Exception(f'An error occurred while loading xml from string:\n{line}Error message is: "{e}"')
                 obj = Environment(element.tag, 'xml', attrib=element.attrib)
             else:
                 obj = Environment(command, category, details, text)

@@ -146,13 +146,12 @@ class LyX:
         :param output_path: path for save the exporting file.
         :param css_files: paths of css files for add to the xhtml file.
         :param css_folder: path for the default css files by the PyLyX package.
-        :param css_copy: do you want copy the css files to the output path?
+        :param css_copy: do you want copy the css files to the output path? (if False copy the css content to the xhtml output)
         :param js_files: paths of js files for add to the xhtml file.
-        :param js_in_head:
-        :param remove_old:
-        :param keep_data:
-        :param replaces:
-        :return:
+        :param js_in_head: do you want insert the js elements to the xhtml head? (if False insert the js elements to the body's end)
+        :param remove_old: do you want to remove the old xhtml version (if exists)?
+        :param keep_data: do you want save data from the LyX file, which is unnecessary for xhtml?
+        :param replaces: a dictionary of string replaces (useful when you want change the xhtml file path)
         """
         output_path = default_path(self.__full_path, '.xhtml', output_path)
         old_file_remove(output_path, remove_old)
@@ -164,37 +163,56 @@ class LyX:
         return True
 
     def export2xml(self, output_path=''):
+        """
+        View the file tree as xml file.
+        :param output_path: path for saving the xml file.
+        """
         if not output_path:
-            output_path = self.__full_path.replace('.lyx', '.xml')
-        else:
-            output_path = correct_name(output_path, '.xml')
+            output_path = self.__full_path
+        output_path = correct_name(output_path, '.xml')
         xml = ElementTree(self.__doc)
         xml.write(output_path)
 
-    def find(self, query: str | None, command='', category='', details=''):
+    def find(self, query: str | None, command='', category='', details='') -> LyXobj | Environment | Container | Element | None:
+        """
+        Find the first element which has a given query in its text or tail.
+        :param query: query for search.
+        :param command: search in elements with this command only.
+        :param category: search in elements with these command and category only.
+        :param details: search in elements with these command category, and details only.
+        :return: the first element which has a given query in its text or tail (None if there is no such element).
+        """
         return rec_find(self.__doc[1], query, command, category, details)
 
     def find_and_replace(self, old_str, new_str, command: str | None = None, category: str | None = None, details: str | None = None, backup=True):
+        """
+        Find and replace any occurrence of given string with another given string.
+        :param old_str: the old string for replace.
+        :param new_str: the new string for replace.
+        :param command: find and replace in elements with this command only.
+        :param category:find and replace in elements with these command and category only.
+        :param details: find and replace in elements with these command category, and details only.
+        :param backup: do you want backup the old version of the LyX document?
+        """
         if backup:
             self.backup()
         rec_find_and_replace(self.__doc, old_str, new_str, command, category, details)
         self.save()
 
-    def reverse_rtl_links(self, backup=True) -> bool:
+    def update_version(self, backup=True) -> bool:
+        """
+        Update file to the newest version.
+        :param backup: do you want backup the old version of the LyX document?
+        :return: True if updated now (the file was in old version), False else (the file was in the newest version).
+        """
         if backup:
             self.backup()
-        return line_functions(self, one_link)
-
-    def update_version(self, backup=True) -> bool:
         with open(self.__full_path, 'r', encoding='utf8') as file:
             first_line = file.readline()
-            if first_line.startswith(f'#LyX {VERSION}'):
-                already_updated = True
-            else:
-                self.export('lyx')
-                already_updated = False
-
-        if VERSION == 2.4 and not already_updated:
-            self.reverse_rtl_links(backup)
-
-        return not already_updated
+        if first_line.startswith(f'#LyX {VERSION}'):
+            updated_now = False
+        else:
+            self.export('lyx')
+            self.__doc = load(self.__full_path)
+            updated_now = True
+        return updated_now
