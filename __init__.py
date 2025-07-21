@@ -74,6 +74,7 @@ class LyX:
     def backup(self) -> bool:
         """
         Backup the old version of the LyX document in the buckup directory.
+        If the backup directory is not define, use the Downloads directory instead.
         :return: True if buckup was success, False else.
         """
         if exists(self.__full_path):
@@ -84,15 +85,21 @@ class LyX:
             return False
 
     def get_path(self) -> str:
-        """:return: the file's path."""
+        """
+        :return: the file's path.
+        """
         return self.__full_path
 
     def get_doc(self) -> Environment:
-        """:return: an Environment which presents a LyX document"""
+        """
+        :return: an Environment which presents a LyX document
+        """
         return self.__doc
 
     def is_writeable(self) -> bool:
-        """:return: does the file can be edited by the PyLyX package."""
+        """
+        :return: does the file can be edited by the PyLyX package.
+        """
         return self.__writeable
 
     def append(self, obj: LyXobj | Environment | Container):
@@ -116,7 +123,7 @@ class LyX:
         """
         if output_path:
             fmt_ = str(fmt)
-            while fmt_ and fmt[-1] in '1234567890':
+            while fmt_ and fmt_[-1] in '1234567890':
                 fmt_ = fmt_[:-1]
             output_path = correct_name(output_path, fmt_)
             cmd = [LYX_EXE, '--export-to', fmt, output_path, self.__full_path]

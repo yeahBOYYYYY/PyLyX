@@ -3,6 +3,10 @@ from json import load
 
 
 def find_settings():
+    """
+    Find the LyX settings: version, installation path, user directory (of LyX) and the backup directory (if exists).
+    If the backup directory is not define, use the Downloads directory instead.
+    """
     for i in range(9, -1, -1):
         path = f'{DRIVE}:\\Program Files\\LyX 2.{i}'
         if exists(path):
@@ -10,7 +14,7 @@ def find_settings():
             user_dir = f'{USER}\\AppData\\Roaming\\LyX{version}'
             break
     else:
-        raise FileNotFoundError(f'Make sure LyX is installed on your computer,\nI can not found it in {DRIVE + ":\\Program Files\\LyX 2.x"}')
+        raise FileNotFoundError(f'Make sure LyX is installed on your computer,\nI can not found it in {DRIVE + ":\\Program Files"}')
 
     backup_dir = DOWNLOADS_DIR
     preferences = join(user_dir, 'preferences')
@@ -18,7 +22,7 @@ def find_settings():
         with open(join(user_dir, 'preferences'), 'r') as file:
             for line in file:
                 if line.startswith('\\backupdir_path'):
-                    backup_dir = line.split()[1][1:-1]
+                    backup_dir = line.split()[1][1:-1]  #split for ignore the quotation marks.
                     break
     return version, path, user_dir, backup_dir
 
