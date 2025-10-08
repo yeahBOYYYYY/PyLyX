@@ -1,3 +1,17 @@
+"""
+Special object handlers for XHTML conversion.
+
+This module provides specialized conversion functions for complex LyX elements:
+- Tables (lyxtabular): Cell formatting, borders, alignment
+- Boxes and frames: Border styles, colors, padding
+- Images: Sizing, scaling, positioning
+- Lists: Itemize, enumerate, description environments
+- Text objects: Quotes, accents, special characters
+- Formulas: LaTeX to MathJax conversion
+
+Each handler transforms LyX-specific formatting into appropriate HTML/CSS.
+"""
+
 from json import load
 from os.path import join
 from PyLyX.data.data import PACKAGE_PATH, RTL_LANGS
