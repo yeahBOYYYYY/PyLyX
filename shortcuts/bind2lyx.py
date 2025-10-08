@@ -1,3 +1,16 @@
+"""
+Convert LyX keybinding files to readable LyX documents.
+
+This module parses LyX .bind files (keyboard shortcut configurations)
+and generates a formatted LyX document with tables showing:
+- Keyboard shortcuts
+- Associated commands
+- Command outputs/descriptions
+
+Usage:
+    python bind2lyx.py [bind_file] [output_file]
+"""
+
 from os import remove
 from os.path import split, splitext, exists, join
 from sys import argv
@@ -25,6 +38,18 @@ LAYOUTS = {0: 'Part',
 
 
 def translate_shortcut(code):
+    """
+    Translate LyX shortcut notation to human-readable format.
+    
+    Converts LyX's internal shortcut format to standard notation:
+    - C- → Ctrl+
+    - M- → Alt+
+    - S- → Shift+
+    Also handles special keys and shifted characters.
+    
+    :param code: LyX shortcut code (e.g., 'C-S-x')
+    :return: Human-readable shortcut (e.g., 'Ctrl+Shift+X')
+    """
     code = code.replace('C-', 'Ctrl+')
     code = code.replace('M-', 'Alt+')
     code = code.replace('S-', 'Shift+')
@@ -37,6 +62,17 @@ def translate_shortcut(code):
 
 
 def command2lyx(code: str):
+    """
+    Convert LyX command to displayable format.
+    
+    Transforms LyX command strings into readable/renderable formats:
+    - Simplifies complex command sequences
+    - Converts math-insert commands to actual formulas
+    - Converts math-delim commands to delimiter pairs
+    
+    :param code: LyX command string
+    :return: Formatted command string or Environment object for rendering
+    """
     if code.startswith('command-sequence'):
         code = 'command-sequence...'
     elif code.startswith('command-alternatives'):
@@ -58,12 +94,27 @@ def command2lyx(code: str):
 
 
 def translate_table(table: list[list]):
+    """
+    Translate all shortcuts and commands in a table.
+    
+    Applies translate_shortcut and command2lyx to each row.
+    
+    :param table: List of [shortcut, command] pairs
+    """
     for i in range(len(table)):
         table[i][0] = translate_shortcut(table[i][0])
         table[i][1] = command2lyx(table[i][1])
 
 
 def design_table(table: list[list]):
+    """
+    Format table with headers and row numbers.
+    
+    Adds a header row and prepends row numbers to each entry.
+    Also adds an empty explanations column.
+    
+    :param table: List of data rows to format
+    """
     table.insert(0, ['', 'Shortcut', 'Output', 'Explanations'])
     for i in range(1, len(table)):
         table[i].insert(0, str(i))
