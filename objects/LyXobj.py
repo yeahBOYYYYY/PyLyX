@@ -1,3 +1,17 @@
+"""
+Base LyX object class extending XML Element.
+
+This module defines LyXobj, the fundamental building block for LyX document trees.
+LyXobj extends Python's xml.etree.ElementTree.Element to add:
+- LyX-specific properties (command, category, details)
+- Rank-based nesting validation
+- Conversion to LyX file format
+- Helper methods for querying object properties
+
+All LyX document elements are instances of LyXobj or its subclasses
+(Environment, Container).
+"""
+
 from copy import deepcopy
 from xml.etree.ElementTree import Element
 from PyLyX.data.data import OBJECTS

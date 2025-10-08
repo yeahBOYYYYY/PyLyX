@@ -1,3 +1,16 @@
+"""
+Environment and Container classes for LyX document structure.
+
+This module defines:
+- Environment: Represents LyX environments (layouts, insets, document settings)
+  with validated properties and specialized nesting rules
+- Container: Wraps layout objects that form document sections
+- Helper functions for LyX syntax serialization
+
+Environments handle the complex nesting rules of LyX documents, ensuring
+that objects can only be placed in valid parent contexts.
+"""
+
 from copy import deepcopy
 from xml.etree.ElementTree import Element, tostring
 from PyLyX.data.data import OBJECTS, DESIGNS, PAR_SET, ENDS, DOC_SET, XML_OBJ
