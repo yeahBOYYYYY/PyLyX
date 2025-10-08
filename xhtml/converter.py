@@ -1,3 +1,14 @@
+"""
+Main XHTML conversion module for LyX documents.
+
+This module converts LyX document objects to XHTML format by:
+- Mapping LyX objects to appropriate HTML tags
+- Converting LyX attributes to HTML/CSS styles
+- Handling special elements (formulas, tables, images, etc.)
+- Generating table of contents and section numbering
+- Processing document modules
+"""
+
 from os.path import join
 from json import load
 from xml.etree.ElementTree import Element
@@ -19,6 +30,15 @@ with open(join(PACKAGE_PATH, 'xhtml\\data\\light_dark.json'), 'r', encoding='utf
 
 
 def create_info(obj: LyXobj):
+    """
+    Determine HTML tag and conversion information for a LyX object.
+    
+    Maps LyX objects to appropriate HTML tags based on their type and properties.
+    Looks up conversion rules in TAGS and TABLES dictionaries.
+    
+    :param obj: LyX object to get conversion info for
+    :return: Dictionary containing 'tag' and optionally other conversion parameters
+    """
     if type(obj) is Environment and obj.is_in(TAGS):
         details = '*****' if obj.details() not in TAGS[obj.command()][obj.category()] else obj.details()
         info = TAGS[obj.command()][obj.category()][details]
@@ -34,6 +54,18 @@ def create_info(obj: LyXobj):
 
 
 def create_attributes(obj: LyXobj, info: dict, keep_data=False):
+    """
+    Convert LyX object attributes to HTML attributes.
+    
+    Transforms LyX-specific attributes into appropriate HTML attributes,
+    handles special cases (boxes, images, tables, etc.), and optionally
+    preserves LyX metadata as data- attributes.
+    
+    :param obj: LyX object to convert attributes from
+    :param info: Conversion information dictionary with attribute mappings
+    :param keep_data: Whether to preserve all LyX attributes as data- attributes
+    :return: Dictionary of HTML attributes
+    """
     old_attrib = obj.attrib.copy()
     new_attrib = {}
 
@@ -74,6 +106,19 @@ def create_attributes(obj: LyXobj, info: dict, keep_data=False):
 
 
 def create_text(obj, new_attrib: dict):
+    """
+    Extract and format text content from a LyX object.
+    
+    Handles special text formatting for:
+    - Mathematical formulas (converts LaTeX syntax)
+    - Formula macros
+    - Special text objects (quotes, accents, etc.)
+    - Cross-references
+    
+    :param obj: LyX object to extract text from
+    :param new_attrib: HTML attributes dictionary (may be modified)
+    :return: Formatted text string for HTML output
+    """
     if obj.is_category('Formula'):
         return correct_formula(obj.text)
     elif obj.is_category('FormulaMacro'):
@@ -101,6 +146,18 @@ def create_text(obj, new_attrib: dict):
 
 
 def one_obj(obj, keep_data=False, replaces: dict | None = None):
+    """
+    Convert a single LyX object to HTML (non-recursive).
+    
+    Creates a copy of the object with HTML tag, attributes, and text.
+    Does not convert child elements. Handles string replacements in attributes
+    and special processing for include insets.
+    
+    :param obj: LyX object to convert
+    :param keep_data: Whether to preserve LyX metadata as data- attributes
+    :param replaces: Dictionary of string replacements to apply to attributes
+    :return: Converted object with HTML properties
+    """
     info = create_info(obj)
     attrib = create_attributes(obj, info, keep_data)
     text = create_text(obj, attrib)
@@ -121,6 +178,22 @@ def one_obj(obj, keep_data=False, replaces: dict | None = None):
 
 
 def recursive_convert(obj: LyXobj | Element, lang='english', toc: tuple[LyXobj, LyXobj] | None = None, keep_data=False, replaces: dict | None = None):
+    """
+    Recursively convert a LyX object and all its children to HTML.
+    
+    Main conversion function that processes the entire document tree:
+    - Tracks document language for RTL/LTR handling
+    - Converts each object and its descendants
+    - Handles special cases (section titles, lists, tables)
+    - Builds table of contents structure
+    
+    :param obj: LyX object to convert
+    :param lang: Document language code (e.g., 'english', 'hebrew')
+    :param toc: Tuple of (toc_title, toc_list) for building table of contents
+    :param keep_data: Whether to preserve LyX metadata
+    :param replaces: Dictionary of string replacements for attributes
+    :return: Converted HTML object with all children converted
+    """
     if obj.is_command('lang'):
         lang = obj.category()
     new_obj = one_obj(obj, keep_data, replaces)
@@ -146,11 +219,40 @@ def recursive_convert(obj: LyXobj | Element, lang='english', toc: tuple[LyXobj, 
 
 
 def add_toc(toc_obj: LyXobj, toc_title: LyXobj, toc: LyXobj):
+    """
+    Add table of contents elements to a TOC container object.
+    
+    :param toc_obj: Container object for the table of contents
+    :param toc_title: Title element (e.g., "Table of Contents" heading)
+    :param toc: List element containing TOC entries
+    """
     toc_obj.append(toc_title)
     toc_obj.append(toc)
 
 
 def convert(root, css_files=(), css_folder=CSS_FOLDER, js_files=(), js_in_head=False, keep_data=False, replaces: dict | None = None):
+    """
+    Convert a complete LyX document to XHTML.
+    
+    Main entry point for XHTML conversion. Processes the entire document:
+    1. Extracts document metadata from header
+    2. Converts header to HTML head with metadata, CSS, and scripts
+    3. Converts body to HTML with proper structure
+    4. Generates table of contents
+    5. Numbers sections, figures, and footnotes
+    6. Applies language-specific styling (RTL/LTR)
+    7. Processes LyX modules
+    
+    :param root: Root document Environment containing [header, body]
+    :param css_files: Additional CSS files to include
+    :param css_folder: Path to default CSS folder
+    :param js_files: JavaScript files to include
+    :param js_in_head: Whether to place JS in <head> (True) or end of body (False)
+    :param keep_data: Whether to preserve LyX metadata in output
+    :param replaces: Dictionary for string replacements in paths/attributes
+    :return: Tuple of (root_element, info_dict)
+    :raises Exception: If root doesn't have exactly 2 elements (header and body)
+    """
     if len(root) == 2:
         info = scan_head(root[0])
         lang = info.get('language', 'english')

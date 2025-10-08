@@ -1,3 +1,14 @@
+"""
+Helper utilities for XHTML generation from LyX documents.
+
+This module provides functions for:
+- Scanning document headers for metadata
+- Adding CSS and JavaScript to HTML output
+- Creating table of contents and section numbering
+- Handling language-specific styling (RTL/LTR)
+- Numbering figures, footnotes, and captions
+"""
+
 from os.path import join
 from PyLyX.package_helper import correct_name
 from PyLyX.data.data import RTL_LANGS, PACKAGE_PATH, TRANSLATE
@@ -12,6 +23,21 @@ SECTIONS = ('Part', 'Chapter', 'Section', 'Subsection', 'Subsubsection', 'Paragr
 
 
 def scan_head(head: Environment):
+    """
+    Extract document metadata from the header.
+    
+    Parses the document header to extract settings like:
+    - language: Document language
+    - secnumdepth: Section numbering depth
+    - tocdepth: Table of contents depth
+    - textclass: Document class
+    - html_math_output: Math rendering mode
+    - html_css_as_file: CSS embedding preference
+    - modules: List of LyX modules in use
+    
+    :param head: Document header Environment
+    :return: Dictionary of document metadata
+    """
     dictionary = {}
     for e in head:
         lst = e.get('class').split(maxsplit=1)
@@ -27,6 +53,17 @@ def scan_head(head: Environment):
 
 
 def perform_lang(root: Environment, head: Environment, lang: str, css_folder=CSS_FOLDER):
+    """
+    Add language-specific CSS and set language attributes.
+    
+    Adds basic CSS and either RTL (right-to-left) or LTR (left-to-right)
+    CSS based on the document language. Sets the lang attribute on the root element.
+    
+    :param root: Root HTML element
+    :param head: HTML head element to add CSS links to
+    :param lang: Document language code
+    :param css_folder: Path to CSS folder
+    """
     head.append(create_css(join(css_folder, BASIC_CSS)))
     if lang in RTL_LANGS:
         root.set('lang', RTL_LANGS[lang])
@@ -36,6 +73,15 @@ def perform_lang(root: Environment, head: Environment, lang: str, css_folder=CSS
 
 
 def create_title(head: LyXobj, body: LyXobj):
+    """
+    Extract document title from body and add to HTML head.
+    
+    Finds the first Title layout in the document body and creates
+    a <title> element in the HTML head.
+    
+    :param head: HTML head element
+    :param body: HTML body element containing the document
+    """
     titles = body.findall(".//*[@class='layout Title']")
     if titles:
         title = titles[0]
@@ -46,12 +92,25 @@ def create_title(head: LyXobj, body: LyXobj):
 
 
 def create_css(path: str):
+    """
+    Create a CSS link element.
+    
+    :param path: Path to the CSS file
+    :return: Link element with stylesheet attributes
+    """
     path = correct_name(path, '.css')
     attrib = {'rel': 'stylesheet', 'type': 'text/css', 'href': path}
     return LyXobj('link', attrib=attrib)
 
 
 def create_script(source: str, async_=''):
+    """
+    Create a JavaScript script element.
+    
+    :param source: URL or path to the JavaScript file
+    :param async_: Value for async attribute (empty string for no async)
+    :return: Script element
+    """
     attrib = {'src': source}
     if async_:
         attrib['async'] = async_
@@ -59,15 +118,37 @@ def create_script(source: str, async_=''):
 
 
 def mathjax():
+    """
+    Create a MathJax script element for rendering mathematical formulas.
+    
+    :return: Script element loading MathJax from CDN
+    """
     return create_script(MATHJAX, 'async')
 
 
 def viewport():
+    """
+    Create a viewport meta tag for responsive design.
+    
+    :return: Meta element with viewport settings
+    """
     attrib = {'name': 'viewport', 'content': 'width=device-width'}
     return LyXobj('meta', attrib=attrib)
 
 
 def css_and_js(head, body, css_files=(), js_files=(), js_in_head=False):
+    """
+    Add CSS and JavaScript files to the HTML document.
+    
+    CSS files are always added to the head. JavaScript files can be added
+    to either the head or the end of the body.
+    
+    :param head: HTML head element
+    :param body: HTML body element
+    :param css_files: Tuple of CSS file paths to include
+    :param js_files: Tuple of JavaScript file paths to include
+    :param js_in_head: Whether to place JS in head (True) or end of body (False)
+    """
     for file in css_files:
         head.append(create_css(file))
     js_parent = head if js_in_head else body

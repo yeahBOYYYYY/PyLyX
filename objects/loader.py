@@ -1,3 +1,17 @@
+"""
+LyX file parser and loader.
+
+This module handles parsing of LyX document files (.lyx) into Python object structures.
+The parser reads LyX's plain text format line by line and constructs a hierarchical
+tree of Environment, Container, and LyXobj instances that represent the document.
+
+Main functions:
+- load(): Parse a complete LyX file into a document tree
+- one_line(): Process a single line during parsing
+- extract_cmd(): Extract command, category, and details from a line
+- order_object(): Add objects to the document tree respecting hierarchy rules
+"""
+
 from os.path import split, join
 from xml.etree.ElementTree import fromstring, ParseError
 from PyLyX.data.data import ENDS, OBJECTS, DESIGNS, XML_OBJ
@@ -30,6 +44,15 @@ def one_line(file, line: str, branch: list, unknowns=None, path=None):
 
 
 def load(full_path: str):
+    """
+    Load and parse a LyX document file.
+    
+    Reads the .lyx file, extracts the format version, and builds a complete
+    document tree structure. Prints warnings for any unrecognized objects.
+    
+    :param full_path: Path to the .lyx file to load
+    :return: Root Environment object containing the complete document structure
+    """
     with open(full_path, 'r', encoding='utf8') as file:
         line = file.readline()
 
