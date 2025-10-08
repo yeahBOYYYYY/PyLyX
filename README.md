@@ -25,7 +25,7 @@ LyX is a document processor that combines the power and flexibility of TeX/LaTeX
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Adidushi/PyLyX.git
+git clone https://github.com/yeahBOYYYYY/PyLyX.git
 cd PyLyX
 ```
 
@@ -366,14 +366,10 @@ Contributions are welcome! Areas for improvement:
 
 [Add license information here]
 
-## Credits
-
-Created by Adidushi
-
 ## Support
 
 For issues and questions:
-- GitHub Issues: https://github.com/Adidushi/PyLyX/issues
+- GitHub Issues: https://github.com/yeahBOYYYYY/PyLyX/issues
 
 ## Version History
 
